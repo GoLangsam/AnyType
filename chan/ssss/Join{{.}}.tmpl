@@ -1,0 +1,12 @@
+// Join{{.}}
+func Join{{.}}(out chan<- {{.Dot}}, inp ...{{.Dot}}) chan struct{} {
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for _, i := range inp {
+			out <- i
+		}
+		done <- struct{}{}
+	}()
+	return done
+}

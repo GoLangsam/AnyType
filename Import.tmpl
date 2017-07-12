@@ -1,0 +1,9 @@
+{{ with .G ":Import:" }}
+	{{- if .Range }}
+import (
+		{{- range .Range}}
+	"{{.}}"
+		{{- end }}
+)
+
+{{ end }}{{ end -}}

@@ -1,0 +1,14 @@
+// Join{{.}}Slice
+func Join{{.}}Slice(out chan<- {{.Dot}}, inp ...[]{{.Dot}}) chan struct{} {
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for _, in := range inp {
+			for _, i := range in {
+				out <- i
+			}
+		}
+		done <- struct{}{}
+	}()
+	return done
+}
