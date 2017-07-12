@@ -188,67 +188,10 @@ func PipeFork(inp <-chan string) (out1, out2 <-chan string) {
 	}(cha1, cha2, inp)
 	return cha1, cha2
 }
-
-// Tube is the signature for a pipe function.
-type Tube func(inp <-chan string, out <-chan string)
-
-// daisy returns a channel to receive all inp after having passed thru tube.
-func daisy(inp <-chan string, tube Tube) (out <-chan string) {
-	cha := make(chan string)
-	go tube(inp, cha)
-	return cha
-}
-
-// DaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func DaisyChain(inp <-chan string, tubes ...Tube) (out <-chan string) {
-	cha := inp
-	for _, tube := range tubes {
-		cha = daisy(cha, tube)
-	}
-	return cha
-}
-
-/*
-func sendOneInto(snd chan<- int) {
-	defer close(snd)
-	snd <- 1 // send a 1
-}
-
-func sendTwoInto(snd chan<- int) {
-	defer close(snd)
-	snd <- 1 // send a 1
-	snd <- 2 // send a 2
-}
-
-var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
-
-func main() {
-	leftmost := make(chan int)
-	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
-	go sendTwoInto(right)
-	fmt.Println(<-leftmost)
-}
-*/
-// Merge returns a channel to receive all inputs sorted and free of duplicates.
-// Each input channel needs to be ascending; sorted and free of duplicates.
-//  Note: If no inputs are given, a closed channel is returned.
-func Merge(inps ...<-chan string) (out <-chan string) {
-
-	if len(inps) < 1 { // none: return a closed channel
-		cha := make(chan string)
-		defer close(cha)
-		return cha
-	} else if len(inps) < 2 { // just one: return it
-		return inps[0]
-	} else { // tail recurse
-		return merge2(inps[0], Merge(inps[1:]...))
-	}
-}
-
-// merge2 takes two (eager) channels of comparable types,
+// Merge2 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func merge2(i1, i2 <-chan string) (out <-chan string) {
+func Merge2(i1, i2 <-chan string) (out <-chan string) {
 	cha := make(chan string)
 	go func(out chan<- string, i1, i2 <-chan string) {
 		defer close(out)
@@ -299,5 +242,3 @@ func merge2(i1, i2 <-chan string) (out <-chan string) {
 	}(cha, i1, i2)
 	return cha
 }
-// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
-// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated! 
