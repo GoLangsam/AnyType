@@ -1,111 +1,126 @@
-## Naming conventions
-Let *Pack* be the ID of a package such as strings, ioutil or os
+# Naming conventions
 
-Let *pack* be the import-path for _Pack_ such as "strings", "io/ioutil" or "os"
+Intentionally, the generated source code provides packages with plenty of visible objects  (exported functions mainly).
 
-Let *Type* be the Name of a type implemented/supported by _Pack_, such as "String", "Writer", "Header", "File" ... (or ""; if it's id is obvious for the given _Type_)
+Thus, they provide (or extend) a very rich API - and this might be confusing at first sight.
 
-Let *type* be the actual type underlying _Type_ such as string or *io.Writer
+In order to ease navigation in this variety, it may help to understand (and memorize?) a few conventions frequently used in the compositions of their naming.
 
-Let *Func* be the ID of an exported function to be wrapped, such as ToUpper, Open, ...
-or some newly invented Name to characterise the lauched functionality
+After some *Meta* about our notations, You'll find typical names chosen used as
+- *Prefix*
+- *Postfix*
+- *Infix*
 
-### Prefixes
-* ChanXyz ([args] as-needed) <-chan _type_
-	* Inputs: anything but a read-only chan to be consumed
-	* Launch: a producer
-	* Return: a read-only chan
+in composing names such as go identifiers.
 
-* PipeXyz (inp <-chan _type1_ [, args]) ( <-chan _type2_ [, more] )
-	* Launch: a producer for _type2_ which consumes _type1_ and closes inp
+Below You'll' also find samples of signatures. Note: For ease of understanding, they are simplified. Hint: You may like to look at the related code sniplets - the `*.tmpl` files in [flavours](flavours.md) [`ssss`](./ssss/) and [`sss`](./sss/) are a good point to start. 
 
-* SinkXyz (inp <-chan _type_ ) // or NullXyz ?
-	* Launch: a simple drainer - intentionally *not* provided!
+## Meta
+- Let *Pack* be the ID of a package such as `strings`, `ioutil` or `os`
+- Let *pack* be the import-path for _Pack_ such as `"strings"`, `"io/ioutil"` or `"os"`
 
-* DoneXyz (inp <-chan _type_ ) <- chan struct{}
-	* Launch: a simple drainer, and give ONE signal on the returned channel when done
+- Let *Type* be the Name of a type implemented/supported by _Pack_, such as `String`, `Writer`, `Header`, `File` ... (or none; if it's id is obvious for the given _Pack_)
+- Let *type* be the actual type underlying _Type_ such as `string` or `*io.Writer`
 
+- Let *Func* be the ID of an exported function to be wrapped, such as `strings.ToUpper`, `Open`, ...
 
-### Postfixes
-#### Postfix "_" - ignore secondary results such as ok's/errors.
-Many functions return multiple values - especially the "comma-error" idiom is very popular.
+## Prefixes
 
-In order to deal conveniently therewith, we use _ as postfix for chan-wrapper-implementations which ignore errors (or other secondary data such as bytes written...) and return a chan with the 'main' data only.
-Any such quiet/skipping/ignoring implementation shall be complimented with it's fully returning companion. Thus, implementors are free to choose.
+- `Make` - a channel creator (convenience)
+- `Chan` - a producer, a source
+- `Pipe` - a tube, busy working
+- `Sink` - intentionally *not* used!
+- `Done` - a signalling drainer
 
-#### Postfix "s" - Plural via variadic arguments
+## Patterns
 
-Note: In templated code, only used by generators (Prefix "Chan").
+### Prefix-patterns
+Let `Foo` be a *Type* of *type* `foo`.
+Let `Bar` be a *Type* of *type* `bar`.
 
-#### Postfix "S" - Plural via Slice 
+Note: Any _pipeable-unit_ has (zero or more) input(s) and/or output(s) and may have additional trailing arguments and/or results `[, ...]` - for brevity this is **not** explicitly mentioned below.
 
-Note: In templated code, only used by generators (Prefix "Chan").
+---
+`Make` - a channel creator (convenience)
 
-### Infixes
-#### Infix "_" to omit optional arguments
-"_" is used as Infix when secondary arguments are ignored/not to be supplied,
+	MakeFoo() <-chan foo
+	
+* Launch: nothing
+
+Note: This is a convenience.
+
+Hint: especially helpful, if Your piping library operates on some hidden (non-exported) type
+(or on a type imported from elsewhere - and You don't want/need or should(!) have to care.)
+
+---
+`Chan` - a producer, a source
+
+	ChanFoo ([args]) <-chan foo
+
+* Launch: a producer
+
+Note: [args] is anything but a read-only chan to be consumed.
+
+---
+`Pipe` - a tube, busy working
+
+	PipeFoo (inp <-chan foo) <-chan bar
+* Launch: a producer for _Bar_ which consumes _Foo_ and closes `inp`
+
+---
+`Sink` - intentionally *not* used!
+	SinkFoo (inp <-chan foo)
+
+* Launch: a silent drainer - intentionally *not* provided!
+
+Note: Could also be named *NullXyz*.
+
+---
+`Done` - a signalling drainer
+
+	DoneFoo (inp <-chan foo ) <- chan struct{}
+
+* Launch: a drainer, who gives **one** signal on the returned channel when done
+
+---
+## Postfixes
+
+- *...`_`* - ignore secondary result(s) such as ok's/errors.
+- *...`s`* - Plural via variadic arguments
+- *...`S`* - Plural via Slice
+
+### Postfix-patterns
+
+*...`_`* - ignore secondary results such as ok's/errors.
+
+Many functions return multiple values - especially the _"comma-error"_ idiom is very popular.
+
+In order to deal conveniently therewith, we use `_` as postfix for 'silent' implementations which ignore errors (or other secondary data such as bytes written...) and return a chan with the 'main' data only.
+
+Any such quiet/skipping/ignoring implementation shall be complimented with it's fully returning companion. Thus, clients are free to choose.
+
+---
+*...`s`* - Plural via variadic arguments
+
+Note: In templated code, only used by generators (Prefix `Chan`).
+
+---
+*...`S`* - Plural via Slice
+
+Note: In templated code, only used by generators (Prefix `Chan`).
+
+---
+## Infixes
+- *...`_`...* ( *`Foo_Bar`* ) - omit optional arguments
+
+### Infix-patterns
+
+...`_`... (`Foo_Bar`) - omit optional arguments
+`_` is used as Infix when secondary arguments are ignored/not required,
 and reasonable and documented(!) defaults are subsituted.
 
-Note: A twin without "_" should behave exactly similar, if called with nil argument(s).
+Note: A twin without `_` should behave exactly similar, if called with nil argument(s).
 
 Note: Yes, this is syntactic sugar.
 Yes, this is useful and practical (and thus almost mandatory)
 as long as go does not allow optional arguments.
-
-### Generic functions
-#### Creators
-* Make _Type_ ()  <-chan _type_
-
-#### Generators
-Hint: A [Generator](https://en.wikipedia.org/wiki/Generator_(computer_programming)) yields a sequence of values ... one at a time.
-* Chan _Type_ s (inp... _type_ ) <-chan _type_
-* Chan _Type_ S (inp [] _type_ ) <-chan _type_
-
-For _Func_ in _pack_ with signature func ( [args] ) ( _type_ [, error]/[, more] )
-
-* Chan _Type_ _Func_ 
-* Chan _Type_ _Func_ _ (if [, error] )
-
-#### Pipetubes
-* Pipe _Type_ Func  (inp [] _type_ , act func( _type_ ) _type_ ) <-chan _type_
-	Note: it 'should' be Pipe _Type_ Map for functional people,
-	alas: map has a different meaning in go ...
-
-* Pipe _Type_ Filter  (inp [] _type_ , pass func( _type_ ) bool ) <-chan _type_
-* Pipe _Type_ Skiper  (inp [] _type_ , skip func( _type_ ) bool ) <-chan _type_
-
-* Done _Type_ (inp <-chan _type_ [, args]) <-chan struct{}
-	an "informative sinkhole" with a simple event channel aka "<-done"-idiom.
-
-For _Func_ in _pack_ with signature func ( _type_ ) ( _type_ [, error]/[, more] )
-
-* Pipe _Type_ _Func_ 
-* Pipe _Type_ _Func_ _ (if [, error] )
-
-For _Func_ in _pack_ with signature func ( _type_ ) ( _type-out_ [, error]/[, more] )
-
-* Pipe _Type-out_ _Func_ _Type_ 
-* Pipe _Type-out_ _Func_ _Type_ _ (if [, error] )
-
-#### Fanning
-* FanOut
-* FanIns
-* FanInS
-* FanOutUpTo (with a workLimit semaphore)
-
-
-### Source file names
-Note: currently, there is exactly one file named "chan.go" (and some related chan*_test.go)
-in "runtime": src/runtime/chan.go. The implementation of channels.
-
-Thus: We feel free to choose and use "chan" as prefix for all our source files.
-Even if we 'inject' such into existing packages in order to enhance them in place.
-
-More specifically:
-* "chan.go"
-  for manual contributions
-
-* "chan\_generic.go"
-  for generated source files ( if _Type_ == "" )
-* "chan\_ _Type_ \_generic.go"
-  for generated source files ( if _Type_ != "" )

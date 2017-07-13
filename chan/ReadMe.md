@@ -1,35 +1,46 @@
 # Gain concurrency - use go-channels for piping (and more)
 
-## Piping
-*Piping* is a popular concept, method, facility, mechanism ... whatever You call it.
+*[Piping](pipe.md)* is a popular concept, method, facility, mechanism ... whatever You call it.
 
-And(!) piping is a convenient way to design a process - a process with **concurrent** parts. Batteries included :-)
+- **And**: piping is a convenient way to design a process - a process with **concurrent** parts.
+  Batteries included :-)
 
-Each such part (and any composite hereof(!)) may be seen as a _pipeable-unit_.
+- **And**: Mind You: *[Concurrency enables parallelism!](resources.md)*
 
-This project [chan](https://github.com/GoLangsam/AnyType/chan/) provides facilites and mechanisms to build, invoke and manage such pipeable-unit.
+[This project `chan`](https://github.com/GoLangsam/AnyType/chan/) provides facilites and mechanisms to build, invoke and manage such process.
 
-They come in a variety of [flavours](flavours.md), have different [sizes](sizes.md), obey to strict and consistent [namings](namings.md).
+Each such concurrent part (and any composite hereof(!)) may be seen as a _pipeable-unit_.
 
-Several such pipeable-unit become connected into a **networked** ensemble.
+Note: Some name it 'transitor' (not transi`s`tor), as it facilitates stuff to transit thru it. Or 'pipe-station', or 'pipe-tube'). [Some](https://blog.golang.org/pipelines) call it 'stage'.
 
-This is useful to desing, build, create and operate a process.
-And: Such process is concurrent by design!
+[They](functions.md) come in a variety of [flavours](flavours.md), have different [sizes](sizes.md), and obey to strict and consistent [namings](namings.md).
+
+---
+Connect several such pipeable-unit into a **networked** ensemble, and You desing, build, create and operate a process.
+
+**And**: Such process is **concurrent** by design!
 
 Thus: it's components may execute as parallel(!)
 (as much as Your environemt permits/supports).
 
-Really(!) parallel (on multi-cores), that is.
+**Really** parallel (on multi-cores), that is.
 Not only quasi-parallel (via some pre-emptive multitasking).
 
-Note: Mind You: Piping is a mechanism as much as a channel is not (just) a type, but should better be seen as a mechanism, a means to some end.)
+Note: Mind You: Conceptually, *Piping* is a mechanism as much as *channeling*.  
+`chan` is not another type, but an atom of such mechanism (think: CSP)  
+a means to some end.
 
-## pipeable-unit
+---
+[Available literature](resources.md) about piping and concurrency is inconsistent and/or incomplete in terms of nomenclatura (so far we've read *both* good books available to us).
 
-Any _pipeable-unit_ has (zero or more) input(s) and/or output(s).
+Thus, we take liberty to introduce some freshly invented [vocabulary](Vocabulary.md), complementing the [namings](namings.md).
 
-Note: It could also be named 'transitor' (not transi`s`tor), as it facilitates stuff to transit thru it. Or 'pipe-station', or 'pipe-tube'). [Some](https://blog.golang.org/pipelines) call it 'stage'.
+---
+Hint:
+- If You like it: ***smile***.
+- If You don't: ***smile anyway*** - You'll be (a little more) happy - may be.
 
-As all available literature about piping and concurrency (so far we've read *both* good books available to us) is inconsistent and/or incomplete in terms of nomenclatura, we take liberty to introduce some freshly invented [vocabulary](Vocabulary.md), complimenting the [namings](namings.md).
+Mind You: the work done here is for You!.  
+For You - to be a ***Happy*** Gopher!  
 
-Hint: If You like it: smile. If You don't: smile anyway, and You'll be (a little more) happy.
+So: be a ***Happy*** Gopher!
