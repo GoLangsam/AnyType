@@ -66,3 +66,13 @@ It started as a proof-of-concept, and grows into a ready-to-use collection which
 Results generated from the templates - still **ugly**, before the pass thru `gofmt`.
 
 You may ignore them, or `diff` them agains their `*.go` twin in order to see the templates and sniplets to be well formated.
+
+---
+Hint:
+- If You like it: ***smile***.
+- If You don't: ***smile anyway*** - You'll be (a little more) happy - may be.
+
+Mind You: the work done here is for You!.  
+For You - to be a ***Happy*** Gopher!  
+
+So: be a ***Happy*** Gopher!
