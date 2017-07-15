@@ -4,3 +4,5 @@
 
 // package anytype provides templates and it's subdirectories hold refining templates, and resulting go code
 package anytype
+
+const dot = `.`
