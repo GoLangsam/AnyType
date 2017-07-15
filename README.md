@@ -2,10 +2,13 @@
 
 Templates, and ready-to-use go lang source files - generated with dotgo.
 
+Hint: Before You shame or blame me for something: I might do so myself already! So, peek [here](ShameOnMe.md) before You waste Your precious time & energy.
+
 ## Subjects
 This repo provides it's subjects (projects) in it's immediate subdirectories:
 
 -  [chan](chan/ReadMe.md) - Gain concurrency - use go-channels for piping (and more)
+-  ... more to come soon
 
 ## Directories
 Each directory has many subdirectories.
