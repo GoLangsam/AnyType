@@ -7,7 +7,7 @@
 
 - **And**: Mind You: *[Concurrency enables parallelism!](resources.md)*
 
-[This project `chan`](https://github.com/GoLangsam/AnyType/chan/) provides facilites and mechanisms to build, invoke and manage such process.
+[This project `chan`]([here](https://github.com/GoLangsam/AnyType/tree/master/chan/) provides facilites and mechanisms to build, invoke and manage such process.
 
 Each such concurrent part (and any composite hereof(!)) may be seen as a _pipeable-unit_.
 
@@ -40,7 +40,7 @@ Hint:
 - If You like it: ***smile***.
 - If You don't: ***smile anyway*** - You'll be (a little more) happy - may be.
 
-Mind You: the work done here is for You!.  
-For You - to be a ***Happy*** Gopher!  
+Mind You: the work done here is for You!. `ʕ◔ϖ◔ʔ`  
+For You - to be a ***Happy*** Gopher! `ʕ◔ϖ◔ʔ`
 
-So: be a ***Happy*** Gopher!
+So: be a ***Happy*** Gopher! `ʕ◔ϖ◔ʔ`
