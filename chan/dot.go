@@ -6,7 +6,7 @@
 package tube
 
 import (
-	_	"github.com/GoLangsam/AnyType" // indicate need of higher level templates
+	_ "github.com/GoLangsam/AnyType" // indicate need of higher level templates
 )
 
 const dot = `.` // just a noop - avoids 'no buildable Go source files' warning of `go get`
