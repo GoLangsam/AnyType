@@ -3,8 +3,9 @@ func Chan{{.}}FuncErr(act func() ({{.Dot}}, error)) (out <-chan {{.Dot}}) {
 	cha := make(chan {{.Dot}})
 	go func(out chan<- {{.Dot}}, act func() ({{.Dot}}, error)) {
 		defer close(out)
-		for i := range inp {
-			if res, err := act(); err != nil { // Apply action
+		for {
+			res, err := act() // Apply action
+			if err != nil {
 				return
 			} else {
 				out <- res

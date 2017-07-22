@@ -3,8 +3,9 @@ func Chan{{.}}FuncNok(act func() ({{.Dot}}, bool)) (out <-chan {{.Dot}}) {
 	cha := make(chan {{.Dot}})
 	go func(out chan<- {{.Dot}}, act func() ({{.Dot}}, bool)) {
 		defer close(out)
-		for i := range inp {
-			if res, ok := act(); !ok { // Apply action
+		for {
+			res, ok := act() // Apply action
+			if !ok {
 				return
 			} else {
 				out <- res
