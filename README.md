@@ -5,6 +5,7 @@ Templates, and ready-to-use go lang source files - generated with dotgo.
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GoLangsam/anytype)](https://goreportcard.com/report/github.com/GoLangsam/anytype)
 [![Build Status](https://travis-ci.org/GoLangsam/anytype.svg?branch=master)](https://travis-ci.org/GoLangsam/anytype)
+[![GoDoc](https://godoc.org/github.com/GoLangsam/anytype?status.svg)](https://godoc.org/github.com/GoLangsam/anytype)
 
 Hint: Before You shame or blame me for something: I might do so myself already! So, peek [here](ShameOnMe.md) before You waste Your precious time & energy.
 
