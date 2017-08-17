@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsNumeric
 
 // This file was generated with dotgo
@@ -209,4 +210,3 @@ func PipeIntFork(inp <-chan int) (out1, out2 <-chan int) {
 	go pipeIntFork(cha1, cha2, inp)
 	return cha1, cha2
 }
-
