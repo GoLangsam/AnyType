@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package io
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"io"
 )
-
-
 type ReaderChan interface { // bidirectional channel
 	ReaderROnlyChan // aka "<-chan" - receive only
 	ReaderSOnlyChan // aka "chan<-" - send only
@@ -65,4 +65,3 @@ func (c *DChReader) TryReader() (dat io.Reader, open bool) {
 }
 
 // TODO(apa): close, cap & len
-

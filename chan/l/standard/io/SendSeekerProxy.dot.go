@@ -1,10 +1,13 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package io
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
+
+// Note: SendProxySeeker uses "container/ring"
 
 import (
 	"container/ring"
@@ -29,10 +32,13 @@ func Sieve() {
 }
 */
 
+// SeekerCAP is the capacity of the buffered proxy channel
 const SeekerCAP = 10
-const SeekerQUE = 16 // the allocated size of the circular queue
 
-// Return a channel to serve as a sending proxy to 'out'.
+// SeekerQUE is the allocated size of the circular queue
+const SeekerQUE = 16
+
+// SendProxySeeker returns a channel to serve as a sending proxy to 'out'.
 // Uses a goroutine to receive values from 'out' and store them
 // in an expanding buffer, so that sending to 'out' never blocks.
 //

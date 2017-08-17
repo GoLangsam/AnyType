@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsString
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"strings"
 )
-
-
 type ReplacerChan interface { // bidirectional channel
 	ReplacerROnlyChan // aka "<-chan" - receive only
 	ReplacerSOnlyChan // aka "chan<-" - send only
@@ -65,4 +65,3 @@ func (c *DChReplacer) TryReplacer() (dat *strings.Replacer, open bool) {
 }
 
 // TODO(apa): close, cap & len
-
