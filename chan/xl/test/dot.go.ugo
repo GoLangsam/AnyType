@@ -5,10 +5,8 @@
 
 package test
 
-
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
 // SomeType is some type and just represents a string.
 type SomeType string
-

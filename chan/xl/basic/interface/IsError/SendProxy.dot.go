@@ -1,10 +1,13 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsError
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
+
+// Note: SendProxy uses "container/ring"
 
 import (
 	"container/ring"
@@ -28,10 +31,13 @@ func Sieve() {
 }
 */
 
+// CAP is the capacity of the buffered proxy channel
 const CAP = 10
-const QUE = 16 // the allocated size of the circular queue
 
-// Return a channel to serve as a sending proxy to 'out'.
+// QUE is the allocated size of the circular queue
+const QUE = 16
+
+// SendProxy returns a channel to serve as a sending proxy to 'out'.
 // Uses a goroutine to receive values from 'out' and store them
 // in an expanding buffer, so that sending to 'out' never blocks.
 //

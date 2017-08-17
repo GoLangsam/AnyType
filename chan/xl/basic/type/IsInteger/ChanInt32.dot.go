@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsInteger
 
 // This file was generated with dotgo
@@ -9,10 +10,26 @@ package IsInteger
 var _ int32 // silence import
 
 // No functionality yet associated with this source file.
-// MergeInt322 takes two (eager) channels of comparable types,
+// MergeInt32 returns a channel to receive all inputs sorted and free of duplicates.
+// Each input channel needs to be ascending; sorted and free of duplicates.
+//  Note: If no inputs are given, a closed Int32channel is returned.
+func MergeInt32(inps ...<-chan int32) (out <-chan int32) {
+
+	if len(inps) < 1 { // none: return a closed channel
+		cha := make(chan int32)
+		defer close(cha)
+		return cha
+	} else if len(inps) < 2 { // just one: return it
+		return inps[0]
+	} else { // tail recurse
+		return mergeInt322(inps[0], MergeInt32(inps[1:]...))
+	}
+}
+
+// mergeInt322 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func MergeInt322(i1, i2 <-chan int32) (out <-chan int32) {
+func mergeInt322(i1, i2 <-chan int32) (out <-chan int32) {
 	cha := make(chan int32)
 	go func(out chan<- int32, i1, i2 <-chan int32) {
 		defer close(out)
@@ -63,3 +80,6 @@ func MergeInt322(i1, i2 <-chan int32) (out <-chan int32) {
 	}(cha, i1, i2)
 	return cha
 }
+
+// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
+// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated!

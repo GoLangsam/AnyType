@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsInteger
 
 // This file was generated with dotgo
@@ -9,10 +10,26 @@ package IsInteger
 var _ int // silence import
 
 // No functionality yet associated with this source file.
-// Merge2 takes two (eager) channels of comparable types,
+// Merge returns a channel to receive all inputs sorted and free of duplicates.
+// Each input channel needs to be ascending; sorted and free of duplicates.
+//  Note: If no inputs are given, a closed channel is returned.
+func Merge(inps ...<-chan int) (out <-chan int) {
+
+	if len(inps) < 1 { // none: return a closed channel
+		cha := make(chan int)
+		defer close(cha)
+		return cha
+	} else if len(inps) < 2 { // just one: return it
+		return inps[0]
+	} else { // tail recurse
+		return merge2(inps[0], Merge(inps[1:]...))
+	}
+}
+
+// merge2 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func Merge2(i1, i2 <-chan int) (out <-chan int) {
+func merge2(i1, i2 <-chan int) (out <-chan int) {
 	cha := make(chan int)
 	go func(out chan<- int, i1, i2 <-chan int) {
 		defer close(out)
@@ -63,3 +80,6 @@ func Merge2(i1, i2 <-chan int) (out <-chan int) {
 	}(cha, i1, i2)
 	return cha
 }
+
+// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
+// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated!
