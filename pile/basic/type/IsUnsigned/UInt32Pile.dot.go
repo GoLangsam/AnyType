@@ -16,26 +16,26 @@ package IsUnsigned
 // Next() traverses the UInt32Pile.
 // Reset() allows a new transversal from the beginning.
 //
-// Yoe may either
+// You may either
 // traverse the UInt32Pile lazily -following its (buffered) growth that is-
 // or
 // await the signal from Wait() before starting traversal.
 //
 // Note: Pile() may be used concurrently,
-// Next() (and Reset) should be confinded to a single routine (thread),
-// as the iteration is not concurrency safe.
+// Next() (and Reset) should be confined to a single go routine (thread),
+// as the iteration is not intended to by concurrency safe.
 type UInt32Pile struct {
 	pile   chan uint32 // channel to receive further items
 	list   []uint32    // list of known items
 	offset int         // index for Next()
 }
 
-// NewS returns a (pointer to a) fresh UInt32Pile
+// MakeUInt32Pile returns a (pointer to a) fresh pile
 // of items (of type `uint32`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
-func UInt32New(size, buff int) *UInt32Pile {
+func MakeUInt32Pile(size, buff int) *UInt32Pile {
 	pile := new(UInt32Pile)
 	pile.list = make([]uint32, 0, size)
 	pile.pile = make(chan uint32, buff)
@@ -50,7 +50,7 @@ func (d *UInt32Pile) Reset() {
 // Next returns the next item,
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
-// iff the UInt32Pile is not Closed().
+// iff the pile is not Closed().
 func (d *UInt32Pile) Next() (item uint32, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
@@ -84,18 +84,23 @@ func (d *UInt32Pile) Close() {
 	close(d.pile)
 }
 
-// Wait returns a done channel which emits the size (=length) of the UInt32Pile once it's been closed.
-// Users of Wait() must not iterate (via Next() and Reset()) before the returned done-channel is closed!
+// Wait returns a done channel which emits the size (=length) of the pile once it's been closed.
 //
-// Wait is a convenience - useful iff You do not like/need to start any traversal before the UInt32Pile is fully populated.
-// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.)
+// Users of Wait() *must not* iterate (via Next() or Reset()) before the done-channel is closed!
 //
-// Note: Upon close of the done-channel, the UInt32Pile is Reset() so You may start traversing it (via Next) right away.
+// Wait is a convenience - useful iff You do not like/need to start any traversal before the pile is fully populated.
+// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.
+// Once the pile is closed, Wait() will return in constant time.)
+//
+// Note: Upon close of the done-channel, the pile is Reset() so You may traverse it (via Next) right away.
 func (d *UInt32Pile) Wait() (done <-chan int) {
 	cha := make(chan int)
 	go func(cha chan<- int, d *UInt32Pile) {
 		defer close(cha)
 		d.Reset()
+		if len(d.list) > 0 { // skip what's already known
+			d.offset = len(d.list) - 1
+		}
 		defer d.Reset()
 		for {
 			_, ok := d.Next() // keep draining

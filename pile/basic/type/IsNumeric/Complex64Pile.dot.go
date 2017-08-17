@@ -16,26 +16,26 @@ package IsNumeric
 // Next() traverses the Complex64Pile.
 // Reset() allows a new transversal from the beginning.
 //
-// Yoe may either
+// You may either
 // traverse the Complex64Pile lazily -following its (buffered) growth that is-
 // or
 // await the signal from Wait() before starting traversal.
 //
 // Note: Pile() may be used concurrently,
-// Next() (and Reset) should be confinded to a single routine (thread),
-// as the iteration is not concurrency safe.
+// Next() (and Reset) should be confined to a single go routine (thread),
+// as the iteration is not intended to by concurrency safe.
 type Complex64Pile struct {
 	pile   chan complex64 // channel to receive further items
 	list   []complex64    // list of known items
 	offset int            // index for Next()
 }
 
-// NewS returns a (pointer to a) fresh Complex64Pile
+// MakeComplex64Pile returns a (pointer to a) fresh pile
 // of items (of type `complex64`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
-func Complex64New(size, buff int) *Complex64Pile {
+func MakeComplex64Pile(size, buff int) *Complex64Pile {
 	pile := new(Complex64Pile)
 	pile.list = make([]complex64, 0, size)
 	pile.pile = make(chan complex64, buff)
@@ -50,7 +50,7 @@ func (d *Complex64Pile) Reset() {
 // Next returns the next item,
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
-// iff the Complex64Pile is not Closed().
+// iff the pile is not Closed().
 func (d *Complex64Pile) Next() (item complex64, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
@@ -84,18 +84,23 @@ func (d *Complex64Pile) Close() {
 	close(d.pile)
 }
 
-// Wait returns a done channel which emits the size (=length) of the Complex64Pile once it's been closed.
-// Users of Wait() must not iterate (via Next() and Reset()) before the returned done-channel is closed!
+// Wait returns a done channel which emits the size (=length) of the pile once it's been closed.
 //
-// Wait is a convenience - useful iff You do not like/need to start any traversal before the Complex64Pile is fully populated.
-// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.)
+// Users of Wait() *must not* iterate (via Next() or Reset()) before the done-channel is closed!
 //
-// Note: Upon close of the done-channel, the Complex64Pile is Reset() so You may start traversing it (via Next) right away.
+// Wait is a convenience - useful iff You do not like/need to start any traversal before the pile is fully populated.
+// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.
+// Once the pile is closed, Wait() will return in constant time.)
+//
+// Note: Upon close of the done-channel, the pile is Reset() so You may traverse it (via Next) right away.
 func (d *Complex64Pile) Wait() (done <-chan int) {
 	cha := make(chan int)
 	go func(cha chan<- int, d *Complex64Pile) {
 		defer close(cha)
 		d.Reset()
+		if len(d.list) > 0 { // skip what's already known
+			d.offset = len(d.list) - 1
+		}
 		defer d.Reset()
 		for {
 			_, ok := d.Next() // keep draining

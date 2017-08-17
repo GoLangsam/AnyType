@@ -16,26 +16,26 @@ package IsInteger
 // Next() traverses the UInt16Pile.
 // Reset() allows a new transversal from the beginning.
 //
-// Yoe may either
+// You may either
 // traverse the UInt16Pile lazily -following its (buffered) growth that is-
 // or
 // await the signal from Wait() before starting traversal.
 //
 // Note: Pile() may be used concurrently,
-// Next() (and Reset) should be confinded to a single routine (thread),
-// as the iteration is not concurrency safe.
+// Next() (and Reset) should be confined to a single go routine (thread),
+// as the iteration is not intended to by concurrency safe.
 type UInt16Pile struct {
 	pile   chan uint16 // channel to receive further items
 	list   []uint16    // list of known items
 	offset int         // index for Next()
 }
 
-// NewS returns a (pointer to a) fresh UInt16Pile
+// MakeUInt16Pile returns a (pointer to a) fresh pile
 // of items (of type `uint16`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
-func UInt16New(size, buff int) *UInt16Pile {
+func MakeUInt16Pile(size, buff int) *UInt16Pile {
 	pile := new(UInt16Pile)
 	pile.list = make([]uint16, 0, size)
 	pile.pile = make(chan uint16, buff)
@@ -50,7 +50,7 @@ func (d *UInt16Pile) Reset() {
 // Next returns the next item,
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
-// iff the UInt16Pile is not Closed().
+// iff the pile is not Closed().
 func (d *UInt16Pile) Next() (item uint16, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
@@ -84,18 +84,23 @@ func (d *UInt16Pile) Close() {
 	close(d.pile)
 }
 
-// Wait returns a done channel which emits the size (=length) of the UInt16Pile once it's been closed.
-// Users of Wait() must not iterate (via Next() and Reset()) before the returned done-channel is closed!
+// Wait returns a done channel which emits the size (=length) of the pile once it's been closed.
 //
-// Wait is a convenience - useful iff You do not like/need to start any traversal before the UInt16Pile is fully populated.
-// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.)
+// Users of Wait() *must not* iterate (via Next() or Reset()) before the done-channel is closed!
 //
-// Note: Upon close of the done-channel, the UInt16Pile is Reset() so You may start traversing it (via Next) right away.
+// Wait is a convenience - useful iff You do not like/need to start any traversal before the pile is fully populated.
+// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.
+// Once the pile is closed, Wait() will return in constant time.)
+//
+// Note: Upon close of the done-channel, the pile is Reset() so You may traverse it (via Next) right away.
 func (d *UInt16Pile) Wait() (done <-chan int) {
 	cha := make(chan int)
 	go func(cha chan<- int, d *UInt16Pile) {
 		defer close(cha)
 		d.Reset()
+		if len(d.list) > 0 { // skip what's already known
+			d.offset = len(d.list) - 1
+		}
 		defer d.Reset()
 		for {
 			_, ok := d.Next() // keep draining

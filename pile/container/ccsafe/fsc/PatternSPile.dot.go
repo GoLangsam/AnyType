@@ -20,26 +20,26 @@ import (
 // Next() traverses the PatternSPile.
 // Reset() allows a new transversal from the beginning.
 //
-// Yoe may either
+// You may either
 // traverse the PatternSPile lazily -following its (buffered) growth that is-
 // or
 // await the signal from Wait() before starting traversal.
 //
 // Note: Pile() may be used concurrently,
-// Next() (and Reset) should be confinded to a single routine (thread),
-// as the iteration is not concurrency safe.
+// Next() (and Reset) should be confined to a single go routine (thread),
+// as the iteration is not intended to by concurrency safe.
 type PatternSPile struct {
 	pile   chan fs.PatternS // channel to receive further items
 	list   []fs.PatternS    // list of known items
 	offset int              // index for Next()
 }
 
-// NewS returns a (pointer to a) fresh PatternSPile
+// MakePatternSPile returns a (pointer to a) fresh pile
 // of items (of type `fs.PatternS`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
-func PatternSNew(size, buff int) *PatternSPile {
+func MakePatternSPile(size, buff int) *PatternSPile {
 	pile := new(PatternSPile)
 	pile.list = make([]fs.PatternS, 0, size)
 	pile.pile = make(chan fs.PatternS, buff)
@@ -54,7 +54,7 @@ func (d *PatternSPile) Reset() {
 // Next returns the next item,
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
-// iff the PatternSPile is not Closed().
+// iff the pile is not Closed().
 func (d *PatternSPile) Next() (item fs.PatternS, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
@@ -88,18 +88,23 @@ func (d *PatternSPile) Close() {
 	close(d.pile)
 }
 
-// Wait returns a done channel which emits the size (=length) of the PatternSPile once it's been closed.
-// Users of Wait() must not iterate (via Next() and Reset()) before the returned done-channel is closed!
+// Wait returns a done channel which emits the size (=length) of the pile once it's been closed.
 //
-// Wait is a convenience - useful iff You do not like/need to start any traversal before the PatternSPile is fully populated.
-// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.)
+// Users of Wait() *must not* iterate (via Next() or Reset()) before the done-channel is closed!
 //
-// Note: Upon close of the done-channel, the PatternSPile is Reset() so You may start traversing it (via Next) right away.
+// Wait is a convenience - useful iff You do not like/need to start any traversal before the pile is fully populated.
+// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.
+// Once the pile is closed, Wait() will return in constant time.)
+//
+// Note: Upon close of the done-channel, the pile is Reset() so You may traverse it (via Next) right away.
 func (d *PatternSPile) Wait() (done <-chan int) {
 	cha := make(chan int)
 	go func(cha chan<- int, d *PatternSPile) {
 		defer close(cha)
 		d.Reset()
+		if len(d.list) > 0 { // skip what's already known
+			d.offset = len(d.list) - 1
+		}
 		defer d.Reset()
 		for {
 			_, ok := d.Next() // keep draining
