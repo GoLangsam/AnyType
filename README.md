@@ -3,9 +3,13 @@
 Templates, and ready-to-use go lang source files - generated with dotgo.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Go Report Card](https://goreportcard.com/badge/github.com/GoLangsam/anytype)](https://goreportcard.com/report/github.com/GoLangsam/anytype)
-[![Build Status](https://travis-ci.org/GoLangsam/anytype.svg?branch=master)](https://travis-ci.org/GoLangsam/anytype)
-[![GoDoc](https://godoc.org/github.com/GoLangsam/anytype?status.svg)](https://godoc.org/github.com/GoLangsam/anytype)
+[![Go Report Card](https://goreportcard.com/badge/github.com/GoLangsam/AnyType)](https://goreportcard.com/report/github.com/GoLangsam/AnyType)
+[![Build Status](https://travis-ci.org/GoLangsam/AnyType.svg?branch=master)](https://travis-ci.org/GoLangsam/AnyType)
+[![GoDoc](https://godoc.org/github.com/GoLangsam/AnyTypee?status.svg)](https://godoc.org/github.com/GoLangsam/AnyType)
+
+**Important:** This repo is not intended to be cloned (or `go get`) - it will just clobber Your disk.
+
+Just focus on what's useful to You - and better: learn how to generate :-)
 
 Hint: Before You shame or blame me for something: I might do so myself already! So, peek [here](ShameOnMe.md) before You waste Your precious time & energy.
 
@@ -13,7 +17,7 @@ Hint: Before You shame or blame me for something: I might do so myself already! 
 This repo provides it's subjects (projects) in it's immediate subdirectories:
 
 -  [chan](chan/ReadMe.md) - Gain concurrency - use go-channels for piping (and more)
--  [pile](pile/ReadMe.md) - A concurrency-safe growing-only first-in-first-out (FIFO) cached list of anythings with a simple (and single-thread) iterator
+-  [pile](pile/ReadMe.md) - A concurrency-safe growing-only first-in-first-out (FIFO) cached collection of things - with a simple (single-thread) iterator
 -  ... more to come soon
 
 ## Directories

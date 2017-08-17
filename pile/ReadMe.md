@@ -1,6 +1,7 @@
-# Gain concurrency - use go-channels for piping (and more)
-
 This project [`pile`](https://github.com/GoLangsam/AnyType/tree/master/pile/) provides -well- a Pile.
+
+A concurrency-safe growing-only first-in-first-out (FIFO) cached collection of things - with a simple (single-thread) iterator
+
 Just a simple, lazy and (hopefully) useful container: A **type-safe** Pile of Your favourite type-of-things :-)
 
 ## Pile
