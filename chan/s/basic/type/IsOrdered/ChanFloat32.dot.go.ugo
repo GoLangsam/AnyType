@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsOrdered
 
 // This file was generated with dotgo
@@ -61,10 +62,26 @@ func (c *SChFloat32) TryFloat32() (dat float32, open bool) {
 }
 
 // TODO(apa): close, cap & len
-// MergeFloat322 takes two (eager) channels of comparable types,
+// MergeFloat32 returns a channel to receive all inputs sorted and free of duplicates.
+// Each input channel needs to be ascending; sorted and free of duplicates.
+//  Note: If no inputs are given, a closed Float32channel is returned.
+func MergeFloat32(inps ...<-chan float32) (out <-chan float32) {
+
+	if len(inps) < 1 { // none: return a closed channel
+		cha := make(chan float32)
+		defer close(cha)
+		return cha
+	} else if len(inps) < 2 { // just one: return it
+		return inps[0]
+	} else { // tail recurse
+		return mergeFloat322(inps[0], MergeFloat32(inps[1:]...))
+	}
+}
+
+// mergeFloat322 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func MergeFloat322(i1, i2 <-chan float32) (out <-chan float32) {
+func mergeFloat322(i1, i2 <-chan float32) (out <-chan float32) {
 	cha := make(chan float32)
 	go func(out chan<- float32, i1, i2 <-chan float32) {
 		defer close(out)
@@ -115,3 +132,5 @@ func MergeFloat322(i1, i2 <-chan float32) (out <-chan float32) {
 	}(cha, i1, i2)
 	return cha
 }
+// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
+// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated! 

@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package os
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"os"
 )
-
-
 type SignalChan interface { // bidirectional channel
 	SignalROnlyChan // aka "<-chan" - receive only
 	SignalSOnlyChan // aka "chan<-" - send only
@@ -65,4 +65,3 @@ func (c *SChSignal) TrySignal() (dat os.Signal, open bool) {
 }
 
 // TODO(apa): close, cap & len
-
