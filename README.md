@@ -13,6 +13,7 @@ Hint: Before You shame or blame me for something: I might do so myself already! 
 This repo provides it's subjects (projects) in it's immediate subdirectories:
 
 -  [chan](chan/ReadMe.md) - Gain concurrency - use go-channels for piping (and more)
+-  [pile](pile/ReadMe.md) - A concurrency-safe growing-only first-in-first-out (FIFO) cached list of anythings with a simple (and single-thread) iterator
 -  ... more to come soon
 
 ## Directories
