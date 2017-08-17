@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package io
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"io"
 )
-
-
 type PipeWriterChan interface { // bidirectional channel
 	PipeWriterROnlyChan // aka "<-chan" - receive only
 	PipeWriterSOnlyChan // aka "chan<-" - send only
@@ -24,4 +24,3 @@ type PipeWriterROnlyChan interface { // receive-only channel
 type PipeWriterSOnlyChan interface { // send-only channel
 	ProvidePipeWriter(dat *io.PipeWriter) // the send function - aka "MyKind <- some PipeWriter"
 }
-

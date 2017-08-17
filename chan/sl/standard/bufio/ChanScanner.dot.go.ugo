@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package bufio
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"bufio"
 )
-
-
 type ScannerChan interface { // bidirectional channel
 	ScannerROnlyChan // aka "<-chan" - receive only
 	ScannerSOnlyChan // aka "chan<-" - send only
@@ -24,4 +24,3 @@ type ScannerROnlyChan interface { // receive-only channel
 type ScannerSOnlyChan interface { // send-only channel
 	ProvideScanner(dat *bufio.Scanner) // the send function - aka "MyKind <- some Scanner"
 }
-

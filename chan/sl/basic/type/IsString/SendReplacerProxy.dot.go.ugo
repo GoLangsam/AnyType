@@ -1,17 +1,18 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsString
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+// Note: SendProxyReplacer uses "container/ring"
+
 import (
 	"container/ring"
 	"strings"
 )
-
-
 
 /* usage as found in go/test/chan/sieve2.go
 func Sieve() {
@@ -31,10 +32,13 @@ func Sieve() {
 }
 */
 
+// ReplacerCAP is the capacity of the buffered proxy channel 
 const ReplacerCAP = 10
-const ReplacerQUE = 16 // the allocated size of the circular queue
 
-// Return a channel to serve as a sending proxy to 'out'.
+// ReplacerQUE is the allocated size of the circular queue
+const ReplacerQUE = 16
+
+// SendProxyReplacer returns a channel to serve as a sending proxy to 'out'.
 // Uses a goroutine to receive values from 'out' and store them
 // in an expanding buffer, so that sending to 'out' never blocks.
 //

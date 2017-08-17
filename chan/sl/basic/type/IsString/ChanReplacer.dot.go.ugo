@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsString
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"strings"
 )
-
-
 type ReplacerChan interface { // bidirectional channel
 	ReplacerROnlyChan // aka "<-chan" - receive only
 	ReplacerSOnlyChan // aka "chan<-" - send only
@@ -24,4 +24,3 @@ type ReplacerROnlyChan interface { // receive-only channel
 type ReplacerSOnlyChan interface { // send-only channel
 	ProvideReplacer(dat *strings.Replacer) // the send function - aka "MyKind <- some Replacer"
 }
-

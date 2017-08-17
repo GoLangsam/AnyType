@@ -1,10 +1,13 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsInteger
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
+
+// Note: SendProxyUInt8 uses "container/ring"
 
 import (
 	"container/ring"
@@ -28,10 +31,13 @@ func Sieve() {
 }
 */
 
+// UInt8CAP is the capacity of the buffered proxy channel
 const UInt8CAP = 10
-const UInt8QUE = 16 // the allocated size of the circular queue
 
-// Return a channel to serve as a sending proxy to 'out'.
+// UInt8QUE is the allocated size of the circular queue
+const UInt8QUE = 16
+
+// SendProxyUInt8 returns a channel to serve as a sending proxy to 'out'.
 // Uses a goroutine to receive values from 'out' and store them
 // in an expanding buffer, so that sending to 'out' never blocks.
 //

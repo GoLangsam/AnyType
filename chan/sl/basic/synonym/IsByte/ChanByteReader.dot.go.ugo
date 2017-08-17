@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsByte
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"io"
 )
-
-
 type ByteReaderChan interface { // bidirectional channel
 	ByteReaderROnlyChan // aka "<-chan" - receive only
 	ByteReaderSOnlyChan // aka "chan<-" - send only
@@ -24,4 +24,3 @@ type ByteReaderROnlyChan interface { // receive-only channel
 type ByteReaderSOnlyChan interface { // send-only channel
 	ProvideByteReader(dat io.ByteReader) // the send function - aka "MyKind <- some ByteReader"
 }
-

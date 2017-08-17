@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsNumeric
 
 // This file was generated with dotgo
@@ -19,4 +20,3 @@ type Complex128ROnlyChan interface { // receive-only channel
 type Complex128SOnlyChan interface { // send-only channel
 	ProvideComplex128(dat complex128) // the send function - aka "MyKind <- some Complex128"
 }
-

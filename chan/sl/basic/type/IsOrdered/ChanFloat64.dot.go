@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsOrdered
 
 // This file was generated with dotgo
@@ -20,10 +21,26 @@ type Float64SOnlyChan interface { // send-only channel
 	ProvideFloat64(dat float64) // the send function - aka "MyKind <- some Float64"
 }
 
-// MergeFloat642 takes two (eager) channels of comparable types,
+// MergeFloat64 returns a channel to receive all inputs sorted and free of duplicates.
+// Each input channel needs to be ascending; sorted and free of duplicates.
+//  Note: If no inputs are given, a closed Float64channel is returned.
+func MergeFloat64(inps ...<-chan float64) (out <-chan float64) {
+
+	if len(inps) < 1 { // none: return a closed channel
+		cha := make(chan float64)
+		defer close(cha)
+		return cha
+	} else if len(inps) < 2 { // just one: return it
+		return inps[0]
+	} else { // tail recurse
+		return mergeFloat642(inps[0], MergeFloat64(inps[1:]...))
+	}
+}
+
+// mergeFloat642 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func MergeFloat642(i1, i2 <-chan float64) (out <-chan float64) {
+func mergeFloat642(i1, i2 <-chan float64) (out <-chan float64) {
 	cha := make(chan float64)
 	go func(out chan<- float64, i1, i2 <-chan float64) {
 		defer close(out)
@@ -74,3 +91,6 @@ func MergeFloat642(i1, i2 <-chan float64) (out <-chan float64) {
 	}(cha, i1, i2)
 	return cha
 }
+
+// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
+// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated!

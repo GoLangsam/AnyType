@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package list
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"container/list"
 )
-
-
 type ElementSChan interface { // bidirectional channel
 	ElementSROnlyChan // aka "<-chan" - receive only
 	ElementSSOnlyChan // aka "chan<-" - send only
@@ -24,4 +24,3 @@ type ElementSROnlyChan interface { // receive-only channel
 type ElementSSOnlyChan interface { // send-only channel
 	ProvideElementS(dat []list.Element) // the send function - aka "MyKind <- some ElementS"
 }
-
