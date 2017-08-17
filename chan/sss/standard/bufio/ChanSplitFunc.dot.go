@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package bufio
 
 // This file was generated with dotgo
@@ -191,3 +192,44 @@ func PipeSplitFuncFork(inp <-chan bufio.SplitFunc) (out1, out2 <-chan bufio.Spli
 	}(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// SplitFuncTube is the signature for a pipe function.
+type SplitFuncTube func(inp <-chan bufio.SplitFunc, out <-chan bufio.SplitFunc)
+
+// SplitFuncdaisy returns a channel to receive all inp after having passed thru tube.
+func SplitFuncdaisy(inp <-chan bufio.SplitFunc, tube SplitFuncTube) (out <-chan bufio.SplitFunc) {
+	cha := make(chan bufio.SplitFunc)
+	go tube(inp, cha)
+	return cha
+}
+
+// SplitFuncDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func SplitFuncDaisyChain(inp <-chan bufio.SplitFunc, tubes ...SplitFuncTube) (out <-chan bufio.SplitFunc) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = SplitFuncdaisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

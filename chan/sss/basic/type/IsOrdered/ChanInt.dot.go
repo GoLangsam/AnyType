@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsOrdered
 
 // This file was generated with dotgo
@@ -188,10 +189,66 @@ func PipeIntFork(inp <-chan int) (out1, out2 <-chan int) {
 	return cha1, cha2
 }
 
-// MergeInt2 takes two (eager) channels of comparable types,
+// IntTube is the signature for a pipe function.
+type IntTube func(inp <-chan int, out <-chan int)
+
+// Intdaisy returns a channel to receive all inp after having passed thru tube.
+func Intdaisy(inp <-chan int, tube IntTube) (out <-chan int) {
+	cha := make(chan int)
+	go tube(inp, cha)
+	return cha
+}
+
+// IntDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func IntDaisyChain(inp <-chan int, tubes ...IntTube) (out <-chan int) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = Intdaisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
+// MergeInt returns a channel to receive all inputs sorted and free of duplicates.
+// Each input channel needs to be ascending; sorted and free of duplicates.
+//  Note: If no inputs are given, a closed Intchannel is returned.
+func MergeInt(inps ...<-chan int) (out <-chan int) {
+
+	if len(inps) < 1 { // none: return a closed channel
+		cha := make(chan int)
+		defer close(cha)
+		return cha
+	} else if len(inps) < 2 { // just one: return it
+		return inps[0]
+	} else { // tail recurse
+		return mergeInt2(inps[0], MergeInt(inps[1:]...))
+	}
+}
+
+// mergeInt2 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func MergeInt2(i1, i2 <-chan int) (out <-chan int) {
+func mergeInt2(i1, i2 <-chan int) (out <-chan int) {
 	cha := make(chan int)
 	go func(out chan<- int, i1, i2 <-chan int) {
 		defer close(out)
@@ -242,3 +299,6 @@ func MergeInt2(i1, i2 <-chan int) (out <-chan int) {
 	}(cha, i1, i2)
 	return cha
 }
+
+// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
+// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated!

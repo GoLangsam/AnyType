@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsString
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"strings"
 )
-
-
 // MakeReaderChan returns a new open channel
 // (simply a 'chan *strings.Reader' that is).
 //
@@ -193,3 +193,43 @@ func PipeReaderFork(inp <-chan *strings.Reader) (out1, out2 <-chan *strings.Read
 	return cha1, cha2
 }
 
+// ReaderTube is the signature for a pipe function.
+type ReaderTube func(inp <-chan *strings.Reader, out <-chan *strings.Reader)
+
+// Readerdaisy returns a channel to receive all inp after having passed thru tube.
+func Readerdaisy(inp <-chan *strings.Reader, tube ReaderTube) (out <-chan *strings.Reader) {
+	cha := make(chan *strings.Reader)
+	go tube(inp, cha)
+	return cha
+}
+
+// ReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ReaderDaisyChain(inp <-chan *strings.Reader, tubes ...ReaderTube) (out <-chan *strings.Reader) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = Readerdaisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

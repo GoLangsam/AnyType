@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsNumeric
 
 // This file was generated with dotgo
@@ -187,3 +188,44 @@ func PipeInt8Fork(inp <-chan int8) (out1, out2 <-chan int8) {
 	}(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// Int8Tube is the signature for a pipe function.
+type Int8Tube func(inp <-chan int8, out <-chan int8)
+
+// Int8daisy returns a channel to receive all inp after having passed thru tube.
+func Int8daisy(inp <-chan int8, tube Int8Tube) (out <-chan int8) {
+	cha := make(chan int8)
+	go tube(inp, cha)
+	return cha
+}
+
+// Int8DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func Int8DaisyChain(inp <-chan int8, tubes ...Int8Tube) (out <-chan int8) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = Int8daisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

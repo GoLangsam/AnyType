@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsInteger
 
 // This file was generated with dotgo
@@ -188,10 +189,66 @@ func PipeUInt16Fork(inp <-chan uint16) (out1, out2 <-chan uint16) {
 	return cha1, cha2
 }
 
-// MergeUInt162 takes two (eager) channels of comparable types,
+// UInt16Tube is the signature for a pipe function.
+type UInt16Tube func(inp <-chan uint16, out <-chan uint16)
+
+// UInt16daisy returns a channel to receive all inp after having passed thru tube.
+func UInt16daisy(inp <-chan uint16, tube UInt16Tube) (out <-chan uint16) {
+	cha := make(chan uint16)
+	go tube(inp, cha)
+	return cha
+}
+
+// UInt16DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func UInt16DaisyChain(inp <-chan uint16, tubes ...UInt16Tube) (out <-chan uint16) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = UInt16daisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
+// MergeUInt16 returns a channel to receive all inputs sorted and free of duplicates.
+// Each input channel needs to be ascending; sorted and free of duplicates.
+//  Note: If no inputs are given, a closed UInt16channel is returned.
+func MergeUInt16(inps ...<-chan uint16) (out <-chan uint16) {
+
+	if len(inps) < 1 { // none: return a closed channel
+		cha := make(chan uint16)
+		defer close(cha)
+		return cha
+	} else if len(inps) < 2 { // just one: return it
+		return inps[0]
+	} else { // tail recurse
+		return mergeUInt162(inps[0], MergeUInt16(inps[1:]...))
+	}
+}
+
+// mergeUInt162 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func MergeUInt162(i1, i2 <-chan uint16) (out <-chan uint16) {
+func mergeUInt162(i1, i2 <-chan uint16) (out <-chan uint16) {
 	cha := make(chan uint16)
 	go func(out chan<- uint16, i1, i2 <-chan uint16) {
 		defer close(out)
@@ -242,3 +299,6 @@ func MergeUInt162(i1, i2 <-chan uint16) (out <-chan uint16) {
 	}(cha, i1, i2)
 	return cha
 }
+
+// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
+// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated!

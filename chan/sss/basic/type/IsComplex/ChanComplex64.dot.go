@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsComplex
 
 // This file was generated with dotgo
@@ -187,3 +188,44 @@ func PipeComplex64Fork(inp <-chan complex64) (out1, out2 <-chan complex64) {
 	}(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// Complex64Tube is the signature for a pipe function.
+type Complex64Tube func(inp <-chan complex64, out <-chan complex64)
+
+// Complex64daisy returns a channel to receive all inp after having passed thru tube.
+func Complex64daisy(inp <-chan complex64, tube Complex64Tube) (out <-chan complex64) {
+	cha := make(chan complex64)
+	go tube(inp, cha)
+	return cha
+}
+
+// Complex64DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func Complex64DaisyChain(inp <-chan complex64, tubes ...Complex64Tube) (out <-chan complex64) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = Complex64daisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

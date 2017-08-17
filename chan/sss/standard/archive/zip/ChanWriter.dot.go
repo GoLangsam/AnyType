@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package zip
 
 // This file was generated with dotgo
@@ -191,3 +192,44 @@ func PipeWriterFork(inp <-chan zip.Writer) (out1, out2 <-chan zip.Writer) {
 	}(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// WriterTube is the signature for a pipe function.
+type WriterTube func(inp <-chan zip.Writer, out <-chan zip.Writer)
+
+// Writerdaisy returns a channel to receive all inp after having passed thru tube.
+func Writerdaisy(inp <-chan zip.Writer, tube WriterTube) (out <-chan zip.Writer) {
+	cha := make(chan zip.Writer)
+	go tube(inp, cha)
+	return cha
+}
+
+// WriterDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func WriterDaisyChain(inp <-chan zip.Writer, tubes ...WriterTube) (out <-chan zip.Writer) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = Writerdaisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

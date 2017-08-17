@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsByte
 
 // This file was generated with dotgo
@@ -191,3 +192,44 @@ func PipeByteReaderFork(inp <-chan io.ByteReader) (out1, out2 <-chan io.ByteRead
 	}(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// ByteReaderTube is the signature for a pipe function.
+type ByteReaderTube func(inp <-chan io.ByteReader, out <-chan io.ByteReader)
+
+// ByteReaderdaisy returns a channel to receive all inp after having passed thru tube.
+func ByteReaderdaisy(inp <-chan io.ByteReader, tube ByteReaderTube) (out <-chan io.ByteReader) {
+	cha := make(chan io.ByteReader)
+	go tube(inp, cha)
+	return cha
+}
+
+// ByteReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ByteReaderDaisyChain(inp <-chan io.ByteReader, tubes ...ByteReaderTube) (out <-chan io.ByteReader) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = ByteReaderdaisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package io
 
 // This file was generated with dotgo
@@ -191,3 +192,44 @@ func PipeReadWriteCloserFork(inp <-chan io.ReadWriteCloser) (out1, out2 <-chan i
 	}(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// ReadWriteCloserTube is the signature for a pipe function.
+type ReadWriteCloserTube func(inp <-chan io.ReadWriteCloser, out <-chan io.ReadWriteCloser)
+
+// ReadWriteCloserdaisy returns a channel to receive all inp after having passed thru tube.
+func ReadWriteCloserdaisy(inp <-chan io.ReadWriteCloser, tube ReadWriteCloserTube) (out <-chan io.ReadWriteCloser) {
+	cha := make(chan io.ReadWriteCloser)
+	go tube(inp, cha)
+	return cha
+}
+
+// ReadWriteCloserDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ReadWriteCloserDaisyChain(inp <-chan io.ReadWriteCloser, tubes ...ReadWriteCloserTube) (out <-chan io.ReadWriteCloser) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = ReadWriteCloserdaisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

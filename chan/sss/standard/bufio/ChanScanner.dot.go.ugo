@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package bufio
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"bufio"
 )
-
-
 // MakeScannerChan returns a new open channel
 // (simply a 'chan *bufio.Scanner' that is).
 //
@@ -193,3 +193,43 @@ func PipeScannerFork(inp <-chan *bufio.Scanner) (out1, out2 <-chan *bufio.Scanne
 	return cha1, cha2
 }
 
+// ScannerTube is the signature for a pipe function.
+type ScannerTube func(inp <-chan *bufio.Scanner, out <-chan *bufio.Scanner)
+
+// Scannerdaisy returns a channel to receive all inp after having passed thru tube.
+func Scannerdaisy(inp <-chan *bufio.Scanner, tube ScannerTube) (out <-chan *bufio.Scanner) {
+	cha := make(chan *bufio.Scanner)
+	go tube(inp, cha)
+	return cha
+}
+
+// ScannerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ScannerDaisyChain(inp <-chan *bufio.Scanner, tubes ...ScannerTube) (out <-chan *bufio.Scanner) {
+	cha := inp
+	for _, tube := range tubes {
+		cha = Scannerdaisy(cha, tube)
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
