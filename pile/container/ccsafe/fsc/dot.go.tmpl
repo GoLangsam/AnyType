@@ -1,0 +1,24 @@
+{{/*-
+{{.DotDot "FsPathS"	"fs.FsPathS"}}
+{{.DotDot "FsInfoS"	"fs.FsInfoS"}}
+{{.DotDot "FsBaseS"	"fs.FsBaseS"}}
+{{.DotDot "FsFoldS"	"fs.FsFoldS"}}
+{{.DotDot "FsFileS"	"fs.FsFileS"}}
+{{.DotDot "FsDataS"	"fs.FsDataS"}}
+{{.DotDot "PatternS"	"fs.PatternS"}}
+{{.DotDot "FsBase"	"*fs.FsBase"}}
+{{.DotDot "FsFold"	"*fs.FsFold"}}
+{{.DotDot "FsFile"	"*fs.FsFile"}}
+{{.DotDot "FsData"	"*fs.FsData"}}
+{{.DotDot "Pattern"	"*fs.Pattern"}}
+{{range .Range}}
+	{{.DotDot ":Package:" "fsc"}}
+	{{with .G ":Import:"}}
+		{{.DotDot "github.com/golangsam/container/ccsafe/fs" ""}}
+	{{end}}
+{{end}}
+-*/}}
+{{template "Copy"			. }}
+{{template "Package"			. }}
+{{template "Edit"			. }}
+// No go functionality is associated with this source file.
