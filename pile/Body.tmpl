@@ -15,7 +15,7 @@
 // Note: Pile() may be used concurrently,
 // Next() (and Reset) should be confinded to a single routine (thread),
 // as the iteration is not concurrency safe.
-type {{.}}Pile{{.}} struct {
+type {{.}}Pile struct {
 	pile   chan {{.Dot}} // channel to receive further items
 	list   []{{.Dot}}    // list of known items
 	offset int           // index for Next()
@@ -84,7 +84,7 @@ func (d *{{.}}Pile) Close() {
 // Note: Upon close of the done-channel, the {{.}}Pile is Reset() so You may start traversing it (via Next) right away.
 func (d *{{.}}Pile) Wait() (done <-chan int) {
 	cha := make(chan int)
-	go func(cha chan<- int, d *Pile) {
+	go func(cha chan<- int, d *{{.}}Pile) {
 		defer close(cha)
 		d.Reset()
 		defer d.Reset()
