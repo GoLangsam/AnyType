@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package zip
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"archive/zip"
 )
-
-
 // MakeReaderChan returns a new open channel
 // (simply a 'chan zip.Reader' that is).
 //
@@ -192,4 +192,3 @@ func PipeReaderFork(inp <-chan zip.Reader) (chan zip.Reader, chan zip.Reader) {
 	}()
 	return out1, out2
 }
-

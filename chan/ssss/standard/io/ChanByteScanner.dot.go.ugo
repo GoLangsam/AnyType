@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package io
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"io"
 )
-
-
 // MakeByteScannerChan returns a new open channel
 // (simply a 'chan io.ByteScanner' that is).
 //
@@ -192,4 +192,3 @@ func PipeByteScannerFork(inp <-chan io.ByteScanner) (chan io.ByteScanner, chan i
 	}()
 	return out1, out2
 }
-

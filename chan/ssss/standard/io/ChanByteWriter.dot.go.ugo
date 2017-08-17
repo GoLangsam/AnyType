@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package io
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"io"
 )
-
-
 // MakeByteWriterChan returns a new open channel
 // (simply a 'chan io.ByteWriter' that is).
 //
@@ -192,4 +192,3 @@ func PipeByteWriterFork(inp <-chan io.ByteWriter) (chan io.ByteWriter, chan io.B
 	}()
 	return out1, out2
 }
-

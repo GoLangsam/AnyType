@@ -1,6 +1,7 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package IsOrdered
 
 // This file was generated with dotgo
@@ -188,10 +189,26 @@ func PipeInt16Fork(inp <-chan int16) (chan int16, chan int16) {
 	return out1, out2
 }
 
-// MergeInt162 takes two (eager) channels of comparable types,
+// MergeInt16 returns a channel to receive all inputs sorted and free of duplicates.
+// Each input channel needs to be ascending; sorted and free of duplicates.
+//  Note: If no inputs are given, a closed Int16channel is returned.
+func MergeInt16(inps ...<-chan int16) (out <-chan int16) {
+
+	if len(inps) < 1 { // none: return a closed channel
+		cha := make(chan int16)
+		defer close(cha)
+		return cha
+	} else if len(inps) < 2 { // just one: return it
+		return inps[0]
+	} else { // tail recurse
+		return mergeInt162(inps[0], MergeInt16(inps[1:]...))
+	}
+}
+
+// mergeInt162 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func MergeInt162(i1, i2 <-chan int16) (out <-chan int16) {
+func mergeInt162(i1, i2 <-chan int16) (out <-chan int16) {
 	cha := make(chan int16)
 	go func(out chan<- int16, i1, i2 <-chan int16) {
 		defer close(out)
@@ -242,3 +259,6 @@ func MergeInt162(i1, i2 <-chan int16) (out <-chan int16) {
 	}(cha, i1, i2)
 	return cha
 }
+
+// Note: merge2 is not my own. Just: I forgot where found it - please accept my apologies.
+// I'd love to learn about it's origin/author, so I can give credit. Any hint is highly appreciated!

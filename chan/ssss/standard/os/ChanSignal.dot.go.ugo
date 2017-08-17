@@ -1,16 +1,16 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package os
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
+
 import (
 	"os"
 )
-
-
 // MakeSignalChan returns a new open channel
 // (simply a 'chan os.Signal' that is).
 //
@@ -192,4 +192,3 @@ func PipeSignalFork(inp <-chan os.Signal) (chan os.Signal, chan os.Signal) {
 	}()
 	return out1, out2
 }
-

@@ -1,10 +1,13 @@
 // Copyright 2017 Andreas Pannewitz. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package zip
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
+
+// Note: SendProxyFile uses "container/ring"
 
 import (
 	"archive/zip"
@@ -29,10 +32,13 @@ func Sieve() {
 }
 */
 
+// FileCAP is the capacity of the buffered proxy channel
 const FileCAP = 10
-const FileQUE = 16 // the allocated size of the circular queue
 
-// Return a channel to serve as a sending proxy to 'out'.
+// FileQUE is the allocated size of the circular queue
+const FileQUE = 16
+
+// SendProxyFile returns a channel to serve as a sending proxy to 'out'.
 // Uses a goroutine to receive values from 'out' and store them
 // in an expanding buffer, so that sending to 'out' never blocks.
 //
