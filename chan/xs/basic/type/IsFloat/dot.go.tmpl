@@ -5,9 +5,9 @@
 	{{.DotDot ":Package:" "IsFloat"}}
 {{end}}
 -*/}}
-{{- define "Body"		  -}}
-{{  template "Merge{{.}}"  		. }}
-{{- end				  -}}
+{{define "Body"}}{{	template "Core"		. }}
+{{			template "Merge{{.}}"	. }}
+{{- end -}}
 {{  template "Copy"			. }}
 {{  template "Package"			. }}
 {{  template "Edit"			. }}
