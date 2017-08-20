@@ -30,6 +30,106 @@ type SOnlyChan interface {
 	Provide(dat float64) // the send function - aka "MyKind <- some "
 }
 
+// DCh is a demand channel
+type DCh struct {
+	dat chan float64
+	req chan struct{}
+}
+
+// MakeDemandChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandChan() *DCh {
+	d := new(DCh)
+	d.dat = make(chan float64)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandBuff(cap int) *DCh {
+	d := new(DCh)
+	d.dat = make(chan float64, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// Provide is the send function - aka "MyKind <- some "
+func (c *DCh) Provide(dat float64) {
+	<-c.req
+	c.dat <- dat
+}
+
+// Request is the receive function - aka "some  <- MyKind"
+func (c *DCh) Request() (dat float64) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// Try is the comma-ok multi-valued form of Request and
+// reports whether a received value was sent before the  channel was closed.
+func (c *DCh) Try() (dat float64, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DCh is a supply channel
+type SCh struct {
+	dat chan float64
+	// req chan struct{}
+}
+
+// MakeSupplyChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyChan() *SCh {
+	d := new(SCh)
+	d.dat = make(chan float64)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyBuff(cap int) *SCh {
+	d := new(SCh)
+	d.dat = make(chan float64, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// Provide is the send function - aka "MyKind <- some "
+func (c *SCh) Provide(dat float64) {
+	// .req
+	c.dat <- dat
+}
+
+// Request is the receive function - aka "some  <- MyKind"
+func (c *SCh) Request() (dat float64) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// Try is the comma-ok multi-valued form of Request and
+// reports whether a received value was sent before the  channel was closed.
+func (c *SCh) Try() (dat float64, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
 // Merge returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed channel is returned.

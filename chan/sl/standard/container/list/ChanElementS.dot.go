@@ -33,3 +33,103 @@ type ElementSROnlyChan interface {
 type ElementSSOnlyChan interface {
 	ProvideElementS(dat []list.Element) // the send function - aka "MyKind <- some ElementS"
 }
+
+// DChElementS is a demand channel
+type DChElementS struct {
+	dat chan []list.Element
+	req chan struct{}
+}
+
+// MakeDemandElementSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandElementSChan() *DChElementS {
+	d := new(DChElementS)
+	d.dat = make(chan []list.Element)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandElementSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandElementSBuff(cap int) *DChElementS {
+	d := new(DChElementS)
+	d.dat = make(chan []list.Element, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideElementS is the send function - aka "MyKind <- some ElementS"
+func (c *DChElementS) ProvideElementS(dat []list.Element) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestElementS is the receive function - aka "some ElementS <- MyKind"
+func (c *DChElementS) RequestElementS() (dat []list.Element) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryElementS is the comma-ok multi-valued form of RequestElementS and
+// reports whether a received value was sent before the ElementS channel was closed.
+func (c *DChElementS) TryElementS() (dat []list.Element, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChElementS is a supply channel
+type SChElementS struct {
+	dat chan []list.Element
+	// req chan struct{}
+}
+
+// MakeSupplyElementSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyElementSChan() *SChElementS {
+	d := new(SChElementS)
+	d.dat = make(chan []list.Element)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyElementSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyElementSBuff(cap int) *SChElementS {
+	d := new(SChElementS)
+	d.dat = make(chan []list.Element, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideElementS is the send function - aka "MyKind <- some ElementS"
+func (c *SChElementS) ProvideElementS(dat []list.Element) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestElementS is the receive function - aka "some ElementS <- MyKind"
+func (c *SChElementS) RequestElementS() (dat []list.Element) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryElementS is the comma-ok multi-valued form of RequestElementS and
+// reports whether a received value was sent before the ElementS channel was closed.
+func (c *SChElementS) TryElementS() (dat []list.Element, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

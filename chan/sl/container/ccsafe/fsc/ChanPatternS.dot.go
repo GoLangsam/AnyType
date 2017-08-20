@@ -33,3 +33,103 @@ type PatternSROnlyChan interface {
 type PatternSSOnlyChan interface {
 	ProvidePatternS(dat fs.PatternS) // the send function - aka "MyKind <- some PatternS"
 }
+
+// DChPatternS is a demand channel
+type DChPatternS struct {
+	dat chan fs.PatternS
+	req chan struct{}
+}
+
+// MakeDemandPatternSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandPatternSChan() *DChPatternS {
+	d := new(DChPatternS)
+	d.dat = make(chan fs.PatternS)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandPatternSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandPatternSBuff(cap int) *DChPatternS {
+	d := new(DChPatternS)
+	d.dat = make(chan fs.PatternS, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvidePatternS is the send function - aka "MyKind <- some PatternS"
+func (c *DChPatternS) ProvidePatternS(dat fs.PatternS) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestPatternS is the receive function - aka "some PatternS <- MyKind"
+func (c *DChPatternS) RequestPatternS() (dat fs.PatternS) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryPatternS is the comma-ok multi-valued form of RequestPatternS and
+// reports whether a received value was sent before the PatternS channel was closed.
+func (c *DChPatternS) TryPatternS() (dat fs.PatternS, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChPatternS is a supply channel
+type SChPatternS struct {
+	dat chan fs.PatternS
+	// req chan struct{}
+}
+
+// MakeSupplyPatternSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyPatternSChan() *SChPatternS {
+	d := new(SChPatternS)
+	d.dat = make(chan fs.PatternS)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyPatternSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyPatternSBuff(cap int) *SChPatternS {
+	d := new(SChPatternS)
+	d.dat = make(chan fs.PatternS, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvidePatternS is the send function - aka "MyKind <- some PatternS"
+func (c *SChPatternS) ProvidePatternS(dat fs.PatternS) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestPatternS is the receive function - aka "some PatternS <- MyKind"
+func (c *SChPatternS) RequestPatternS() (dat fs.PatternS) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryPatternS is the comma-ok multi-valued form of RequestPatternS and
+// reports whether a received value was sent before the PatternS channel was closed.
+func (c *SChPatternS) TryPatternS() (dat fs.PatternS, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

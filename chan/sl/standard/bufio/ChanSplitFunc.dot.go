@@ -33,3 +33,103 @@ type SplitFuncROnlyChan interface {
 type SplitFuncSOnlyChan interface {
 	ProvideSplitFunc(dat bufio.SplitFunc) // the send function - aka "MyKind <- some SplitFunc"
 }
+
+// DChSplitFunc is a demand channel
+type DChSplitFunc struct {
+	dat chan bufio.SplitFunc
+	req chan struct{}
+}
+
+// MakeDemandSplitFuncChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandSplitFuncChan() *DChSplitFunc {
+	d := new(DChSplitFunc)
+	d.dat = make(chan bufio.SplitFunc)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandSplitFuncBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandSplitFuncBuff(cap int) *DChSplitFunc {
+	d := new(DChSplitFunc)
+	d.dat = make(chan bufio.SplitFunc, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideSplitFunc is the send function - aka "MyKind <- some SplitFunc"
+func (c *DChSplitFunc) ProvideSplitFunc(dat bufio.SplitFunc) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestSplitFunc is the receive function - aka "some SplitFunc <- MyKind"
+func (c *DChSplitFunc) RequestSplitFunc() (dat bufio.SplitFunc) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TrySplitFunc is the comma-ok multi-valued form of RequestSplitFunc and
+// reports whether a received value was sent before the SplitFunc channel was closed.
+func (c *DChSplitFunc) TrySplitFunc() (dat bufio.SplitFunc, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChSplitFunc is a supply channel
+type SChSplitFunc struct {
+	dat chan bufio.SplitFunc
+	// req chan struct{}
+}
+
+// MakeSupplySplitFuncChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplySplitFuncChan() *SChSplitFunc {
+	d := new(SChSplitFunc)
+	d.dat = make(chan bufio.SplitFunc)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplySplitFuncBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplySplitFuncBuff(cap int) *SChSplitFunc {
+	d := new(SChSplitFunc)
+	d.dat = make(chan bufio.SplitFunc, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideSplitFunc is the send function - aka "MyKind <- some SplitFunc"
+func (c *SChSplitFunc) ProvideSplitFunc(dat bufio.SplitFunc) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestSplitFunc is the receive function - aka "some SplitFunc <- MyKind"
+func (c *SChSplitFunc) RequestSplitFunc() (dat bufio.SplitFunc) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TrySplitFunc is the comma-ok multi-valued form of RequestSplitFunc and
+// reports whether a received value was sent before the SplitFunc channel was closed.
+func (c *SChSplitFunc) TrySplitFunc() (dat bufio.SplitFunc, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

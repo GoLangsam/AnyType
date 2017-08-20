@@ -33,3 +33,103 @@ type RuneScannerROnlyChan interface {
 type RuneScannerSOnlyChan interface {
 	ProvideRuneScanner(dat io.RuneScanner) // the send function - aka "MyKind <- some RuneScanner"
 }
+
+// DChRuneScanner is a demand channel
+type DChRuneScanner struct {
+	dat chan io.RuneScanner
+	req chan struct{}
+}
+
+// MakeDemandRuneScannerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandRuneScannerChan() *DChRuneScanner {
+	d := new(DChRuneScanner)
+	d.dat = make(chan io.RuneScanner)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandRuneScannerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandRuneScannerBuff(cap int) *DChRuneScanner {
+	d := new(DChRuneScanner)
+	d.dat = make(chan io.RuneScanner, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideRuneScanner is the send function - aka "MyKind <- some RuneScanner"
+func (c *DChRuneScanner) ProvideRuneScanner(dat io.RuneScanner) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestRuneScanner is the receive function - aka "some RuneScanner <- MyKind"
+func (c *DChRuneScanner) RequestRuneScanner() (dat io.RuneScanner) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryRuneScanner is the comma-ok multi-valued form of RequestRuneScanner and
+// reports whether a received value was sent before the RuneScanner channel was closed.
+func (c *DChRuneScanner) TryRuneScanner() (dat io.RuneScanner, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChRuneScanner is a supply channel
+type SChRuneScanner struct {
+	dat chan io.RuneScanner
+	// req chan struct{}
+}
+
+// MakeSupplyRuneScannerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyRuneScannerChan() *SChRuneScanner {
+	d := new(SChRuneScanner)
+	d.dat = make(chan io.RuneScanner)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyRuneScannerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyRuneScannerBuff(cap int) *SChRuneScanner {
+	d := new(SChRuneScanner)
+	d.dat = make(chan io.RuneScanner, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideRuneScanner is the send function - aka "MyKind <- some RuneScanner"
+func (c *SChRuneScanner) ProvideRuneScanner(dat io.RuneScanner) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestRuneScanner is the receive function - aka "some RuneScanner <- MyKind"
+func (c *SChRuneScanner) RequestRuneScanner() (dat io.RuneScanner) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryRuneScanner is the comma-ok multi-valued form of RequestRuneScanner and
+// reports whether a received value was sent before the RuneScanner channel was closed.
+func (c *SChRuneScanner) TryRuneScanner() (dat io.RuneScanner, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

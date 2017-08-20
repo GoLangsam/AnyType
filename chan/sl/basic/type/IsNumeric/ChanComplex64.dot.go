@@ -29,3 +29,103 @@ type Complex64ROnlyChan interface {
 type Complex64SOnlyChan interface {
 	ProvideComplex64(dat complex64) // the send function - aka "MyKind <- some Complex64"
 }
+
+// DChComplex64 is a demand channel
+type DChComplex64 struct {
+	dat chan complex64
+	req chan struct{}
+}
+
+// MakeDemandComplex64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandComplex64Chan() *DChComplex64 {
+	d := new(DChComplex64)
+	d.dat = make(chan complex64)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandComplex64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandComplex64Buff(cap int) *DChComplex64 {
+	d := new(DChComplex64)
+	d.dat = make(chan complex64, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideComplex64 is the send function - aka "MyKind <- some Complex64"
+func (c *DChComplex64) ProvideComplex64(dat complex64) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestComplex64 is the receive function - aka "some Complex64 <- MyKind"
+func (c *DChComplex64) RequestComplex64() (dat complex64) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryComplex64 is the comma-ok multi-valued form of RequestComplex64 and
+// reports whether a received value was sent before the Complex64 channel was closed.
+func (c *DChComplex64) TryComplex64() (dat complex64, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChComplex64 is a supply channel
+type SChComplex64 struct {
+	dat chan complex64
+	// req chan struct{}
+}
+
+// MakeSupplyComplex64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyComplex64Chan() *SChComplex64 {
+	d := new(SChComplex64)
+	d.dat = make(chan complex64)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyComplex64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyComplex64Buff(cap int) *SChComplex64 {
+	d := new(SChComplex64)
+	d.dat = make(chan complex64, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideComplex64 is the send function - aka "MyKind <- some Complex64"
+func (c *SChComplex64) ProvideComplex64(dat complex64) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestComplex64 is the receive function - aka "some Complex64 <- MyKind"
+func (c *SChComplex64) RequestComplex64() (dat complex64) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryComplex64 is the comma-ok multi-valued form of RequestComplex64 and
+// reports whether a received value was sent before the Complex64 channel was closed.
+func (c *SChComplex64) TryComplex64() (dat complex64, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

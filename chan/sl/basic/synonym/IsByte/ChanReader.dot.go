@@ -33,3 +33,103 @@ type ReaderROnlyChan interface {
 type ReaderSOnlyChan interface {
 	ProvideReader(dat bytes.Reader) // the send function - aka "MyKind <- some Reader"
 }
+
+// DChReader is a demand channel
+type DChReader struct {
+	dat chan bytes.Reader
+	req chan struct{}
+}
+
+// MakeDemandReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandReaderChan() *DChReader {
+	d := new(DChReader)
+	d.dat = make(chan bytes.Reader)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandReaderBuff(cap int) *DChReader {
+	d := new(DChReader)
+	d.dat = make(chan bytes.Reader, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideReader is the send function - aka "MyKind <- some Reader"
+func (c *DChReader) ProvideReader(dat bytes.Reader) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestReader is the receive function - aka "some Reader <- MyKind"
+func (c *DChReader) RequestReader() (dat bytes.Reader) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryReader is the comma-ok multi-valued form of RequestReader and
+// reports whether a received value was sent before the Reader channel was closed.
+func (c *DChReader) TryReader() (dat bytes.Reader, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChReader is a supply channel
+type SChReader struct {
+	dat chan bytes.Reader
+	// req chan struct{}
+}
+
+// MakeSupplyReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyReaderChan() *SChReader {
+	d := new(SChReader)
+	d.dat = make(chan bytes.Reader)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyReaderBuff(cap int) *SChReader {
+	d := new(SChReader)
+	d.dat = make(chan bytes.Reader, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideReader is the send function - aka "MyKind <- some Reader"
+func (c *SChReader) ProvideReader(dat bytes.Reader) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestReader is the receive function - aka "some Reader <- MyKind"
+func (c *SChReader) RequestReader() (dat bytes.Reader) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryReader is the comma-ok multi-valued form of RequestReader and
+// reports whether a received value was sent before the Reader channel was closed.
+func (c *SChReader) TryReader() (dat bytes.Reader, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

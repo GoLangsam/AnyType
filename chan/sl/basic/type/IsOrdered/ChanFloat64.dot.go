@@ -30,6 +30,106 @@ type Float64SOnlyChan interface {
 	ProvideFloat64(dat float64) // the send function - aka "MyKind <- some Float64"
 }
 
+// DChFloat64 is a demand channel
+type DChFloat64 struct {
+	dat chan float64
+	req chan struct{}
+}
+
+// MakeDemandFloat64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandFloat64Chan() *DChFloat64 {
+	d := new(DChFloat64)
+	d.dat = make(chan float64)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandFloat64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandFloat64Buff(cap int) *DChFloat64 {
+	d := new(DChFloat64)
+	d.dat = make(chan float64, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFloat64 is the send function - aka "MyKind <- some Float64"
+func (c *DChFloat64) ProvideFloat64(dat float64) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestFloat64 is the receive function - aka "some Float64 <- MyKind"
+func (c *DChFloat64) RequestFloat64() (dat float64) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryFloat64 is the comma-ok multi-valued form of RequestFloat64 and
+// reports whether a received value was sent before the Float64 channel was closed.
+func (c *DChFloat64) TryFloat64() (dat float64, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChFloat64 is a supply channel
+type SChFloat64 struct {
+	dat chan float64
+	// req chan struct{}
+}
+
+// MakeSupplyFloat64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyFloat64Chan() *SChFloat64 {
+	d := new(SChFloat64)
+	d.dat = make(chan float64)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyFloat64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyFloat64Buff(cap int) *SChFloat64 {
+	d := new(SChFloat64)
+	d.dat = make(chan float64, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFloat64 is the send function - aka "MyKind <- some Float64"
+func (c *SChFloat64) ProvideFloat64(dat float64) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestFloat64 is the receive function - aka "some Float64 <- MyKind"
+func (c *SChFloat64) RequestFloat64() (dat float64) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryFloat64 is the comma-ok multi-valued form of RequestFloat64 and
+// reports whether a received value was sent before the Float64 channel was closed.
+func (c *SChFloat64) TryFloat64() (dat float64, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
 // MergeFloat64 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed Float64channel is returned.

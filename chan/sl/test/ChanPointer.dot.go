@@ -29,3 +29,103 @@ type PointerROnlyChan interface {
 type PointerSOnlyChan interface {
 	ProvidePointer(dat *SomeType) // the send function - aka "MyKind <- some Pointer"
 }
+
+// DChPointer is a demand channel
+type DChPointer struct {
+	dat chan *SomeType
+	req chan struct{}
+}
+
+// MakeDemandPointerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandPointerChan() *DChPointer {
+	d := new(DChPointer)
+	d.dat = make(chan *SomeType)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandPointerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandPointerBuff(cap int) *DChPointer {
+	d := new(DChPointer)
+	d.dat = make(chan *SomeType, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvidePointer is the send function - aka "MyKind <- some Pointer"
+func (c *DChPointer) ProvidePointer(dat *SomeType) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestPointer is the receive function - aka "some Pointer <- MyKind"
+func (c *DChPointer) RequestPointer() (dat *SomeType) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryPointer is the comma-ok multi-valued form of RequestPointer and
+// reports whether a received value was sent before the Pointer channel was closed.
+func (c *DChPointer) TryPointer() (dat *SomeType, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChPointer is a supply channel
+type SChPointer struct {
+	dat chan *SomeType
+	// req chan struct{}
+}
+
+// MakeSupplyPointerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyPointerChan() *SChPointer {
+	d := new(SChPointer)
+	d.dat = make(chan *SomeType)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyPointerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyPointerBuff(cap int) *SChPointer {
+	d := new(SChPointer)
+	d.dat = make(chan *SomeType, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvidePointer is the send function - aka "MyKind <- some Pointer"
+func (c *SChPointer) ProvidePointer(dat *SomeType) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestPointer is the receive function - aka "some Pointer <- MyKind"
+func (c *SChPointer) RequestPointer() (dat *SomeType) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryPointer is the comma-ok multi-valued form of RequestPointer and
+// reports whether a received value was sent before the Pointer channel was closed.
+func (c *SChPointer) TryPointer() (dat *SomeType, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

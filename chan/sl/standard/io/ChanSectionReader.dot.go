@@ -33,3 +33,103 @@ type SectionReaderROnlyChan interface {
 type SectionReaderSOnlyChan interface {
 	ProvideSectionReader(dat *io.SectionReader) // the send function - aka "MyKind <- some SectionReader"
 }
+
+// DChSectionReader is a demand channel
+type DChSectionReader struct {
+	dat chan *io.SectionReader
+	req chan struct{}
+}
+
+// MakeDemandSectionReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandSectionReaderChan() *DChSectionReader {
+	d := new(DChSectionReader)
+	d.dat = make(chan *io.SectionReader)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandSectionReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandSectionReaderBuff(cap int) *DChSectionReader {
+	d := new(DChSectionReader)
+	d.dat = make(chan *io.SectionReader, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideSectionReader is the send function - aka "MyKind <- some SectionReader"
+func (c *DChSectionReader) ProvideSectionReader(dat *io.SectionReader) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestSectionReader is the receive function - aka "some SectionReader <- MyKind"
+func (c *DChSectionReader) RequestSectionReader() (dat *io.SectionReader) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TrySectionReader is the comma-ok multi-valued form of RequestSectionReader and
+// reports whether a received value was sent before the SectionReader channel was closed.
+func (c *DChSectionReader) TrySectionReader() (dat *io.SectionReader, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChSectionReader is a supply channel
+type SChSectionReader struct {
+	dat chan *io.SectionReader
+	// req chan struct{}
+}
+
+// MakeSupplySectionReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplySectionReaderChan() *SChSectionReader {
+	d := new(SChSectionReader)
+	d.dat = make(chan *io.SectionReader)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplySectionReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplySectionReaderBuff(cap int) *SChSectionReader {
+	d := new(SChSectionReader)
+	d.dat = make(chan *io.SectionReader, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideSectionReader is the send function - aka "MyKind <- some SectionReader"
+func (c *SChSectionReader) ProvideSectionReader(dat *io.SectionReader) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestSectionReader is the receive function - aka "some SectionReader <- MyKind"
+func (c *SChSectionReader) RequestSectionReader() (dat *io.SectionReader) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TrySectionReader is the comma-ok multi-valued form of RequestSectionReader and
+// reports whether a received value was sent before the SectionReader channel was closed.
+func (c *SChSectionReader) TrySectionReader() (dat *io.SectionReader, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

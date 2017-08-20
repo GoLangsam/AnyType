@@ -33,3 +33,103 @@ type WriterROnlyChan interface {
 type WriterSOnlyChan interface {
 	ProvideWriter(dat io.Writer) // the send function - aka "MyKind <- some Writer"
 }
+
+// DChWriter is a demand channel
+type DChWriter struct {
+	dat chan io.Writer
+	req chan struct{}
+}
+
+// MakeDemandWriterChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandWriterChan() *DChWriter {
+	d := new(DChWriter)
+	d.dat = make(chan io.Writer)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandWriterBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandWriterBuff(cap int) *DChWriter {
+	d := new(DChWriter)
+	d.dat = make(chan io.Writer, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideWriter is the send function - aka "MyKind <- some Writer"
+func (c *DChWriter) ProvideWriter(dat io.Writer) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestWriter is the receive function - aka "some Writer <- MyKind"
+func (c *DChWriter) RequestWriter() (dat io.Writer) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryWriter is the comma-ok multi-valued form of RequestWriter and
+// reports whether a received value was sent before the Writer channel was closed.
+func (c *DChWriter) TryWriter() (dat io.Writer, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChWriter is a supply channel
+type SChWriter struct {
+	dat chan io.Writer
+	// req chan struct{}
+}
+
+// MakeSupplyWriterChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyWriterChan() *SChWriter {
+	d := new(SChWriter)
+	d.dat = make(chan io.Writer)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyWriterBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyWriterBuff(cap int) *SChWriter {
+	d := new(SChWriter)
+	d.dat = make(chan io.Writer, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideWriter is the send function - aka "MyKind <- some Writer"
+func (c *SChWriter) ProvideWriter(dat io.Writer) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestWriter is the receive function - aka "some Writer <- MyKind"
+func (c *SChWriter) RequestWriter() (dat io.Writer) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryWriter is the comma-ok multi-valued form of RequestWriter and
+// reports whether a received value was sent before the Writer channel was closed.
+func (c *SChWriter) TryWriter() (dat io.Writer, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

@@ -33,3 +33,103 @@ type FsDataSROnlyChan interface {
 type FsDataSSOnlyChan interface {
 	ProvideFsDataS(dat fs.FsDataS) // the send function - aka "MyKind <- some FsDataS"
 }
+
+// DChFsDataS is a demand channel
+type DChFsDataS struct {
+	dat chan fs.FsDataS
+	req chan struct{}
+}
+
+// MakeDemandFsDataSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandFsDataSChan() *DChFsDataS {
+	d := new(DChFsDataS)
+	d.dat = make(chan fs.FsDataS)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandFsDataSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandFsDataSBuff(cap int) *DChFsDataS {
+	d := new(DChFsDataS)
+	d.dat = make(chan fs.FsDataS, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFsDataS is the send function - aka "MyKind <- some FsDataS"
+func (c *DChFsDataS) ProvideFsDataS(dat fs.FsDataS) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestFsDataS is the receive function - aka "some FsDataS <- MyKind"
+func (c *DChFsDataS) RequestFsDataS() (dat fs.FsDataS) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryFsDataS is the comma-ok multi-valued form of RequestFsDataS and
+// reports whether a received value was sent before the FsDataS channel was closed.
+func (c *DChFsDataS) TryFsDataS() (dat fs.FsDataS, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChFsDataS is a supply channel
+type SChFsDataS struct {
+	dat chan fs.FsDataS
+	// req chan struct{}
+}
+
+// MakeSupplyFsDataSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyFsDataSChan() *SChFsDataS {
+	d := new(SChFsDataS)
+	d.dat = make(chan fs.FsDataS)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyFsDataSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyFsDataSBuff(cap int) *SChFsDataS {
+	d := new(SChFsDataS)
+	d.dat = make(chan fs.FsDataS, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFsDataS is the send function - aka "MyKind <- some FsDataS"
+func (c *SChFsDataS) ProvideFsDataS(dat fs.FsDataS) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestFsDataS is the receive function - aka "some FsDataS <- MyKind"
+func (c *SChFsDataS) RequestFsDataS() (dat fs.FsDataS) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryFsDataS is the comma-ok multi-valued form of RequestFsDataS and
+// reports whether a received value was sent before the FsDataS channel was closed.
+func (c *SChFsDataS) TryFsDataS() (dat fs.FsDataS, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

@@ -33,3 +33,103 @@ type FsBaseSROnlyChan interface {
 type FsBaseSSOnlyChan interface {
 	ProvideFsBaseS(dat fs.FsBaseS) // the send function - aka "MyKind <- some FsBaseS"
 }
+
+// DChFsBaseS is a demand channel
+type DChFsBaseS struct {
+	dat chan fs.FsBaseS
+	req chan struct{}
+}
+
+// MakeDemandFsBaseSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandFsBaseSChan() *DChFsBaseS {
+	d := new(DChFsBaseS)
+	d.dat = make(chan fs.FsBaseS)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandFsBaseSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandFsBaseSBuff(cap int) *DChFsBaseS {
+	d := new(DChFsBaseS)
+	d.dat = make(chan fs.FsBaseS, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFsBaseS is the send function - aka "MyKind <- some FsBaseS"
+func (c *DChFsBaseS) ProvideFsBaseS(dat fs.FsBaseS) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestFsBaseS is the receive function - aka "some FsBaseS <- MyKind"
+func (c *DChFsBaseS) RequestFsBaseS() (dat fs.FsBaseS) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryFsBaseS is the comma-ok multi-valued form of RequestFsBaseS and
+// reports whether a received value was sent before the FsBaseS channel was closed.
+func (c *DChFsBaseS) TryFsBaseS() (dat fs.FsBaseS, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChFsBaseS is a supply channel
+type SChFsBaseS struct {
+	dat chan fs.FsBaseS
+	// req chan struct{}
+}
+
+// MakeSupplyFsBaseSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyFsBaseSChan() *SChFsBaseS {
+	d := new(SChFsBaseS)
+	d.dat = make(chan fs.FsBaseS)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyFsBaseSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyFsBaseSBuff(cap int) *SChFsBaseS {
+	d := new(SChFsBaseS)
+	d.dat = make(chan fs.FsBaseS, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFsBaseS is the send function - aka "MyKind <- some FsBaseS"
+func (c *SChFsBaseS) ProvideFsBaseS(dat fs.FsBaseS) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestFsBaseS is the receive function - aka "some FsBaseS <- MyKind"
+func (c *SChFsBaseS) RequestFsBaseS() (dat fs.FsBaseS) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryFsBaseS is the comma-ok multi-valued form of RequestFsBaseS and
+// reports whether a received value was sent before the FsBaseS channel was closed.
+func (c *SChFsBaseS) TryFsBaseS() (dat fs.FsBaseS, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

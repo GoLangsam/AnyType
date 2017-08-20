@@ -29,3 +29,103 @@ type UInt64ROnlyChan interface {
 type UInt64SOnlyChan interface {
 	ProvideUInt64(dat uint64) // the send function - aka "MyKind <- some UInt64"
 }
+
+// DChUInt64 is a demand channel
+type DChUInt64 struct {
+	dat chan uint64
+	req chan struct{}
+}
+
+// MakeDemandUInt64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandUInt64Chan() *DChUInt64 {
+	d := new(DChUInt64)
+	d.dat = make(chan uint64)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandUInt64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandUInt64Buff(cap int) *DChUInt64 {
+	d := new(DChUInt64)
+	d.dat = make(chan uint64, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideUInt64 is the send function - aka "MyKind <- some UInt64"
+func (c *DChUInt64) ProvideUInt64(dat uint64) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestUInt64 is the receive function - aka "some UInt64 <- MyKind"
+func (c *DChUInt64) RequestUInt64() (dat uint64) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryUInt64 is the comma-ok multi-valued form of RequestUInt64 and
+// reports whether a received value was sent before the UInt64 channel was closed.
+func (c *DChUInt64) TryUInt64() (dat uint64, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChUInt64 is a supply channel
+type SChUInt64 struct {
+	dat chan uint64
+	// req chan struct{}
+}
+
+// MakeSupplyUInt64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyUInt64Chan() *SChUInt64 {
+	d := new(SChUInt64)
+	d.dat = make(chan uint64)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyUInt64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyUInt64Buff(cap int) *SChUInt64 {
+	d := new(SChUInt64)
+	d.dat = make(chan uint64, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideUInt64 is the send function - aka "MyKind <- some UInt64"
+func (c *SChUInt64) ProvideUInt64(dat uint64) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestUInt64 is the receive function - aka "some UInt64 <- MyKind"
+func (c *SChUInt64) RequestUInt64() (dat uint64) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryUInt64 is the comma-ok multi-valued form of RequestUInt64 and
+// reports whether a received value was sent before the UInt64 channel was closed.
+func (c *SChUInt64) TryUInt64() (dat uint64, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

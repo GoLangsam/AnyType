@@ -33,3 +33,103 @@ type FsPathSROnlyChan interface {
 type FsPathSSOnlyChan interface {
 	ProvideFsPathS(dat fs.FsPathS) // the send function - aka "MyKind <- some FsPathS"
 }
+
+// DChFsPathS is a demand channel
+type DChFsPathS struct {
+	dat chan fs.FsPathS
+	req chan struct{}
+}
+
+// MakeDemandFsPathSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandFsPathSChan() *DChFsPathS {
+	d := new(DChFsPathS)
+	d.dat = make(chan fs.FsPathS)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandFsPathSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandFsPathSBuff(cap int) *DChFsPathS {
+	d := new(DChFsPathS)
+	d.dat = make(chan fs.FsPathS, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFsPathS is the send function - aka "MyKind <- some FsPathS"
+func (c *DChFsPathS) ProvideFsPathS(dat fs.FsPathS) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestFsPathS is the receive function - aka "some FsPathS <- MyKind"
+func (c *DChFsPathS) RequestFsPathS() (dat fs.FsPathS) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryFsPathS is the comma-ok multi-valued form of RequestFsPathS and
+// reports whether a received value was sent before the FsPathS channel was closed.
+func (c *DChFsPathS) TryFsPathS() (dat fs.FsPathS, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChFsPathS is a supply channel
+type SChFsPathS struct {
+	dat chan fs.FsPathS
+	// req chan struct{}
+}
+
+// MakeSupplyFsPathSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyFsPathSChan() *SChFsPathS {
+	d := new(SChFsPathS)
+	d.dat = make(chan fs.FsPathS)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyFsPathSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyFsPathSBuff(cap int) *SChFsPathS {
+	d := new(SChFsPathS)
+	d.dat = make(chan fs.FsPathS, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideFsPathS is the send function - aka "MyKind <- some FsPathS"
+func (c *SChFsPathS) ProvideFsPathS(dat fs.FsPathS) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestFsPathS is the receive function - aka "some FsPathS <- MyKind"
+func (c *SChFsPathS) RequestFsPathS() (dat fs.FsPathS) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryFsPathS is the comma-ok multi-valued form of RequestFsPathS and
+// reports whether a received value was sent before the FsPathS channel was closed.
+func (c *SChFsPathS) TryFsPathS() (dat fs.FsPathS, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

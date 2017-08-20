@@ -29,3 +29,103 @@ type SomeTypeSROnlyChan interface {
 type SomeTypeSSOnlyChan interface {
 	ProvideSomeTypeS(dat []SomeType) // the send function - aka "MyKind <- some SomeTypeS"
 }
+
+// DChSomeTypeS is a demand channel
+type DChSomeTypeS struct {
+	dat chan []SomeType
+	req chan struct{}
+}
+
+// MakeDemandSomeTypeSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandSomeTypeSChan() *DChSomeTypeS {
+	d := new(DChSomeTypeS)
+	d.dat = make(chan []SomeType)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandSomeTypeSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandSomeTypeSBuff(cap int) *DChSomeTypeS {
+	d := new(DChSomeTypeS)
+	d.dat = make(chan []SomeType, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideSomeTypeS is the send function - aka "MyKind <- some SomeTypeS"
+func (c *DChSomeTypeS) ProvideSomeTypeS(dat []SomeType) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestSomeTypeS is the receive function - aka "some SomeTypeS <- MyKind"
+func (c *DChSomeTypeS) RequestSomeTypeS() (dat []SomeType) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TrySomeTypeS is the comma-ok multi-valued form of RequestSomeTypeS and
+// reports whether a received value was sent before the SomeTypeS channel was closed.
+func (c *DChSomeTypeS) TrySomeTypeS() (dat []SomeType, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChSomeTypeS is a supply channel
+type SChSomeTypeS struct {
+	dat chan []SomeType
+	// req chan struct{}
+}
+
+// MakeSupplySomeTypeSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplySomeTypeSChan() *SChSomeTypeS {
+	d := new(SChSomeTypeS)
+	d.dat = make(chan []SomeType)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplySomeTypeSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplySomeTypeSBuff(cap int) *SChSomeTypeS {
+	d := new(SChSomeTypeS)
+	d.dat = make(chan []SomeType, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideSomeTypeS is the send function - aka "MyKind <- some SomeTypeS"
+func (c *SChSomeTypeS) ProvideSomeTypeS(dat []SomeType) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestSomeTypeS is the receive function - aka "some SomeTypeS <- MyKind"
+func (c *SChSomeTypeS) RequestSomeTypeS() (dat []SomeType) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TrySomeTypeS is the comma-ok multi-valued form of RequestSomeTypeS and
+// reports whether a received value was sent before the SomeTypeS channel was closed.
+func (c *SChSomeTypeS) TrySomeTypeS() (dat []SomeType, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

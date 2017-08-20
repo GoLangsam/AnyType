@@ -33,3 +33,103 @@ type ListSROnlyChan interface {
 type ListSSOnlyChan interface {
 	ProvideListS(dat []list.List) // the send function - aka "MyKind <- some ListS"
 }
+
+// DChListS is a demand channel
+type DChListS struct {
+	dat chan []list.List
+	req chan struct{}
+}
+
+// MakeDemandListSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandListSChan() *DChListS {
+	d := new(DChListS)
+	d.dat = make(chan []list.List)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandListSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandListSBuff(cap int) *DChListS {
+	d := new(DChListS)
+	d.dat = make(chan []list.List, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideListS is the send function - aka "MyKind <- some ListS"
+func (c *DChListS) ProvideListS(dat []list.List) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestListS is the receive function - aka "some ListS <- MyKind"
+func (c *DChListS) RequestListS() (dat []list.List) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryListS is the comma-ok multi-valued form of RequestListS and
+// reports whether a received value was sent before the ListS channel was closed.
+func (c *DChListS) TryListS() (dat []list.List, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChListS is a supply channel
+type SChListS struct {
+	dat chan []list.List
+	// req chan struct{}
+}
+
+// MakeSupplyListSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyListSChan() *SChListS {
+	d := new(SChListS)
+	d.dat = make(chan []list.List)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyListSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyListSBuff(cap int) *SChListS {
+	d := new(SChListS)
+	d.dat = make(chan []list.List, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideListS is the send function - aka "MyKind <- some ListS"
+func (c *SChListS) ProvideListS(dat []list.List) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestListS is the receive function - aka "some ListS <- MyKind"
+func (c *SChListS) RequestListS() (dat []list.List) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryListS is the comma-ok multi-valued form of RequestListS and
+// reports whether a received value was sent before the ListS channel was closed.
+func (c *SChListS) TryListS() (dat []list.List, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len

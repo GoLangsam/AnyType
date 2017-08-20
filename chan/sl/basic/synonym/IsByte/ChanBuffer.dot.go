@@ -33,3 +33,103 @@ type BufferROnlyChan interface {
 type BufferSOnlyChan interface {
 	ProvideBuffer(dat bytes.Buffer) // the send function - aka "MyKind <- some Buffer"
 }
+
+// DChBuffer is a demand channel
+type DChBuffer struct {
+	dat chan bytes.Buffer
+	req chan struct{}
+}
+
+// MakeDemandBufferChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
+func MakeDemandBufferChan() *DChBuffer {
+	d := new(DChBuffer)
+	d.dat = make(chan bytes.Buffer)
+	d.req = make(chan struct{})
+	return d
+}
+
+// MakeDemandBufferBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
+func MakeDemandBufferBuff(cap int) *DChBuffer {
+	d := new(DChBuffer)
+	d.dat = make(chan bytes.Buffer, cap)
+	d.req = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideBuffer is the send function - aka "MyKind <- some Buffer"
+func (c *DChBuffer) ProvideBuffer(dat bytes.Buffer) {
+	<-c.req
+	c.dat <- dat
+}
+
+// RequestBuffer is the receive function - aka "some Buffer <- MyKind"
+func (c *DChBuffer) RequestBuffer() (dat bytes.Buffer) {
+	c.req <- struct{}{}
+	return <-c.dat
+}
+
+// TryBuffer is the comma-ok multi-valued form of RequestBuffer and
+// reports whether a received value was sent before the Buffer channel was closed.
+func (c *DChBuffer) TryBuffer() (dat bytes.Buffer, open bool) {
+	c.req <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
+
+// DChBuffer is a supply channel
+type SChBuffer struct {
+	dat chan bytes.Buffer
+	// req chan struct{}
+}
+
+// MakeSupplyBufferChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
+func MakeSupplyBufferChan() *SChBuffer {
+	d := new(SChBuffer)
+	d.dat = make(chan bytes.Buffer)
+	// d.req = make(chan struct{})
+	return d
+}
+
+// MakeSupplyBufferBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
+func MakeSupplyBufferBuff(cap int) *SChBuffer {
+	d := new(SChBuffer)
+	d.dat = make(chan bytes.Buffer, cap)
+	// eq = make(chan struct{}, cap)
+	return d
+}
+
+// ProvideBuffer is the send function - aka "MyKind <- some Buffer"
+func (c *SChBuffer) ProvideBuffer(dat bytes.Buffer) {
+	// .req
+	c.dat <- dat
+}
+
+// RequestBuffer is the receive function - aka "some Buffer <- MyKind"
+func (c *SChBuffer) RequestBuffer() (dat bytes.Buffer) {
+	// eq <- struct{}{}
+	return <-c.dat
+}
+
+// TryBuffer is the comma-ok multi-valued form of RequestBuffer and
+// reports whether a received value was sent before the Buffer channel was closed.
+func (c *SChBuffer) TryBuffer() (dat bytes.Buffer, open bool) {
+	// eq <- struct{}{}
+	dat, open = <-c.dat
+	return dat, open
+}
+
+// TODO(apa): close, cap & len
