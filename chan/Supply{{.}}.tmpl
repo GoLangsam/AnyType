@@ -1,8 +1,13 @@
-type SCh{{.}} struct { // supply channel
+// DCh{{.}} is a supply channel
+type SCh{{.}} struct {
 	dat chan {{.Dot}}
 	// req chan struct{}
 }
 
+// MakeSupply{{.}}Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupply{{.}}Chan() *SCh{{.}} {
 	d := new(SCh{{.}})
 	d.dat = make(chan {{.Dot}})
@@ -10,6 +15,10 @@ func MakeSupply{{.}}Chan() *SCh{{.}} {
 	return d
 }
 
+// MakeSupply{{.}}Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupply{{.}}Buff(cap int) *SCh{{.}} {
 	d := new(SCh{{.}})
 	d.dat = make(chan {{.Dot}}, cap)
