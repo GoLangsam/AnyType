@@ -36,7 +36,7 @@ type DChFloat32 struct {
 	req chan struct{}
 }
 
-// MakeDemandFloat32Chan() returns
+// MakeDemandFloat32Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandFloat32Chan() *DChFloat32 {
 	return d
 }
 
-// MakeDemandFloat32Buff() returns
+// MakeDemandFloat32Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

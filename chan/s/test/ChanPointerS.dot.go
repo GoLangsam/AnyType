@@ -36,7 +36,7 @@ type SChPointerS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyPointerSChan() returns
+// MakeSupplyPointerSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyPointerSChan() *SChPointerS {
 	return d
 }
 
-// MakeSupplyPointerSBuff() returns
+// MakeSupplyPointerSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

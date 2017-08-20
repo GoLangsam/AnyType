@@ -40,7 +40,7 @@ type DChSignal struct {
 	req chan struct{}
 }
 
-// MakeDemandSignalChan() returns
+// MakeDemandSignalChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandSignalChan() *DChSignal {
 	return d
 }
 
-// MakeDemandSignalBuff() returns
+// MakeDemandSignalBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChSignal struct {
 	// req chan struct{}
 }
 
-// MakeSupplySignalChan() returns
+// MakeSupplySignalChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplySignalChan() *SChSignal {
 	return d
 }
 
-// MakeSupplySignalBuff() returns
+// MakeSupplySignalBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

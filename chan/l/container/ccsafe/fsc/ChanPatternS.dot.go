@@ -40,7 +40,7 @@ type DChPatternS struct {
 	req chan struct{}
 }
 
-// MakeDemandPatternSChan() returns
+// MakeDemandPatternSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandPatternSChan() *DChPatternS {
 	return d
 }
 
-// MakeDemandPatternSBuff() returns
+// MakeDemandPatternSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

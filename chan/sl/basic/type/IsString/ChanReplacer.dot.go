@@ -40,7 +40,7 @@ type DChReplacer struct {
 	req chan struct{}
 }
 
-// MakeDemandReplacerChan() returns
+// MakeDemandReplacerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandReplacerChan() *DChReplacer {
 	return d
 }
 
-// MakeDemandReplacerBuff() returns
+// MakeDemandReplacerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChReplacer struct {
 	// req chan struct{}
 }
 
-// MakeSupplyReplacerChan() returns
+// MakeSupplyReplacerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyReplacerChan() *SChReplacer {
 	return d
 }
 
-// MakeSupplyReplacerBuff() returns
+// MakeSupplyReplacerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

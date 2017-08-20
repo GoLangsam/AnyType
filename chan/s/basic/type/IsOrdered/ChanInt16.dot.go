@@ -36,7 +36,7 @@ type SChInt16 struct {
 	// req chan struct{}
 }
 
-// MakeSupplyInt16Chan() returns
+// MakeSupplyInt16Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyInt16Chan() *SChInt16 {
 	return d
 }
 
-// MakeSupplyInt16Buff() returns
+// MakeSupplyInt16Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

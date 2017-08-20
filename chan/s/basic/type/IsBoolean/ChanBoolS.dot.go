@@ -36,7 +36,7 @@ type SChBoolS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyBoolSChan() returns
+// MakeSupplyBoolSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyBoolSChan() *SChBoolS {
 	return d
 }
 
-// MakeSupplyBoolSBuff() returns
+// MakeSupplyBoolSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

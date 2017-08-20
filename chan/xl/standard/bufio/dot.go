@@ -23,7 +23,7 @@ var _ = map[string]string{
 	".":          "",                  // func NewWriterSize(w io.Writer, size int) *Writer
 }
 
-// Pipe Readers(w io.Reader) *Reader
+// Readers - (w io.Reader) *Reader
 func Readers(inp <-chan io.Reader) (out <-chan *bufio.Reader) {
 	cha := make(chan *bufio.Reader)
 	go func(inp <-chan io.Reader, out chan<- *bufio.Reader) {
@@ -35,7 +35,7 @@ func Readers(inp <-chan io.Reader) (out <-chan *bufio.Reader) {
 	return cha
 }
 
-// Pipe ReaderSize(w io.Reader, size int) *Reader
+// ReaderSize - (w io.Reader, size int) *Reader
 func ReaderSize(inp <-chan io.Reader, size int) (out <-chan *bufio.Reader) {
 	cha := make(chan *bufio.Reader)
 	go func(inp <-chan io.Reader, size int, out chan<- *bufio.Reader) {
@@ -47,7 +47,7 @@ func ReaderSize(inp <-chan io.Reader, size int) (out <-chan *bufio.Reader) {
 	return cha
 }
 
-// Pipe ReadWriters(r *Reader, w *Writer) *ReadWriter
+// ReadWriters - (r *Reader, w *Writer) *ReadWriter
 func ReadWriters(inp1 <-chan *bufio.Reader, inp2 <-chan *bufio.Writer) (out <-chan *bufio.ReadWriter) {
 	cha := make(chan *bufio.ReadWriter)
 	go func(inp1 <-chan *bufio.Reader, inp2 <-chan *bufio.Writer, out chan<- *bufio.ReadWriter) {
@@ -63,7 +63,7 @@ func ReadWriters(inp1 <-chan *bufio.Reader, inp2 <-chan *bufio.Writer) (out <-ch
 	return cha
 }
 
-// Pipe Scanners(r io.Reader) *Scanner
+// Scanners - (r io.Reader) *Scanner
 func Scanners(inp <-chan io.Reader) (out <-chan *bufio.Scanner) {
 	cha := make(chan *bufio.Scanner)
 	go func(inp <-chan io.Reader, out chan<- *bufio.Scanner) {
@@ -75,7 +75,7 @@ func Scanners(inp <-chan io.Reader) (out <-chan *bufio.Scanner) {
 	return cha
 }
 
-// Pipe Writers(w io.Writer) *Writer
+// Writers - (w io.Writer) *Writer
 func Writers(inp <-chan io.Writer) (out <-chan *bufio.Writer) {
 	cha := make(chan *bufio.Writer)
 	go func(inp <-chan io.Writer, out chan<- *bufio.Writer) {
@@ -87,7 +87,7 @@ func Writers(inp <-chan io.Writer) (out <-chan *bufio.Writer) {
 	return cha
 }
 
-// Pipe WriterSize(w io.Writer, size int) *Writer
+// WriterSize - (w io.Writer, size int) *Writer
 func WriterSize(inp <-chan io.Writer, size int) (out <-chan *bufio.Writer) {
 	cha := make(chan *bufio.Writer)
 	go func(inp <-chan io.Writer, size int, out chan<- *bufio.Writer) {

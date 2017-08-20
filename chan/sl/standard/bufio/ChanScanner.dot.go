@@ -40,7 +40,7 @@ type DChScanner struct {
 	req chan struct{}
 }
 
-// MakeDemandScannerChan() returns
+// MakeDemandScannerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandScannerChan() *DChScanner {
 	return d
 }
 
-// MakeDemandScannerBuff() returns
+// MakeDemandScannerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChScanner struct {
 	// req chan struct{}
 }
 
-// MakeSupplyScannerChan() returns
+// MakeSupplyScannerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyScannerChan() *SChScanner {
 	return d
 }
 
-// MakeSupplyScannerBuff() returns
+// MakeSupplyScannerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

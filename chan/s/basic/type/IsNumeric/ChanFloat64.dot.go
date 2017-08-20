@@ -36,7 +36,7 @@ type SChFloat64 struct {
 	// req chan struct{}
 }
 
-// MakeSupplyFloat64Chan() returns
+// MakeSupplyFloat64Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyFloat64Chan() *SChFloat64 {
 	return d
 }
 
-// MakeSupplyFloat64Buff() returns
+// MakeSupplyFloat64Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

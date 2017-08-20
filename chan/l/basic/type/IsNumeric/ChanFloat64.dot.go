@@ -36,7 +36,7 @@ type DChFloat64 struct {
 	req chan struct{}
 }
 
-// MakeDemandFloat64Chan() returns
+// MakeDemandFloat64Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandFloat64Chan() *DChFloat64 {
 	return d
 }
 
-// MakeDemandFloat64Buff() returns
+// MakeDemandFloat64Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

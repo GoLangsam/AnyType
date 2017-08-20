@@ -40,7 +40,7 @@ type DChSplitFunc struct {
 	req chan struct{}
 }
 
-// MakeDemandSplitFuncChan() returns
+// MakeDemandSplitFuncChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandSplitFuncChan() *DChSplitFunc {
 	return d
 }
 
-// MakeDemandSplitFuncBuff() returns
+// MakeDemandSplitFuncBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChSplitFunc struct {
 	// req chan struct{}
 }
 
-// MakeSupplySplitFuncChan() returns
+// MakeSupplySplitFuncChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplySplitFuncChan() *SChSplitFunc {
 	return d
 }
 
-// MakeSupplySplitFuncBuff() returns
+// MakeSupplySplitFuncBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

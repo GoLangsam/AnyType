@@ -36,7 +36,7 @@ type SChUInt64 struct {
 	// req chan struct{}
 }
 
-// MakeSupplyUInt64Chan() returns
+// MakeSupplyUInt64Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyUInt64Chan() *SChUInt64 {
 	return d
 }
 
-// MakeSupplyUInt64Buff() returns
+// MakeSupplyUInt64Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

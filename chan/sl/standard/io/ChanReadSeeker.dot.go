@@ -40,7 +40,7 @@ type DChReadSeeker struct {
 	req chan struct{}
 }
 
-// MakeDemandReadSeekerChan() returns
+// MakeDemandReadSeekerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandReadSeekerChan() *DChReadSeeker {
 	return d
 }
 
-// MakeDemandReadSeekerBuff() returns
+// MakeDemandReadSeekerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChReadSeeker struct {
 	// req chan struct{}
 }
 
-// MakeSupplyReadSeekerChan() returns
+// MakeSupplyReadSeekerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyReadSeekerChan() *SChReadSeeker {
 	return d
 }
 
-// MakeSupplyReadSeekerBuff() returns
+// MakeSupplyReadSeekerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

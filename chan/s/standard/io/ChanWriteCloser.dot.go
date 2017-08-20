@@ -40,7 +40,7 @@ type SChWriteCloser struct {
 	// req chan struct{}
 }
 
-// MakeSupplyWriteCloserChan() returns
+// MakeSupplyWriteCloserChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyWriteCloserChan() *SChWriteCloser {
 	return d
 }
 
-// MakeSupplyWriteCloserBuff() returns
+// MakeSupplyWriteCloserBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

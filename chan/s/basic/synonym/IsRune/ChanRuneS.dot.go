@@ -36,7 +36,7 @@ type SChRuneS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyRuneSChan() returns
+// MakeSupplyRuneSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyRuneSChan() *SChRuneS {
 	return d
 }
 
-// MakeSupplyRuneSBuff() returns
+// MakeSupplyRuneSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

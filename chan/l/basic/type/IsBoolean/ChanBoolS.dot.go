@@ -36,7 +36,7 @@ type DChBoolS struct {
 	req chan struct{}
 }
 
-// MakeDemandBoolSChan() returns
+// MakeDemandBoolSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandBoolSChan() *DChBoolS {
 	return d
 }
 
-// MakeDemandBoolSBuff() returns
+// MakeDemandBoolSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

@@ -40,7 +40,7 @@ type SChRuneScanner struct {
 	// req chan struct{}
 }
 
-// MakeSupplyRuneScannerChan() returns
+// MakeSupplyRuneScannerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyRuneScannerChan() *SChRuneScanner {
 	return d
 }
 
-// MakeSupplyRuneScannerBuff() returns
+// MakeSupplyRuneScannerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

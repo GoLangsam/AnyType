@@ -40,7 +40,7 @@ type DChWriteSeeker struct {
 	req chan struct{}
 }
 
-// MakeDemandWriteSeekerChan() returns
+// MakeDemandWriteSeekerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandWriteSeekerChan() *DChWriteSeeker {
 	return d
 }
 
-// MakeDemandWriteSeekerBuff() returns
+// MakeDemandWriteSeekerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

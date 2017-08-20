@@ -40,7 +40,7 @@ type DChPipeReader struct {
 	req chan struct{}
 }
 
-// MakeDemandPipeReaderChan() returns
+// MakeDemandPipeReaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandPipeReaderChan() *DChPipeReader {
 	return d
 }
 
-// MakeDemandPipeReaderBuff() returns
+// MakeDemandPipeReaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChPipeReader struct {
 	// req chan struct{}
 }
 
-// MakeSupplyPipeReaderChan() returns
+// MakeSupplyPipeReaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyPipeReaderChan() *SChPipeReader {
 	return d
 }
 
-// MakeSupplyPipeReaderBuff() returns
+// MakeSupplyPipeReaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

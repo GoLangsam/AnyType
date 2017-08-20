@@ -36,7 +36,7 @@ type SChComplex64 struct {
 	// req chan struct{}
 }
 
-// MakeSupplyComplex64Chan() returns
+// MakeSupplyComplex64Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyComplex64Chan() *SChComplex64 {
 	return d
 }
 
-// MakeSupplyComplex64Buff() returns
+// MakeSupplyComplex64Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

@@ -36,7 +36,7 @@ type DChByte struct {
 	req chan struct{}
 }
 
-// MakeDemandByteChan() returns
+// MakeDemandByteChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandByteChan() *DChByte {
 	return d
 }
 
-// MakeDemandByteBuff() returns
+// MakeDemandByteBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

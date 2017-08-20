@@ -40,7 +40,7 @@ type SChFsFoldS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyFsFoldSChan() returns
+// MakeSupplyFsFoldSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyFsFoldSChan() *SChFsFoldS {
 	return d
 }
 
-// MakeSupplyFsFoldSBuff() returns
+// MakeSupplyFsFoldSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

@@ -40,7 +40,7 @@ type DChListS struct {
 	req chan struct{}
 }
 
-// MakeDemandListSChan() returns
+// MakeDemandListSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandListSChan() *DChListS {
 	return d
 }
 
-// MakeDemandListSBuff() returns
+// MakeDemandListSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChListS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyListSChan() returns
+// MakeSupplyListSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyListSChan() *SChListS {
 	return d
 }
 
-// MakeSupplyListSBuff() returns
+// MakeSupplyListSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

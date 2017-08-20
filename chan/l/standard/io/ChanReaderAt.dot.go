@@ -40,7 +40,7 @@ type DChReaderAt struct {
 	req chan struct{}
 }
 
-// MakeDemandReaderAtChan() returns
+// MakeDemandReaderAtChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandReaderAtChan() *DChReaderAt {
 	return d
 }
 
-// MakeDemandReaderAtBuff() returns
+// MakeDemandReaderAtBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

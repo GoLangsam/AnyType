@@ -36,7 +36,7 @@ type SChInt32 struct {
 	// req chan struct{}
 }
 
-// MakeSupplyInt32Chan() returns
+// MakeSupplyInt32Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyInt32Chan() *SChInt32 {
 	return d
 }
 
-// MakeSupplyInt32Buff() returns
+// MakeSupplyInt32Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

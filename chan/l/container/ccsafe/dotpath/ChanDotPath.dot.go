@@ -40,7 +40,7 @@ type DChDotPath struct {
 	req chan struct{}
 }
 
-// MakeDemandDotPathChan() returns
+// MakeDemandDotPathChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandDotPathChan() *DChDotPath {
 	return d
 }
 
-// MakeDemandDotPathBuff() returns
+// MakeDemandDotPathBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

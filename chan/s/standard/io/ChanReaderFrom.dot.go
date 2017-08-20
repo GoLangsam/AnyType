@@ -40,7 +40,7 @@ type SChReaderFrom struct {
 	// req chan struct{}
 }
 
-// MakeSupplyReaderFromChan() returns
+// MakeSupplyReaderFromChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyReaderFromChan() *SChReaderFrom {
 	return d
 }
 
-// MakeSupplyReaderFromBuff() returns
+// MakeSupplyReaderFromBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

@@ -40,7 +40,7 @@ type DChHeader struct {
 	req chan struct{}
 }
 
-// MakeDemandHeaderChan() returns
+// MakeDemandHeaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandHeaderChan() *DChHeader {
 	return d
 }
 
-// MakeDemandHeaderBuff() returns
+// MakeDemandHeaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

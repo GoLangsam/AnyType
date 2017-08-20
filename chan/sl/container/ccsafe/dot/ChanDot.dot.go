@@ -40,7 +40,7 @@ type DChDot struct {
 	req chan struct{}
 }
 
-// MakeDemandDotChan() returns
+// MakeDemandDotChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandDotChan() *DChDot {
 	return d
 }
 
-// MakeDemandDotBuff() returns
+// MakeDemandDotBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChDot struct {
 	// req chan struct{}
 }
 
-// MakeSupplyDotChan() returns
+// MakeSupplyDotChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyDotChan() *SChDot {
 	return d
 }
 
-// MakeSupplyDotBuff() returns
+// MakeSupplyDotBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

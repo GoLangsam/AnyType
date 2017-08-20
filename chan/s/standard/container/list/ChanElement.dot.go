@@ -40,7 +40,7 @@ type SChElement struct {
 	// req chan struct{}
 }
 
-// MakeSupplyElementChan() returns
+// MakeSupplyElementChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyElementChan() *SChElement {
 	return d
 }
 
-// MakeSupplyElementBuff() returns
+// MakeSupplyElementBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

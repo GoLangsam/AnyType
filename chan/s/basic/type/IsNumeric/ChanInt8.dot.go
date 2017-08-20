@@ -36,7 +36,7 @@ type SChInt8 struct {
 	// req chan struct{}
 }
 
-// MakeSupplyInt8Chan() returns
+// MakeSupplyInt8Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyInt8Chan() *SChInt8 {
 	return d
 }
 
-// MakeSupplyInt8Buff() returns
+// MakeSupplyInt8Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

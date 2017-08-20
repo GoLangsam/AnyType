@@ -40,7 +40,7 @@ type DChTag struct {
 	req chan struct{}
 }
 
-// MakeDemandTagChan() returns
+// MakeDemandTagChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandTagChan() *DChTag {
 	return d
 }
 
-// MakeDemandTagBuff() returns
+// MakeDemandTagBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChTag struct {
 	// req chan struct{}
 }
 
-// MakeSupplyTagChan() returns
+// MakeSupplyTagChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyTagChan() *SChTag {
 	return d
 }
 
-// MakeSupplyTagBuff() returns
+// MakeSupplyTagBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

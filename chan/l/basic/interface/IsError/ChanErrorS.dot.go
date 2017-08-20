@@ -36,7 +36,7 @@ type DChErrorS struct {
 	req chan struct{}
 }
 
-// MakeDemandErrorSChan() returns
+// MakeDemandErrorSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandErrorSChan() *DChErrorS {
 	return d
 }
 
-// MakeDemandErrorSBuff() returns
+// MakeDemandErrorSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

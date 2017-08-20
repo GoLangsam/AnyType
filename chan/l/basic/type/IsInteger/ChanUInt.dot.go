@@ -36,7 +36,7 @@ type DChUInt struct {
 	req chan struct{}
 }
 
-// MakeDemandUIntChan() returns
+// MakeDemandUIntChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandUIntChan() *DChUInt {
 	return d
 }
 
-// MakeDemandUIntBuff() returns
+// MakeDemandUIntBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

@@ -40,7 +40,7 @@ type SChTag struct {
 	// req chan struct{}
 }
 
-// MakeSupplyTagChan() returns
+// MakeSupplyTagChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyTagChan() *SChTag {
 	return d
 }
 
-// MakeSupplyTagBuff() returns
+// MakeSupplyTagBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

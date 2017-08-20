@@ -40,7 +40,7 @@ type SChSeeker struct {
 	// req chan struct{}
 }
 
-// MakeSupplySeekerChan() returns
+// MakeSupplySeekerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplySeekerChan() *SChSeeker {
 	return d
 }
 
-// MakeSupplySeekerBuff() returns
+// MakeSupplySeekerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

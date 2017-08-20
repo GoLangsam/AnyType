@@ -40,7 +40,7 @@ type DChByteScanner struct {
 	req chan struct{}
 }
 
-// MakeDemandByteScannerChan() returns
+// MakeDemandByteScannerChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandByteScannerChan() *DChByteScanner {
 	return d
 }
 
-// MakeDemandByteScannerBuff() returns
+// MakeDemandByteScannerBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

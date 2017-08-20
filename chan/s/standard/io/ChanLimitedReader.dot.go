@@ -40,7 +40,7 @@ type SChLimitedReader struct {
 	// req chan struct{}
 }
 
-// MakeSupplyLimitedReaderChan() returns
+// MakeSupplyLimitedReaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyLimitedReaderChan() *SChLimitedReader {
 	return d
 }
 
-// MakeSupplyLimitedReaderBuff() returns
+// MakeSupplyLimitedReaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

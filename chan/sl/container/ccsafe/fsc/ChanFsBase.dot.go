@@ -40,7 +40,7 @@ type DChFsBase struct {
 	req chan struct{}
 }
 
-// MakeDemandFsBaseChan() returns
+// MakeDemandFsBaseChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandFsBaseChan() *DChFsBase {
 	return d
 }
 
-// MakeDemandFsBaseBuff() returns
+// MakeDemandFsBaseBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChFsBase struct {
 	// req chan struct{}
 }
 
-// MakeSupplyFsBaseChan() returns
+// MakeSupplyFsBaseChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyFsBaseChan() *SChFsBase {
 	return d
 }
 
-// MakeSupplyFsBaseBuff() returns
+// MakeSupplyFsBaseBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

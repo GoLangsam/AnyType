@@ -36,7 +36,7 @@ type DChInt16 struct {
 	req chan struct{}
 }
 
-// MakeDemandInt16Chan() returns
+// MakeDemandInt16Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandInt16Chan() *DChInt16 {
 	return d
 }
 
-// MakeDemandInt16Buff() returns
+// MakeDemandInt16Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

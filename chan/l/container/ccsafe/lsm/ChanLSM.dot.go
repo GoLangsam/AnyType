@@ -40,7 +40,7 @@ type DChLSM struct {
 	req chan struct{}
 }
 
-// MakeDemandLSMChan() returns
+// MakeDemandLSMChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandLSMChan() *DChLSM {
 	return d
 }
 
-// MakeDemandLSMBuff() returns
+// MakeDemandLSMBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

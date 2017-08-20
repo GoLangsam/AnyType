@@ -36,7 +36,7 @@ type DChRuneS struct {
 	req chan struct{}
 }
 
-// MakeDemandRuneSChan() returns
+// MakeDemandRuneSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandRuneSChan() *DChRuneS {
 	return d
 }
 
-// MakeDemandRuneSBuff() returns
+// MakeDemandRuneSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -86,7 +86,7 @@ type SChRuneS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyRuneSChan() returns
+// MakeSupplyRuneSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -97,7 +97,7 @@ func MakeSupplyRuneSChan() *SChRuneS {
 	return d
 }
 
-// MakeSupplyRuneSBuff() returns
+// MakeSupplyRuneSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

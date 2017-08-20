@@ -40,7 +40,7 @@ type DChByteReader struct {
 	req chan struct{}
 }
 
-// MakeDemandByteReaderChan() returns
+// MakeDemandByteReaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandByteReaderChan() *DChByteReader {
 	return d
 }
 
-// MakeDemandByteReaderBuff() returns
+// MakeDemandByteReaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChByteReader struct {
 	// req chan struct{}
 }
 
-// MakeSupplyByteReaderChan() returns
+// MakeSupplyByteReaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyByteReaderChan() *SChByteReader {
 	return d
 }
 
-// MakeSupplyByteReaderBuff() returns
+// MakeSupplyByteReaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

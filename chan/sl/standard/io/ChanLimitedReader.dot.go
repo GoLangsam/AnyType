@@ -40,7 +40,7 @@ type DChLimitedReader struct {
 	req chan struct{}
 }
 
-// MakeDemandLimitedReaderChan() returns
+// MakeDemandLimitedReaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandLimitedReaderChan() *DChLimitedReader {
 	return d
 }
 
-// MakeDemandLimitedReaderBuff() returns
+// MakeDemandLimitedReaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChLimitedReader struct {
 	// req chan struct{}
 }
 
-// MakeSupplyLimitedReaderChan() returns
+// MakeSupplyLimitedReaderChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyLimitedReaderChan() *SChLimitedReader {
 	return d
 }
 
-// MakeSupplyLimitedReaderBuff() returns
+// MakeSupplyLimitedReaderBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

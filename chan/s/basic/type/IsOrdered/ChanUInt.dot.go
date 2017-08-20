@@ -36,7 +36,7 @@ type SChUInt struct {
 	// req chan struct{}
 }
 
-// MakeSupplyUIntChan() returns
+// MakeSupplyUIntChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -47,7 +47,7 @@ func MakeSupplyUIntChan() *SChUInt {
 	return d
 }
 
-// MakeSupplyUIntBuff() returns
+// MakeSupplyUIntBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

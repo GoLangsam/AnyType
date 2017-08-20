@@ -40,7 +40,7 @@ type SChFsPathS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyFsPathSChan() returns
+// MakeSupplyFsPathSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyFsPathSChan() *SChFsPathS {
 	return d
 }
 
-// MakeSupplyFsPathSBuff() returns
+// MakeSupplyFsPathSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

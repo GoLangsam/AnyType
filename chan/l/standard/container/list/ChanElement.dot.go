@@ -40,7 +40,7 @@ type DChElement struct {
 	req chan struct{}
 }
 
-// MakeDemandElementChan() returns
+// MakeDemandElementChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandElementChan() *DChElement {
 	return d
 }
 
-// MakeDemandElementBuff() returns
+// MakeDemandElementBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

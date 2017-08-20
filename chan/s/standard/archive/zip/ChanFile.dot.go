@@ -40,7 +40,7 @@ type SChFile struct {
 	// req chan struct{}
 }
 
-// MakeSupplyFileChan() returns
+// MakeSupplyFileChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyFileChan() *SChFile {
 	return d
 }
 
-// MakeSupplyFileBuff() returns
+// MakeSupplyFileBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

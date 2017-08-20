@@ -40,7 +40,7 @@ type DChFile struct {
 	req chan struct{}
 }
 
-// MakeDemandFileChan() returns
+// MakeDemandFileChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandFileChan() *DChFile {
 	return d
 }
 
-// MakeDemandFileBuff() returns
+// MakeDemandFileBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

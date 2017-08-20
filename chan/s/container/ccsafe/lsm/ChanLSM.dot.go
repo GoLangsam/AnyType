@@ -40,7 +40,7 @@ type SChLSM struct {
 	// req chan struct{}
 }
 
-// MakeSupplyLSMChan() returns
+// MakeSupplyLSMChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyLSMChan() *SChLSM {
 	return d
 }
 
-// MakeSupplyLSMBuff() returns
+// MakeSupplyLSMBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

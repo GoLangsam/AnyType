@@ -40,7 +40,7 @@ type DChWriteCloser struct {
 	req chan struct{}
 }
 
-// MakeDemandWriteCloserChan() returns
+// MakeDemandWriteCloserChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandWriteCloserChan() *DChWriteCloser {
 	return d
 }
 
-// MakeDemandWriteCloserBuff() returns
+// MakeDemandWriteCloserBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

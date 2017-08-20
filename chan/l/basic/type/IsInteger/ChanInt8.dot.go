@@ -36,7 +36,7 @@ type DChInt8 struct {
 	req chan struct{}
 }
 
-// MakeDemandInt8Chan() returns
+// MakeDemandInt8Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandInt8Chan() *DChInt8 {
 	return d
 }
 
-// MakeDemandInt8Buff() returns
+// MakeDemandInt8Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

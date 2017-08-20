@@ -40,7 +40,7 @@ type DChCloser struct {
 	req chan struct{}
 }
 
-// MakeDemandCloserChan() returns
+// MakeDemandCloserChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandCloserChan() *DChCloser {
 	return d
 }
 
-// MakeDemandCloserBuff() returns
+// MakeDemandCloserBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel

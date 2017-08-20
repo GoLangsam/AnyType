@@ -40,7 +40,7 @@ type SChPatternS struct {
 	// req chan struct{}
 }
 
-// MakeSupplyPatternSChan() returns
+// MakeSupplyPatternSChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyPatternSChan() *SChPatternS {
 	return d
 }
 
-// MakeSupplyPatternSBuff() returns
+// MakeSupplyPatternSBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

@@ -40,7 +40,7 @@ type DChReadCloser struct {
 	req chan struct{}
 }
 
-// MakeDemandReadCloserChan() returns
+// MakeDemandReadCloserChan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -51,7 +51,7 @@ func MakeDemandReadCloserChan() *DChReadCloser {
 	return d
 }
 
-// MakeDemandReadCloserBuff() returns
+// MakeDemandReadCloserBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -90,7 +90,7 @@ type SChReadCloser struct {
 	// req chan struct{}
 }
 
-// MakeSupplyReadCloserChan() returns
+// MakeSupplyReadCloserChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -101,7 +101,7 @@ func MakeSupplyReadCloserChan() *SChReadCloser {
 	return d
 }
 
-// MakeSupplyReadCloserBuff() returns
+// MakeSupplyReadCloserBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

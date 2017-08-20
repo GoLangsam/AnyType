@@ -36,7 +36,7 @@ type DChUInt32 struct {
 	req chan struct{}
 }
 
-// MakeDemandUInt32Chan() returns
+// MakeDemandUInt32Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandUInt32Chan() *DChUInt32 {
 	return d
 }
 
-// MakeDemandUInt32Buff() returns
+// MakeDemandUInt32Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
@@ -86,7 +86,7 @@ type SChUInt32 struct {
 	// req chan struct{}
 }
 
-// MakeSupplyUInt32Chan() returns
+// MakeSupplyUInt32Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -97,7 +97,7 @@ func MakeSupplyUInt32Chan() *SChUInt32 {
 	return d
 }
 
-// MakeSupplyUInt32Buff() returns
+// MakeSupplyUInt32Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

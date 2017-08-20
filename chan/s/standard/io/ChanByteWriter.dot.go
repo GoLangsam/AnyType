@@ -40,7 +40,7 @@ type SChByteWriter struct {
 	// req chan struct{}
 }
 
-// MakeSupplyByteWriterChan() returns
+// MakeSupplyByteWriterChan returns
 // a (pointer to a) fresh
 // unbuffered
 // supply channel
@@ -51,7 +51,7 @@ func MakeSupplyByteWriterChan() *SChByteWriter {
 	return d
 }
 
-// MakeSupplyByteWriterBuff() returns
+// MakeSupplyByteWriterBuff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // supply channel

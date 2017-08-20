@@ -36,7 +36,7 @@ type DChComplex128 struct {
 	req chan struct{}
 }
 
-// MakeDemandComplex128Chan() returns
+// MakeDemandComplex128Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -47,7 +47,7 @@ func MakeDemandComplex128Chan() *DChComplex128 {
 	return d
 }
 
-// MakeDemandComplex128Buff() returns
+// MakeDemandComplex128Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
