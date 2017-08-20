@@ -7,16 +7,25 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type UIntChan interface { // bidirectional channel
+// UIntChan represents a
+// bidirectional
+// channel
+type UIntChan interface {
 	UIntROnlyChan // aka "<-chan" - receive only
 	UIntSOnlyChan // aka "chan<-" - send only
 }
 
-type UIntROnlyChan interface { // receive-only channel
-	RequestUInt() (dat uint)        // the receive function - aka "some-new-UInt-var := <-MyKind"
-	TryUInt() (dat uint, open bool) // the multi-valued comma-ok receive function - aka "some-new-UInt-var, ok := <-MyKind"
+// UIntROnlyChan represents a
+// receive-only
+// channel
+type UIntROnlyChan interface {
+	RequestUInt() (dat uint)        // the receive function - aka "MyUInt := <-MyUIntROnlyChan"
+	TryUInt() (dat uint, open bool) // the multi-valued comma-ok receive function - aka "MyUInt, ok := <-MyUIntROnlyChan"
 }
 
-type UIntSOnlyChan interface { // send-only channel
+// UIntSOnlyChan represents a
+// send-only
+// channel
+type UIntSOnlyChan interface {
 	ProvideUInt(dat uint) // the send function - aka "MyKind <- some UInt"
 }

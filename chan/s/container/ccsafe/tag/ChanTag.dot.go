@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/tag"
 )
 
-type TagChan interface { // bidirectional channel
+// TagChan represents a
+// bidirectional
+// channel
+type TagChan interface {
 	TagROnlyChan // aka "<-chan" - receive only
 	TagSOnlyChan // aka "chan<-" - send only
 }
 
-type TagROnlyChan interface { // receive-only channel
-	RequestTag() (dat tag.TagAny)        // the receive function - aka "some-new-Tag-var := <-MyKind"
-	TryTag() (dat tag.TagAny, open bool) // the multi-valued comma-ok receive function - aka "some-new-Tag-var, ok := <-MyKind"
+// TagROnlyChan represents a
+// receive-only
+// channel
+type TagROnlyChan interface {
+	RequestTag() (dat tag.TagAny)        // the receive function - aka "MyTag := <-MyTagROnlyChan"
+	TryTag() (dat tag.TagAny, open bool) // the multi-valued comma-ok receive function - aka "MyTag, ok := <-MyTagROnlyChan"
 }
 
-type TagSOnlyChan interface { // send-only channel
+// TagSOnlyChan represents a
+// send-only
+// channel
+type TagSOnlyChan interface {
 	ProvideTag(dat tag.TagAny) // the send function - aka "MyKind <- some Tag"
 }
 
-type SChTag struct { // supply channel
+// DChTag is a supply channel
+type SChTag struct {
 	dat chan tag.TagAny
 	// req chan struct{}
 }
 
+// MakeSupplyTagChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyTagChan() *SChTag {
 	d := new(SChTag)
 	d.dat = make(chan tag.TagAny)
@@ -37,6 +51,10 @@ func MakeSupplyTagChan() *SChTag {
 	return d
 }
 
+// MakeSupplyTagBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyTagBuff(cap int) *SChTag {
 	d := new(SChTag)
 	d.dat = make(chan tag.TagAny, cap)

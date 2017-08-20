@@ -7,25 +7,39 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type UInt32Chan interface { // bidirectional channel
+// UInt32Chan represents a
+// bidirectional
+// channel
+type UInt32Chan interface {
 	UInt32ROnlyChan // aka "<-chan" - receive only
 	UInt32SOnlyChan // aka "chan<-" - send only
 }
 
-type UInt32ROnlyChan interface { // receive-only channel
-	RequestUInt32() (dat uint32)        // the receive function - aka "some-new-UInt32-var := <-MyKind"
-	TryUInt32() (dat uint32, open bool) // the multi-valued comma-ok receive function - aka "some-new-UInt32-var, ok := <-MyKind"
+// UInt32ROnlyChan represents a
+// receive-only
+// channel
+type UInt32ROnlyChan interface {
+	RequestUInt32() (dat uint32)        // the receive function - aka "MyUInt32 := <-MyUInt32ROnlyChan"
+	TryUInt32() (dat uint32, open bool) // the multi-valued comma-ok receive function - aka "MyUInt32, ok := <-MyUInt32ROnlyChan"
 }
 
-type UInt32SOnlyChan interface { // send-only channel
+// UInt32SOnlyChan represents a
+// send-only
+// channel
+type UInt32SOnlyChan interface {
 	ProvideUInt32(dat uint32) // the send function - aka "MyKind <- some UInt32"
 }
 
-type SChUInt32 struct { // supply channel
+// DChUInt32 is a supply channel
+type SChUInt32 struct {
 	dat chan uint32
 	// req chan struct{}
 }
 
+// MakeSupplyUInt32Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyUInt32Chan() *SChUInt32 {
 	d := new(SChUInt32)
 	d.dat = make(chan uint32)
@@ -33,6 +47,10 @@ func MakeSupplyUInt32Chan() *SChUInt32 {
 	return d
 }
 
+// MakeSupplyUInt32Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyUInt32Buff(cap int) *SChUInt32 {
 	d := new(SChUInt32)
 	d.dat = make(chan uint32, cap)

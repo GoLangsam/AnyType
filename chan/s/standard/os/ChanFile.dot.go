@@ -11,25 +11,39 @@ import (
 	"os"
 )
 
-type FileChan interface { // bidirectional channel
+// FileChan represents a
+// bidirectional
+// channel
+type FileChan interface {
 	FileROnlyChan // aka "<-chan" - receive only
 	FileSOnlyChan // aka "chan<-" - send only
 }
 
-type FileROnlyChan interface { // receive-only channel
-	RequestFile() (dat *os.File)        // the receive function - aka "some-new-File-var := <-MyKind"
-	TryFile() (dat *os.File, open bool) // the multi-valued comma-ok receive function - aka "some-new-File-var, ok := <-MyKind"
+// FileROnlyChan represents a
+// receive-only
+// channel
+type FileROnlyChan interface {
+	RequestFile() (dat *os.File)        // the receive function - aka "MyFile := <-MyFileROnlyChan"
+	TryFile() (dat *os.File, open bool) // the multi-valued comma-ok receive function - aka "MyFile, ok := <-MyFileROnlyChan"
 }
 
-type FileSOnlyChan interface { // send-only channel
+// FileSOnlyChan represents a
+// send-only
+// channel
+type FileSOnlyChan interface {
 	ProvideFile(dat *os.File) // the send function - aka "MyKind <- some File"
 }
 
-type SChFile struct { // supply channel
+// DChFile is a supply channel
+type SChFile struct {
 	dat chan *os.File
 	// req chan struct{}
 }
 
+// MakeSupplyFileChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyFileChan() *SChFile {
 	d := new(SChFile)
 	d.dat = make(chan *os.File)
@@ -37,6 +51,10 @@ func MakeSupplyFileChan() *SChFile {
 	return d
 }
 
+// MakeSupplyFileBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyFileBuff(cap int) *SChFile {
 	d := new(SChFile)
 	d.dat = make(chan *os.File, cap)

@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/dotpath"
 )
 
-type DotPathChan interface { // bidirectional channel
+// DotPathChan represents a
+// bidirectional
+// channel
+type DotPathChan interface {
 	DotPathROnlyChan // aka "<-chan" - receive only
 	DotPathSOnlyChan // aka "chan<-" - send only
 }
 
-type DotPathROnlyChan interface { // receive-only channel
-	RequestDotPath() (dat dotpath.DotPath)        // the receive function - aka "some-new-DotPath-var := <-MyKind"
-	TryDotPath() (dat dotpath.DotPath, open bool) // the multi-valued comma-ok receive function - aka "some-new-DotPath-var, ok := <-MyKind"
+// DotPathROnlyChan represents a
+// receive-only
+// channel
+type DotPathROnlyChan interface {
+	RequestDotPath() (dat dotpath.DotPath)        // the receive function - aka "MyDotPath := <-MyDotPathROnlyChan"
+	TryDotPath() (dat dotpath.DotPath, open bool) // the multi-valued comma-ok receive function - aka "MyDotPath, ok := <-MyDotPathROnlyChan"
 }
 
-type DotPathSOnlyChan interface { // send-only channel
+// DotPathSOnlyChan represents a
+// send-only
+// channel
+type DotPathSOnlyChan interface {
 	ProvideDotPath(dat dotpath.DotPath) // the send function - aka "MyKind <- some DotPath"
 }
 
-type DChDotPath struct { // demand channel
+// DChDotPath is a demand channel
+type DChDotPath struct {
 	dat chan dotpath.DotPath
 	req chan struct{}
 }
 
+// MakeDemandDotPathChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandDotPathChan() *DChDotPath {
 	d := new(DChDotPath)
 	d.dat = make(chan dotpath.DotPath)
@@ -37,6 +51,10 @@ func MakeDemandDotPathChan() *DChDotPath {
 	return d
 }
 
+// MakeDemandDotPathBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandDotPathBuff(cap int) *DChDotPath {
 	d := new(DChDotPath)
 	d.dat = make(chan dotpath.DotPath, cap)

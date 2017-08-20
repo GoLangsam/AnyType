@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type ByteScannerChan interface { // bidirectional channel
+// ByteScannerChan represents a
+// bidirectional
+// channel
+type ByteScannerChan interface {
 	ByteScannerROnlyChan // aka "<-chan" - receive only
 	ByteScannerSOnlyChan // aka "chan<-" - send only
 }
 
-type ByteScannerROnlyChan interface { // receive-only channel
-	RequestByteScanner() (dat io.ByteScanner)        // the receive function - aka "some-new-ByteScanner-var := <-MyKind"
-	TryByteScanner() (dat io.ByteScanner, open bool) // the multi-valued comma-ok receive function - aka "some-new-ByteScanner-var, ok := <-MyKind"
+// ByteScannerROnlyChan represents a
+// receive-only
+// channel
+type ByteScannerROnlyChan interface {
+	RequestByteScanner() (dat io.ByteScanner)        // the receive function - aka "MyByteScanner := <-MyByteScannerROnlyChan"
+	TryByteScanner() (dat io.ByteScanner, open bool) // the multi-valued comma-ok receive function - aka "MyByteScanner, ok := <-MyByteScannerROnlyChan"
 }
 
-type ByteScannerSOnlyChan interface { // send-only channel
+// ByteScannerSOnlyChan represents a
+// send-only
+// channel
+type ByteScannerSOnlyChan interface {
 	ProvideByteScanner(dat io.ByteScanner) // the send function - aka "MyKind <- some ByteScanner"
 }
 
-type DChByteScanner struct { // demand channel
+// DChByteScanner is a demand channel
+type DChByteScanner struct {
 	dat chan io.ByteScanner
 	req chan struct{}
 }
 
+// MakeDemandByteScannerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandByteScannerChan() *DChByteScanner {
 	d := new(DChByteScanner)
 	d.dat = make(chan io.ByteScanner)
@@ -37,6 +51,10 @@ func MakeDemandByteScannerChan() *DChByteScanner {
 	return d
 }
 
+// MakeDemandByteScannerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandByteScannerBuff(cap int) *DChByteScanner {
 	d := new(DChByteScanner)
 	d.dat = make(chan io.ByteScanner, cap)

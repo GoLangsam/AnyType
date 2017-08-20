@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type WriterAtChan interface { // bidirectional channel
+// WriterAtChan represents a
+// bidirectional
+// channel
+type WriterAtChan interface {
 	WriterAtROnlyChan // aka "<-chan" - receive only
 	WriterAtSOnlyChan // aka "chan<-" - send only
 }
 
-type WriterAtROnlyChan interface { // receive-only channel
-	RequestWriterAt() (dat io.WriterAt)        // the receive function - aka "some-new-WriterAt-var := <-MyKind"
-	TryWriterAt() (dat io.WriterAt, open bool) // the multi-valued comma-ok receive function - aka "some-new-WriterAt-var, ok := <-MyKind"
+// WriterAtROnlyChan represents a
+// receive-only
+// channel
+type WriterAtROnlyChan interface {
+	RequestWriterAt() (dat io.WriterAt)        // the receive function - aka "MyWriterAt := <-MyWriterAtROnlyChan"
+	TryWriterAt() (dat io.WriterAt, open bool) // the multi-valued comma-ok receive function - aka "MyWriterAt, ok := <-MyWriterAtROnlyChan"
 }
 
-type WriterAtSOnlyChan interface { // send-only channel
+// WriterAtSOnlyChan represents a
+// send-only
+// channel
+type WriterAtSOnlyChan interface {
 	ProvideWriterAt(dat io.WriterAt) // the send function - aka "MyKind <- some WriterAt"
 }
 
-type SChWriterAt struct { // supply channel
+// DChWriterAt is a supply channel
+type SChWriterAt struct {
 	dat chan io.WriterAt
 	// req chan struct{}
 }
 
+// MakeSupplyWriterAtChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyWriterAtChan() *SChWriterAt {
 	d := new(SChWriterAt)
 	d.dat = make(chan io.WriterAt)
@@ -37,6 +51,10 @@ func MakeSupplyWriterAtChan() *SChWriterAt {
 	return d
 }
 
+// MakeSupplyWriterAtBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyWriterAtBuff(cap int) *SChWriterAt {
 	d := new(SChWriterAt)
 	d.dat = make(chan io.WriterAt, cap)

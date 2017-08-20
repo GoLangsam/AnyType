@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type ReadWriteSeekerChan interface { // bidirectional channel
+// ReadWriteSeekerChan represents a
+// bidirectional
+// channel
+type ReadWriteSeekerChan interface {
 	ReadWriteSeekerROnlyChan // aka "<-chan" - receive only
 	ReadWriteSeekerSOnlyChan // aka "chan<-" - send only
 }
 
-type ReadWriteSeekerROnlyChan interface { // receive-only channel
-	RequestReadWriteSeeker() (dat io.ReadWriteSeeker)        // the receive function - aka "some-new-ReadWriteSeeker-var := <-MyKind"
-	TryReadWriteSeeker() (dat io.ReadWriteSeeker, open bool) // the multi-valued comma-ok receive function - aka "some-new-ReadWriteSeeker-var, ok := <-MyKind"
+// ReadWriteSeekerROnlyChan represents a
+// receive-only
+// channel
+type ReadWriteSeekerROnlyChan interface {
+	RequestReadWriteSeeker() (dat io.ReadWriteSeeker)        // the receive function - aka "MyReadWriteSeeker := <-MyReadWriteSeekerROnlyChan"
+	TryReadWriteSeeker() (dat io.ReadWriteSeeker, open bool) // the multi-valued comma-ok receive function - aka "MyReadWriteSeeker, ok := <-MyReadWriteSeekerROnlyChan"
 }
 
-type ReadWriteSeekerSOnlyChan interface { // send-only channel
+// ReadWriteSeekerSOnlyChan represents a
+// send-only
+// channel
+type ReadWriteSeekerSOnlyChan interface {
 	ProvideReadWriteSeeker(dat io.ReadWriteSeeker) // the send function - aka "MyKind <- some ReadWriteSeeker"
 }
 
-type SChReadWriteSeeker struct { // supply channel
+// DChReadWriteSeeker is a supply channel
+type SChReadWriteSeeker struct {
 	dat chan io.ReadWriteSeeker
 	// req chan struct{}
 }
 
+// MakeSupplyReadWriteSeekerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyReadWriteSeekerChan() *SChReadWriteSeeker {
 	d := new(SChReadWriteSeeker)
 	d.dat = make(chan io.ReadWriteSeeker)
@@ -37,6 +51,10 @@ func MakeSupplyReadWriteSeekerChan() *SChReadWriteSeeker {
 	return d
 }
 
+// MakeSupplyReadWriteSeekerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyReadWriteSeekerBuff(cap int) *SChReadWriteSeeker {
 	d := new(SChReadWriteSeeker)
 	d.dat = make(chan io.ReadWriteSeeker, cap)

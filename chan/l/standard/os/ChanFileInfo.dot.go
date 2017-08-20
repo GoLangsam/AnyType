@@ -11,25 +11,39 @@ import (
 	"os"
 )
 
-type FileInfoChan interface { // bidirectional channel
+// FileInfoChan represents a
+// bidirectional
+// channel
+type FileInfoChan interface {
 	FileInfoROnlyChan // aka "<-chan" - receive only
 	FileInfoSOnlyChan // aka "chan<-" - send only
 }
 
-type FileInfoROnlyChan interface { // receive-only channel
-	RequestFileInfo() (dat os.FileInfo)        // the receive function - aka "some-new-FileInfo-var := <-MyKind"
-	TryFileInfo() (dat os.FileInfo, open bool) // the multi-valued comma-ok receive function - aka "some-new-FileInfo-var, ok := <-MyKind"
+// FileInfoROnlyChan represents a
+// receive-only
+// channel
+type FileInfoROnlyChan interface {
+	RequestFileInfo() (dat os.FileInfo)        // the receive function - aka "MyFileInfo := <-MyFileInfoROnlyChan"
+	TryFileInfo() (dat os.FileInfo, open bool) // the multi-valued comma-ok receive function - aka "MyFileInfo, ok := <-MyFileInfoROnlyChan"
 }
 
-type FileInfoSOnlyChan interface { // send-only channel
+// FileInfoSOnlyChan represents a
+// send-only
+// channel
+type FileInfoSOnlyChan interface {
 	ProvideFileInfo(dat os.FileInfo) // the send function - aka "MyKind <- some FileInfo"
 }
 
-type DChFileInfo struct { // demand channel
+// DChFileInfo is a demand channel
+type DChFileInfo struct {
 	dat chan os.FileInfo
 	req chan struct{}
 }
 
+// MakeDemandFileInfoChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandFileInfoChan() *DChFileInfo {
 	d := new(DChFileInfo)
 	d.dat = make(chan os.FileInfo)
@@ -37,6 +51,10 @@ func MakeDemandFileInfoChan() *DChFileInfo {
 	return d
 }
 
+// MakeDemandFileInfoBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandFileInfoBuff(cap int) *DChFileInfo {
 	d := new(DChFileInfo)
 	d.dat = make(chan os.FileInfo, cap)

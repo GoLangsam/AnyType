@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type PipeReaderChan interface { // bidirectional channel
+// PipeReaderChan represents a
+// bidirectional
+// channel
+type PipeReaderChan interface {
 	PipeReaderROnlyChan // aka "<-chan" - receive only
 	PipeReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type PipeReaderROnlyChan interface { // receive-only channel
-	RequestPipeReader() (dat *io.PipeReader)        // the receive function - aka "some-new-PipeReader-var := <-MyKind"
-	TryPipeReader() (dat *io.PipeReader, open bool) // the multi-valued comma-ok receive function - aka "some-new-PipeReader-var, ok := <-MyKind"
+// PipeReaderROnlyChan represents a
+// receive-only
+// channel
+type PipeReaderROnlyChan interface {
+	RequestPipeReader() (dat *io.PipeReader)        // the receive function - aka "MyPipeReader := <-MyPipeReaderROnlyChan"
+	TryPipeReader() (dat *io.PipeReader, open bool) // the multi-valued comma-ok receive function - aka "MyPipeReader, ok := <-MyPipeReaderROnlyChan"
 }
 
-type PipeReaderSOnlyChan interface { // send-only channel
+// PipeReaderSOnlyChan represents a
+// send-only
+// channel
+type PipeReaderSOnlyChan interface {
 	ProvidePipeReader(dat *io.PipeReader) // the send function - aka "MyKind <- some PipeReader"
 }
 
-type SChPipeReader struct { // supply channel
+// DChPipeReader is a supply channel
+type SChPipeReader struct {
 	dat chan *io.PipeReader
 	// req chan struct{}
 }
 
+// MakeSupplyPipeReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyPipeReaderChan() *SChPipeReader {
 	d := new(SChPipeReader)
 	d.dat = make(chan *io.PipeReader)
@@ -37,6 +51,10 @@ func MakeSupplyPipeReaderChan() *SChPipeReader {
 	return d
 }
 
+// MakeSupplyPipeReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyPipeReaderBuff(cap int) *SChPipeReader {
 	d := new(SChPipeReader)
 	d.dat = make(chan *io.PipeReader, cap)

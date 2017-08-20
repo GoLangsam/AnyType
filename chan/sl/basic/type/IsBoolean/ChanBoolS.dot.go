@@ -7,16 +7,25 @@ package IsBoolean
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type BoolSChan interface { // bidirectional channel
+// BoolSChan represents a
+// bidirectional
+// channel
+type BoolSChan interface {
 	BoolSROnlyChan // aka "<-chan" - receive only
 	BoolSSOnlyChan // aka "chan<-" - send only
 }
 
-type BoolSROnlyChan interface { // receive-only channel
-	RequestBoolS() (dat []bool)        // the receive function - aka "some-new-BoolS-var := <-MyKind"
-	TryBoolS() (dat []bool, open bool) // the multi-valued comma-ok receive function - aka "some-new-BoolS-var, ok := <-MyKind"
+// BoolSROnlyChan represents a
+// receive-only
+// channel
+type BoolSROnlyChan interface {
+	RequestBoolS() (dat []bool)        // the receive function - aka "MyBoolS := <-MyBoolSROnlyChan"
+	TryBoolS() (dat []bool, open bool) // the multi-valued comma-ok receive function - aka "MyBoolS, ok := <-MyBoolSROnlyChan"
 }
 
-type BoolSSOnlyChan interface { // send-only channel
+// BoolSSOnlyChan represents a
+// send-only
+// channel
+type BoolSSOnlyChan interface {
 	ProvideBoolS(dat []bool) // the send function - aka "MyKind <- some BoolS"
 }

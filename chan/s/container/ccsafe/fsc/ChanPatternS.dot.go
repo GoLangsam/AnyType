@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/fs"
 )
 
-type PatternSChan interface { // bidirectional channel
+// PatternSChan represents a
+// bidirectional
+// channel
+type PatternSChan interface {
 	PatternSROnlyChan // aka "<-chan" - receive only
 	PatternSSOnlyChan // aka "chan<-" - send only
 }
 
-type PatternSROnlyChan interface { // receive-only channel
-	RequestPatternS() (dat fs.PatternS)        // the receive function - aka "some-new-PatternS-var := <-MyKind"
-	TryPatternS() (dat fs.PatternS, open bool) // the multi-valued comma-ok receive function - aka "some-new-PatternS-var, ok := <-MyKind"
+// PatternSROnlyChan represents a
+// receive-only
+// channel
+type PatternSROnlyChan interface {
+	RequestPatternS() (dat fs.PatternS)        // the receive function - aka "MyPatternS := <-MyPatternSROnlyChan"
+	TryPatternS() (dat fs.PatternS, open bool) // the multi-valued comma-ok receive function - aka "MyPatternS, ok := <-MyPatternSROnlyChan"
 }
 
-type PatternSSOnlyChan interface { // send-only channel
+// PatternSSOnlyChan represents a
+// send-only
+// channel
+type PatternSSOnlyChan interface {
 	ProvidePatternS(dat fs.PatternS) // the send function - aka "MyKind <- some PatternS"
 }
 
-type SChPatternS struct { // supply channel
+// DChPatternS is a supply channel
+type SChPatternS struct {
 	dat chan fs.PatternS
 	// req chan struct{}
 }
 
+// MakeSupplyPatternSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyPatternSChan() *SChPatternS {
 	d := new(SChPatternS)
 	d.dat = make(chan fs.PatternS)
@@ -37,6 +51,10 @@ func MakeSupplyPatternSChan() *SChPatternS {
 	return d
 }
 
+// MakeSupplyPatternSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyPatternSBuff(cap int) *SChPatternS {
 	d := new(SChPatternS)
 	d.dat = make(chan fs.PatternS, cap)

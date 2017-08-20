@@ -11,16 +11,25 @@ import (
 	"io"
 )
 
-type RuneReaderChan interface { // bidirectional channel
+// RuneReaderChan represents a
+// bidirectional
+// channel
+type RuneReaderChan interface {
 	RuneReaderROnlyChan // aka "<-chan" - receive only
 	RuneReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type RuneReaderROnlyChan interface { // receive-only channel
-	RequestRuneReader() (dat io.RuneReader)        // the receive function - aka "some-new-RuneReader-var := <-MyKind"
-	TryRuneReader() (dat io.RuneReader, open bool) // the multi-valued comma-ok receive function - aka "some-new-RuneReader-var, ok := <-MyKind"
+// RuneReaderROnlyChan represents a
+// receive-only
+// channel
+type RuneReaderROnlyChan interface {
+	RequestRuneReader() (dat io.RuneReader)        // the receive function - aka "MyRuneReader := <-MyRuneReaderROnlyChan"
+	TryRuneReader() (dat io.RuneReader, open bool) // the multi-valued comma-ok receive function - aka "MyRuneReader, ok := <-MyRuneReaderROnlyChan"
 }
 
-type RuneReaderSOnlyChan interface { // send-only channel
+// RuneReaderSOnlyChan represents a
+// send-only
+// channel
+type RuneReaderSOnlyChan interface {
 	ProvideRuneReader(dat io.RuneReader) // the send function - aka "MyKind <- some RuneReader"
 }

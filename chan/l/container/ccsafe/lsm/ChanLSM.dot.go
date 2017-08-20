@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/lsm"
 )
 
-type LSMChan interface { // bidirectional channel
+// LSMChan represents a
+// bidirectional
+// channel
+type LSMChan interface {
 	LSMROnlyChan // aka "<-chan" - receive only
 	LSMSOnlyChan // aka "chan<-" - send only
 }
 
-type LSMROnlyChan interface { // receive-only channel
-	RequestLSM() (dat lsm.LazyStringerMap)        // the receive function - aka "some-new-LSM-var := <-MyKind"
-	TryLSM() (dat lsm.LazyStringerMap, open bool) // the multi-valued comma-ok receive function - aka "some-new-LSM-var, ok := <-MyKind"
+// LSMROnlyChan represents a
+// receive-only
+// channel
+type LSMROnlyChan interface {
+	RequestLSM() (dat lsm.LazyStringerMap)        // the receive function - aka "MyLSM := <-MyLSMROnlyChan"
+	TryLSM() (dat lsm.LazyStringerMap, open bool) // the multi-valued comma-ok receive function - aka "MyLSM, ok := <-MyLSMROnlyChan"
 }
 
-type LSMSOnlyChan interface { // send-only channel
+// LSMSOnlyChan represents a
+// send-only
+// channel
+type LSMSOnlyChan interface {
 	ProvideLSM(dat lsm.LazyStringerMap) // the send function - aka "MyKind <- some LSM"
 }
 
-type DChLSM struct { // demand channel
+// DChLSM is a demand channel
+type DChLSM struct {
 	dat chan lsm.LazyStringerMap
 	req chan struct{}
 }
 
+// MakeDemandLSMChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandLSMChan() *DChLSM {
 	d := new(DChLSM)
 	d.dat = make(chan lsm.LazyStringerMap)
@@ -37,6 +51,10 @@ func MakeDemandLSMChan() *DChLSM {
 	return d
 }
 
+// MakeDemandLSMBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandLSMBuff(cap int) *DChLSM {
 	d := new(DChLSM)
 	d.dat = make(chan lsm.LazyStringerMap, cap)

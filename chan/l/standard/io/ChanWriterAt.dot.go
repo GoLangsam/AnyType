@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type WriterAtChan interface { // bidirectional channel
+// WriterAtChan represents a
+// bidirectional
+// channel
+type WriterAtChan interface {
 	WriterAtROnlyChan // aka "<-chan" - receive only
 	WriterAtSOnlyChan // aka "chan<-" - send only
 }
 
-type WriterAtROnlyChan interface { // receive-only channel
-	RequestWriterAt() (dat io.WriterAt)        // the receive function - aka "some-new-WriterAt-var := <-MyKind"
-	TryWriterAt() (dat io.WriterAt, open bool) // the multi-valued comma-ok receive function - aka "some-new-WriterAt-var, ok := <-MyKind"
+// WriterAtROnlyChan represents a
+// receive-only
+// channel
+type WriterAtROnlyChan interface {
+	RequestWriterAt() (dat io.WriterAt)        // the receive function - aka "MyWriterAt := <-MyWriterAtROnlyChan"
+	TryWriterAt() (dat io.WriterAt, open bool) // the multi-valued comma-ok receive function - aka "MyWriterAt, ok := <-MyWriterAtROnlyChan"
 }
 
-type WriterAtSOnlyChan interface { // send-only channel
+// WriterAtSOnlyChan represents a
+// send-only
+// channel
+type WriterAtSOnlyChan interface {
 	ProvideWriterAt(dat io.WriterAt) // the send function - aka "MyKind <- some WriterAt"
 }
 
-type DChWriterAt struct { // demand channel
+// DChWriterAt is a demand channel
+type DChWriterAt struct {
 	dat chan io.WriterAt
 	req chan struct{}
 }
 
+// MakeDemandWriterAtChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandWriterAtChan() *DChWriterAt {
 	d := new(DChWriterAt)
 	d.dat = make(chan io.WriterAt)
@@ -37,6 +51,10 @@ func MakeDemandWriterAtChan() *DChWriterAt {
 	return d
 }
 
+// MakeDemandWriterAtBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandWriterAtBuff(cap int) *DChWriterAt {
 	d := new(DChWriterAt)
 	d.dat = make(chan io.WriterAt, cap)

@@ -7,25 +7,39 @@ package IsError
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type ErrorSChan interface { // bidirectional channel
+// ErrorSChan represents a
+// bidirectional
+// channel
+type ErrorSChan interface {
 	ErrorSROnlyChan // aka "<-chan" - receive only
 	ErrorSSOnlyChan // aka "chan<-" - send only
 }
 
-type ErrorSROnlyChan interface { // receive-only channel
-	RequestErrorS() (dat []error)        // the receive function - aka "some-new-ErrorS-var := <-MyKind"
-	TryErrorS() (dat []error, open bool) // the multi-valued comma-ok receive function - aka "some-new-ErrorS-var, ok := <-MyKind"
+// ErrorSROnlyChan represents a
+// receive-only
+// channel
+type ErrorSROnlyChan interface {
+	RequestErrorS() (dat []error)        // the receive function - aka "MyErrorS := <-MyErrorSROnlyChan"
+	TryErrorS() (dat []error, open bool) // the multi-valued comma-ok receive function - aka "MyErrorS, ok := <-MyErrorSROnlyChan"
 }
 
-type ErrorSSOnlyChan interface { // send-only channel
+// ErrorSSOnlyChan represents a
+// send-only
+// channel
+type ErrorSSOnlyChan interface {
 	ProvideErrorS(dat []error) // the send function - aka "MyKind <- some ErrorS"
 }
 
-type SChErrorS struct { // supply channel
+// DChErrorS is a supply channel
+type SChErrorS struct {
 	dat chan []error
 	// req chan struct{}
 }
 
+// MakeSupplyErrorSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyErrorSChan() *SChErrorS {
 	d := new(SChErrorS)
 	d.dat = make(chan []error)
@@ -33,6 +47,10 @@ func MakeSupplyErrorSChan() *SChErrorS {
 	return d
 }
 
+// MakeSupplyErrorSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyErrorSBuff(cap int) *SChErrorS {
 	d := new(SChErrorS)
 	d.dat = make(chan []error, cap)

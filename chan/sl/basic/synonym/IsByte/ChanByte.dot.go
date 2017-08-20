@@ -7,16 +7,25 @@ package IsByte
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type ByteChan interface { // bidirectional channel
+// ByteChan represents a
+// bidirectional
+// channel
+type ByteChan interface {
 	ByteROnlyChan // aka "<-chan" - receive only
 	ByteSOnlyChan // aka "chan<-" - send only
 }
 
-type ByteROnlyChan interface { // receive-only channel
-	RequestByte() (dat byte)        // the receive function - aka "some-new-Byte-var := <-MyKind"
-	TryByte() (dat byte, open bool) // the multi-valued comma-ok receive function - aka "some-new-Byte-var, ok := <-MyKind"
+// ByteROnlyChan represents a
+// receive-only
+// channel
+type ByteROnlyChan interface {
+	RequestByte() (dat byte)        // the receive function - aka "MyByte := <-MyByteROnlyChan"
+	TryByte() (dat byte, open bool) // the multi-valued comma-ok receive function - aka "MyByte, ok := <-MyByteROnlyChan"
 }
 
-type ByteSOnlyChan interface { // send-only channel
+// ByteSOnlyChan represents a
+// send-only
+// channel
+type ByteSOnlyChan interface {
 	ProvideByte(dat byte) // the send function - aka "MyKind <- some Byte"
 }

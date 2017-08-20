@@ -7,25 +7,39 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Complex64Chan interface { // bidirectional channel
+// Complex64Chan represents a
+// bidirectional
+// channel
+type Complex64Chan interface {
 	Complex64ROnlyChan // aka "<-chan" - receive only
 	Complex64SOnlyChan // aka "chan<-" - send only
 }
 
-type Complex64ROnlyChan interface { // receive-only channel
-	RequestComplex64() (dat complex64)        // the receive function - aka "some-new-Complex64-var := <-MyKind"
-	TryComplex64() (dat complex64, open bool) // the multi-valued comma-ok receive function - aka "some-new-Complex64-var, ok := <-MyKind"
+// Complex64ROnlyChan represents a
+// receive-only
+// channel
+type Complex64ROnlyChan interface {
+	RequestComplex64() (dat complex64)        // the receive function - aka "MyComplex64 := <-MyComplex64ROnlyChan"
+	TryComplex64() (dat complex64, open bool) // the multi-valued comma-ok receive function - aka "MyComplex64, ok := <-MyComplex64ROnlyChan"
 }
 
-type Complex64SOnlyChan interface { // send-only channel
+// Complex64SOnlyChan represents a
+// send-only
+// channel
+type Complex64SOnlyChan interface {
 	ProvideComplex64(dat complex64) // the send function - aka "MyKind <- some Complex64"
 }
 
-type DChComplex64 struct { // demand channel
+// DChComplex64 is a demand channel
+type DChComplex64 struct {
 	dat chan complex64
 	req chan struct{}
 }
 
+// MakeDemandComplex64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandComplex64Chan() *DChComplex64 {
 	d := new(DChComplex64)
 	d.dat = make(chan complex64)
@@ -33,6 +47,10 @@ func MakeDemandComplex64Chan() *DChComplex64 {
 	return d
 }
 
+// MakeDemandComplex64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandComplex64Buff(cap int) *DChComplex64 {
 	d := new(DChComplex64)
 	d.dat = make(chan complex64, cap)

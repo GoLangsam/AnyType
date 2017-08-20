@@ -7,16 +7,25 @@ package test
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type PointerSChan interface { // bidirectional channel
+// PointerSChan represents a
+// bidirectional
+// channel
+type PointerSChan interface {
 	PointerSROnlyChan // aka "<-chan" - receive only
 	PointerSSOnlyChan // aka "chan<-" - send only
 }
 
-type PointerSROnlyChan interface { // receive-only channel
-	RequestPointerS() (dat []*SomeType)        // the receive function - aka "some-new-PointerS-var := <-MyKind"
-	TryPointerS() (dat []*SomeType, open bool) // the multi-valued comma-ok receive function - aka "some-new-PointerS-var, ok := <-MyKind"
+// PointerSROnlyChan represents a
+// receive-only
+// channel
+type PointerSROnlyChan interface {
+	RequestPointerS() (dat []*SomeType)        // the receive function - aka "MyPointerS := <-MyPointerSROnlyChan"
+	TryPointerS() (dat []*SomeType, open bool) // the multi-valued comma-ok receive function - aka "MyPointerS, ok := <-MyPointerSROnlyChan"
 }
 
-type PointerSSOnlyChan interface { // send-only channel
+// PointerSSOnlyChan represents a
+// send-only
+// channel
+type PointerSSOnlyChan interface {
 	ProvidePointerS(dat []*SomeType) // the send function - aka "MyKind <- some PointerS"
 }

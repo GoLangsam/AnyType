@@ -7,25 +7,39 @@ package IsOrdered
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Float32Chan interface { // bidirectional channel
+// Float32Chan represents a
+// bidirectional
+// channel
+type Float32Chan interface {
 	Float32ROnlyChan // aka "<-chan" - receive only
 	Float32SOnlyChan // aka "chan<-" - send only
 }
 
-type Float32ROnlyChan interface { // receive-only channel
-	RequestFloat32() (dat float32)        // the receive function - aka "some-new-Float32-var := <-MyKind"
-	TryFloat32() (dat float32, open bool) // the multi-valued comma-ok receive function - aka "some-new-Float32-var, ok := <-MyKind"
+// Float32ROnlyChan represents a
+// receive-only
+// channel
+type Float32ROnlyChan interface {
+	RequestFloat32() (dat float32)        // the receive function - aka "MyFloat32 := <-MyFloat32ROnlyChan"
+	TryFloat32() (dat float32, open bool) // the multi-valued comma-ok receive function - aka "MyFloat32, ok := <-MyFloat32ROnlyChan"
 }
 
-type Float32SOnlyChan interface { // send-only channel
+// Float32SOnlyChan represents a
+// send-only
+// channel
+type Float32SOnlyChan interface {
 	ProvideFloat32(dat float32) // the send function - aka "MyKind <- some Float32"
 }
 
-type DChFloat32 struct { // demand channel
+// DChFloat32 is a demand channel
+type DChFloat32 struct {
 	dat chan float32
 	req chan struct{}
 }
 
+// MakeDemandFloat32Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandFloat32Chan() *DChFloat32 {
 	d := new(DChFloat32)
 	d.dat = make(chan float32)
@@ -33,6 +47,10 @@ func MakeDemandFloat32Chan() *DChFloat32 {
 	return d
 }
 
+// MakeDemandFloat32Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandFloat32Buff(cap int) *DChFloat32 {
 	d := new(DChFloat32)
 	d.dat = make(chan float32, cap)

@@ -11,25 +11,39 @@ import (
 	"container/list"
 )
 
-type ElementSChan interface { // bidirectional channel
+// ElementSChan represents a
+// bidirectional
+// channel
+type ElementSChan interface {
 	ElementSROnlyChan // aka "<-chan" - receive only
 	ElementSSOnlyChan // aka "chan<-" - send only
 }
 
-type ElementSROnlyChan interface { // receive-only channel
-	RequestElementS() (dat []list.Element)        // the receive function - aka "some-new-ElementS-var := <-MyKind"
-	TryElementS() (dat []list.Element, open bool) // the multi-valued comma-ok receive function - aka "some-new-ElementS-var, ok := <-MyKind"
+// ElementSROnlyChan represents a
+// receive-only
+// channel
+type ElementSROnlyChan interface {
+	RequestElementS() (dat []list.Element)        // the receive function - aka "MyElementS := <-MyElementSROnlyChan"
+	TryElementS() (dat []list.Element, open bool) // the multi-valued comma-ok receive function - aka "MyElementS, ok := <-MyElementSROnlyChan"
 }
 
-type ElementSSOnlyChan interface { // send-only channel
+// ElementSSOnlyChan represents a
+// send-only
+// channel
+type ElementSSOnlyChan interface {
 	ProvideElementS(dat []list.Element) // the send function - aka "MyKind <- some ElementS"
 }
 
-type DChElementS struct { // demand channel
+// DChElementS is a demand channel
+type DChElementS struct {
 	dat chan []list.Element
 	req chan struct{}
 }
 
+// MakeDemandElementSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandElementSChan() *DChElementS {
 	d := new(DChElementS)
 	d.dat = make(chan []list.Element)
@@ -37,6 +51,10 @@ func MakeDemandElementSChan() *DChElementS {
 	return d
 }
 
+// MakeDemandElementSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandElementSBuff(cap int) *DChElementS {
 	d := new(DChElementS)
 	d.dat = make(chan []list.Element, cap)

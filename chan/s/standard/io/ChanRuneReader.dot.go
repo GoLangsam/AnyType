@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type RuneReaderChan interface { // bidirectional channel
+// RuneReaderChan represents a
+// bidirectional
+// channel
+type RuneReaderChan interface {
 	RuneReaderROnlyChan // aka "<-chan" - receive only
 	RuneReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type RuneReaderROnlyChan interface { // receive-only channel
-	RequestRuneReader() (dat io.RuneReader)        // the receive function - aka "some-new-RuneReader-var := <-MyKind"
-	TryRuneReader() (dat io.RuneReader, open bool) // the multi-valued comma-ok receive function - aka "some-new-RuneReader-var, ok := <-MyKind"
+// RuneReaderROnlyChan represents a
+// receive-only
+// channel
+type RuneReaderROnlyChan interface {
+	RequestRuneReader() (dat io.RuneReader)        // the receive function - aka "MyRuneReader := <-MyRuneReaderROnlyChan"
+	TryRuneReader() (dat io.RuneReader, open bool) // the multi-valued comma-ok receive function - aka "MyRuneReader, ok := <-MyRuneReaderROnlyChan"
 }
 
-type RuneReaderSOnlyChan interface { // send-only channel
+// RuneReaderSOnlyChan represents a
+// send-only
+// channel
+type RuneReaderSOnlyChan interface {
 	ProvideRuneReader(dat io.RuneReader) // the send function - aka "MyKind <- some RuneReader"
 }
 
-type SChRuneReader struct { // supply channel
+// DChRuneReader is a supply channel
+type SChRuneReader struct {
 	dat chan io.RuneReader
 	// req chan struct{}
 }
 
+// MakeSupplyRuneReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyRuneReaderChan() *SChRuneReader {
 	d := new(SChRuneReader)
 	d.dat = make(chan io.RuneReader)
@@ -37,6 +51,10 @@ func MakeSupplyRuneReaderChan() *SChRuneReader {
 	return d
 }
 
+// MakeSupplyRuneReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyRuneReaderBuff(cap int) *SChRuneReader {
 	d := new(SChRuneReader)
 	d.dat = make(chan io.RuneReader, cap)

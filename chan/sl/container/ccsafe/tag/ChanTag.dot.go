@@ -11,16 +11,25 @@ import (
 	"github.com/golangsam/container/ccsafe/tag"
 )
 
-type TagChan interface { // bidirectional channel
+// TagChan represents a
+// bidirectional
+// channel
+type TagChan interface {
 	TagROnlyChan // aka "<-chan" - receive only
 	TagSOnlyChan // aka "chan<-" - send only
 }
 
-type TagROnlyChan interface { // receive-only channel
-	RequestTag() (dat tag.TagAny)        // the receive function - aka "some-new-Tag-var := <-MyKind"
-	TryTag() (dat tag.TagAny, open bool) // the multi-valued comma-ok receive function - aka "some-new-Tag-var, ok := <-MyKind"
+// TagROnlyChan represents a
+// receive-only
+// channel
+type TagROnlyChan interface {
+	RequestTag() (dat tag.TagAny)        // the receive function - aka "MyTag := <-MyTagROnlyChan"
+	TryTag() (dat tag.TagAny, open bool) // the multi-valued comma-ok receive function - aka "MyTag, ok := <-MyTagROnlyChan"
 }
 
-type TagSOnlyChan interface { // send-only channel
+// TagSOnlyChan represents a
+// send-only
+// channel
+type TagSOnlyChan interface {
 	ProvideTag(dat tag.TagAny) // the send function - aka "MyKind <- some Tag"
 }

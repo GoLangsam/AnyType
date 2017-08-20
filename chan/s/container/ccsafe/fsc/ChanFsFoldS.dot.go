@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/fs"
 )
 
-type FsFoldSChan interface { // bidirectional channel
+// FsFoldSChan represents a
+// bidirectional
+// channel
+type FsFoldSChan interface {
 	FsFoldSROnlyChan // aka "<-chan" - receive only
 	FsFoldSSOnlyChan // aka "chan<-" - send only
 }
 
-type FsFoldSROnlyChan interface { // receive-only channel
-	RequestFsFoldS() (dat fs.FsFoldS)        // the receive function - aka "some-new-FsFoldS-var := <-MyKind"
-	TryFsFoldS() (dat fs.FsFoldS, open bool) // the multi-valued comma-ok receive function - aka "some-new-FsFoldS-var, ok := <-MyKind"
+// FsFoldSROnlyChan represents a
+// receive-only
+// channel
+type FsFoldSROnlyChan interface {
+	RequestFsFoldS() (dat fs.FsFoldS)        // the receive function - aka "MyFsFoldS := <-MyFsFoldSROnlyChan"
+	TryFsFoldS() (dat fs.FsFoldS, open bool) // the multi-valued comma-ok receive function - aka "MyFsFoldS, ok := <-MyFsFoldSROnlyChan"
 }
 
-type FsFoldSSOnlyChan interface { // send-only channel
+// FsFoldSSOnlyChan represents a
+// send-only
+// channel
+type FsFoldSSOnlyChan interface {
 	ProvideFsFoldS(dat fs.FsFoldS) // the send function - aka "MyKind <- some FsFoldS"
 }
 
-type SChFsFoldS struct { // supply channel
+// DChFsFoldS is a supply channel
+type SChFsFoldS struct {
 	dat chan fs.FsFoldS
 	// req chan struct{}
 }
 
+// MakeSupplyFsFoldSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyFsFoldSChan() *SChFsFoldS {
 	d := new(SChFsFoldS)
 	d.dat = make(chan fs.FsFoldS)
@@ -37,6 +51,10 @@ func MakeSupplyFsFoldSChan() *SChFsFoldS {
 	return d
 }
 
+// MakeSupplyFsFoldSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyFsFoldSBuff(cap int) *SChFsFoldS {
 	d := new(SChFsFoldS)
 	d.dat = make(chan fs.FsFoldS, cap)

@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type ByteReaderChan interface { // bidirectional channel
+// ByteReaderChan represents a
+// bidirectional
+// channel
+type ByteReaderChan interface {
 	ByteReaderROnlyChan // aka "<-chan" - receive only
 	ByteReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type ByteReaderROnlyChan interface { // receive-only channel
-	RequestByteReader() (dat io.ByteReader)        // the receive function - aka "some-new-ByteReader-var := <-MyKind"
-	TryByteReader() (dat io.ByteReader, open bool) // the multi-valued comma-ok receive function - aka "some-new-ByteReader-var, ok := <-MyKind"
+// ByteReaderROnlyChan represents a
+// receive-only
+// channel
+type ByteReaderROnlyChan interface {
+	RequestByteReader() (dat io.ByteReader)        // the receive function - aka "MyByteReader := <-MyByteReaderROnlyChan"
+	TryByteReader() (dat io.ByteReader, open bool) // the multi-valued comma-ok receive function - aka "MyByteReader, ok := <-MyByteReaderROnlyChan"
 }
 
-type ByteReaderSOnlyChan interface { // send-only channel
+// ByteReaderSOnlyChan represents a
+// send-only
+// channel
+type ByteReaderSOnlyChan interface {
 	ProvideByteReader(dat io.ByteReader) // the send function - aka "MyKind <- some ByteReader"
 }
 
-type DChByteReader struct { // demand channel
+// DChByteReader is a demand channel
+type DChByteReader struct {
 	dat chan io.ByteReader
 	req chan struct{}
 }
 
+// MakeDemandByteReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandByteReaderChan() *DChByteReader {
 	d := new(DChByteReader)
 	d.dat = make(chan io.ByteReader)
@@ -37,6 +51,10 @@ func MakeDemandByteReaderChan() *DChByteReader {
 	return d
 }
 
+// MakeDemandByteReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandByteReaderBuff(cap int) *DChByteReader {
 	d := new(DChByteReader)
 	d.dat = make(chan io.ByteReader, cap)

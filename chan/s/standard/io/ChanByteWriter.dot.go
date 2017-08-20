@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type ByteWriterChan interface { // bidirectional channel
+// ByteWriterChan represents a
+// bidirectional
+// channel
+type ByteWriterChan interface {
 	ByteWriterROnlyChan // aka "<-chan" - receive only
 	ByteWriterSOnlyChan // aka "chan<-" - send only
 }
 
-type ByteWriterROnlyChan interface { // receive-only channel
-	RequestByteWriter() (dat io.ByteWriter)        // the receive function - aka "some-new-ByteWriter-var := <-MyKind"
-	TryByteWriter() (dat io.ByteWriter, open bool) // the multi-valued comma-ok receive function - aka "some-new-ByteWriter-var, ok := <-MyKind"
+// ByteWriterROnlyChan represents a
+// receive-only
+// channel
+type ByteWriterROnlyChan interface {
+	RequestByteWriter() (dat io.ByteWriter)        // the receive function - aka "MyByteWriter := <-MyByteWriterROnlyChan"
+	TryByteWriter() (dat io.ByteWriter, open bool) // the multi-valued comma-ok receive function - aka "MyByteWriter, ok := <-MyByteWriterROnlyChan"
 }
 
-type ByteWriterSOnlyChan interface { // send-only channel
+// ByteWriterSOnlyChan represents a
+// send-only
+// channel
+type ByteWriterSOnlyChan interface {
 	ProvideByteWriter(dat io.ByteWriter) // the send function - aka "MyKind <- some ByteWriter"
 }
 
-type SChByteWriter struct { // supply channel
+// DChByteWriter is a supply channel
+type SChByteWriter struct {
 	dat chan io.ByteWriter
 	// req chan struct{}
 }
 
+// MakeSupplyByteWriterChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyByteWriterChan() *SChByteWriter {
 	d := new(SChByteWriter)
 	d.dat = make(chan io.ByteWriter)
@@ -37,6 +51,10 @@ func MakeSupplyByteWriterChan() *SChByteWriter {
 	return d
 }
 
+// MakeSupplyByteWriterBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyByteWriterBuff(cap int) *SChByteWriter {
 	d := new(SChByteWriter)
 	d.dat = make(chan io.ByteWriter, cap)

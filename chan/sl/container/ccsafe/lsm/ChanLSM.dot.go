@@ -11,16 +11,25 @@ import (
 	"github.com/golangsam/container/ccsafe/lsm"
 )
 
-type LSMChan interface { // bidirectional channel
+// LSMChan represents a
+// bidirectional
+// channel
+type LSMChan interface {
 	LSMROnlyChan // aka "<-chan" - receive only
 	LSMSOnlyChan // aka "chan<-" - send only
 }
 
-type LSMROnlyChan interface { // receive-only channel
-	RequestLSM() (dat lsm.LazyStringerMap)        // the receive function - aka "some-new-LSM-var := <-MyKind"
-	TryLSM() (dat lsm.LazyStringerMap, open bool) // the multi-valued comma-ok receive function - aka "some-new-LSM-var, ok := <-MyKind"
+// LSMROnlyChan represents a
+// receive-only
+// channel
+type LSMROnlyChan interface {
+	RequestLSM() (dat lsm.LazyStringerMap)        // the receive function - aka "MyLSM := <-MyLSMROnlyChan"
+	TryLSM() (dat lsm.LazyStringerMap, open bool) // the multi-valued comma-ok receive function - aka "MyLSM, ok := <-MyLSMROnlyChan"
 }
 
-type LSMSOnlyChan interface { // send-only channel
+// LSMSOnlyChan represents a
+// send-only
+// channel
+type LSMSOnlyChan interface {
 	ProvideLSM(dat lsm.LazyStringerMap) // the send function - aka "MyKind <- some LSM"
 }

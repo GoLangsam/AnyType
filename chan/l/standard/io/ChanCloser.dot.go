@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type CloserChan interface { // bidirectional channel
+// CloserChan represents a
+// bidirectional
+// channel
+type CloserChan interface {
 	CloserROnlyChan // aka "<-chan" - receive only
 	CloserSOnlyChan // aka "chan<-" - send only
 }
 
-type CloserROnlyChan interface { // receive-only channel
-	RequestCloser() (dat io.Closer)        // the receive function - aka "some-new-Closer-var := <-MyKind"
-	TryCloser() (dat io.Closer, open bool) // the multi-valued comma-ok receive function - aka "some-new-Closer-var, ok := <-MyKind"
+// CloserROnlyChan represents a
+// receive-only
+// channel
+type CloserROnlyChan interface {
+	RequestCloser() (dat io.Closer)        // the receive function - aka "MyCloser := <-MyCloserROnlyChan"
+	TryCloser() (dat io.Closer, open bool) // the multi-valued comma-ok receive function - aka "MyCloser, ok := <-MyCloserROnlyChan"
 }
 
-type CloserSOnlyChan interface { // send-only channel
+// CloserSOnlyChan represents a
+// send-only
+// channel
+type CloserSOnlyChan interface {
 	ProvideCloser(dat io.Closer) // the send function - aka "MyKind <- some Closer"
 }
 
-type DChCloser struct { // demand channel
+// DChCloser is a demand channel
+type DChCloser struct {
 	dat chan io.Closer
 	req chan struct{}
 }
 
+// MakeDemandCloserChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandCloserChan() *DChCloser {
 	d := new(DChCloser)
 	d.dat = make(chan io.Closer)
@@ -37,6 +51,10 @@ func MakeDemandCloserChan() *DChCloser {
 	return d
 }
 
+// MakeDemandCloserBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandCloserBuff(cap int) *DChCloser {
 	d := new(DChCloser)
 	d.dat = make(chan io.Closer, cap)

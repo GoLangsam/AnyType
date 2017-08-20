@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/fs"
 )
 
-type FsDataChan interface { // bidirectional channel
+// FsDataChan represents a
+// bidirectional
+// channel
+type FsDataChan interface {
 	FsDataROnlyChan // aka "<-chan" - receive only
 	FsDataSOnlyChan // aka "chan<-" - send only
 }
 
-type FsDataROnlyChan interface { // receive-only channel
-	RequestFsData() (dat *fs.FsData)        // the receive function - aka "some-new-FsData-var := <-MyKind"
-	TryFsData() (dat *fs.FsData, open bool) // the multi-valued comma-ok receive function - aka "some-new-FsData-var, ok := <-MyKind"
+// FsDataROnlyChan represents a
+// receive-only
+// channel
+type FsDataROnlyChan interface {
+	RequestFsData() (dat *fs.FsData)        // the receive function - aka "MyFsData := <-MyFsDataROnlyChan"
+	TryFsData() (dat *fs.FsData, open bool) // the multi-valued comma-ok receive function - aka "MyFsData, ok := <-MyFsDataROnlyChan"
 }
 
-type FsDataSOnlyChan interface { // send-only channel
+// FsDataSOnlyChan represents a
+// send-only
+// channel
+type FsDataSOnlyChan interface {
 	ProvideFsData(dat *fs.FsData) // the send function - aka "MyKind <- some FsData"
 }
 
-type DChFsData struct { // demand channel
+// DChFsData is a demand channel
+type DChFsData struct {
 	dat chan *fs.FsData
 	req chan struct{}
 }
 
+// MakeDemandFsDataChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandFsDataChan() *DChFsData {
 	d := new(DChFsData)
 	d.dat = make(chan *fs.FsData)
@@ -37,6 +51,10 @@ func MakeDemandFsDataChan() *DChFsData {
 	return d
 }
 
+// MakeDemandFsDataBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandFsDataBuff(cap int) *DChFsData {
 	d := new(DChFsData)
 	d.dat = make(chan *fs.FsData, cap)

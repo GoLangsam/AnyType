@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type CloserChan interface { // bidirectional channel
+// CloserChan represents a
+// bidirectional
+// channel
+type CloserChan interface {
 	CloserROnlyChan // aka "<-chan" - receive only
 	CloserSOnlyChan // aka "chan<-" - send only
 }
 
-type CloserROnlyChan interface { // receive-only channel
-	RequestCloser() (dat io.Closer)        // the receive function - aka "some-new-Closer-var := <-MyKind"
-	TryCloser() (dat io.Closer, open bool) // the multi-valued comma-ok receive function - aka "some-new-Closer-var, ok := <-MyKind"
+// CloserROnlyChan represents a
+// receive-only
+// channel
+type CloserROnlyChan interface {
+	RequestCloser() (dat io.Closer)        // the receive function - aka "MyCloser := <-MyCloserROnlyChan"
+	TryCloser() (dat io.Closer, open bool) // the multi-valued comma-ok receive function - aka "MyCloser, ok := <-MyCloserROnlyChan"
 }
 
-type CloserSOnlyChan interface { // send-only channel
+// CloserSOnlyChan represents a
+// send-only
+// channel
+type CloserSOnlyChan interface {
 	ProvideCloser(dat io.Closer) // the send function - aka "MyKind <- some Closer"
 }
 
-type SChCloser struct { // supply channel
+// DChCloser is a supply channel
+type SChCloser struct {
 	dat chan io.Closer
 	// req chan struct{}
 }
 
+// MakeSupplyCloserChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyCloserChan() *SChCloser {
 	d := new(SChCloser)
 	d.dat = make(chan io.Closer)
@@ -37,6 +51,10 @@ func MakeSupplyCloserChan() *SChCloser {
 	return d
 }
 
+// MakeSupplyCloserBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyCloserBuff(cap int) *SChCloser {
 	d := new(SChCloser)
 	d.dat = make(chan io.Closer, cap)

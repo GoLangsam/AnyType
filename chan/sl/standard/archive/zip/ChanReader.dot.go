@@ -11,16 +11,25 @@ import (
 	"archive/zip"
 )
 
-type ReaderChan interface { // bidirectional channel
+// ReaderChan represents a
+// bidirectional
+// channel
+type ReaderChan interface {
 	ReaderROnlyChan // aka "<-chan" - receive only
 	ReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type ReaderROnlyChan interface { // receive-only channel
-	RequestReader() (dat zip.Reader)        // the receive function - aka "some-new-Reader-var := <-MyKind"
-	TryReader() (dat zip.Reader, open bool) // the multi-valued comma-ok receive function - aka "some-new-Reader-var, ok := <-MyKind"
+// ReaderROnlyChan represents a
+// receive-only
+// channel
+type ReaderROnlyChan interface {
+	RequestReader() (dat zip.Reader)        // the receive function - aka "MyReader := <-MyReaderROnlyChan"
+	TryReader() (dat zip.Reader, open bool) // the multi-valued comma-ok receive function - aka "MyReader, ok := <-MyReaderROnlyChan"
 }
 
-type ReaderSOnlyChan interface { // send-only channel
+// ReaderSOnlyChan represents a
+// send-only
+// channel
+type ReaderSOnlyChan interface {
 	ProvideReader(dat zip.Reader) // the send function - aka "MyKind <- some Reader"
 }

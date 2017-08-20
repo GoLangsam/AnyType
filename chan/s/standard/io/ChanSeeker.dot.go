@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type SeekerChan interface { // bidirectional channel
+// SeekerChan represents a
+// bidirectional
+// channel
+type SeekerChan interface {
 	SeekerROnlyChan // aka "<-chan" - receive only
 	SeekerSOnlyChan // aka "chan<-" - send only
 }
 
-type SeekerROnlyChan interface { // receive-only channel
-	RequestSeeker() (dat io.Seeker)        // the receive function - aka "some-new-Seeker-var := <-MyKind"
-	TrySeeker() (dat io.Seeker, open bool) // the multi-valued comma-ok receive function - aka "some-new-Seeker-var, ok := <-MyKind"
+// SeekerROnlyChan represents a
+// receive-only
+// channel
+type SeekerROnlyChan interface {
+	RequestSeeker() (dat io.Seeker)        // the receive function - aka "MySeeker := <-MySeekerROnlyChan"
+	TrySeeker() (dat io.Seeker, open bool) // the multi-valued comma-ok receive function - aka "MySeeker, ok := <-MySeekerROnlyChan"
 }
 
-type SeekerSOnlyChan interface { // send-only channel
+// SeekerSOnlyChan represents a
+// send-only
+// channel
+type SeekerSOnlyChan interface {
 	ProvideSeeker(dat io.Seeker) // the send function - aka "MyKind <- some Seeker"
 }
 
-type SChSeeker struct { // supply channel
+// DChSeeker is a supply channel
+type SChSeeker struct {
 	dat chan io.Seeker
 	// req chan struct{}
 }
 
+// MakeSupplySeekerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplySeekerChan() *SChSeeker {
 	d := new(SChSeeker)
 	d.dat = make(chan io.Seeker)
@@ -37,6 +51,10 @@ func MakeSupplySeekerChan() *SChSeeker {
 	return d
 }
 
+// MakeSupplySeekerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplySeekerBuff(cap int) *SChSeeker {
 	d := new(SChSeeker)
 	d.dat = make(chan io.Seeker, cap)

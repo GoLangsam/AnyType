@@ -7,25 +7,39 @@ package IsComplex
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Chan interface { // bidirectional channel
+// Chan represents a
+// bidirectional
+// channel
+type Chan interface {
 	ROnlyChan // aka "<-chan" - receive only
 	SOnlyChan // aka "chan<-" - send only
 }
 
-type ROnlyChan interface { // receive-only channel
-	Request() (dat complex128)        // the receive function - aka "some-new--var := <-MyKind"
-	Try() (dat complex128, open bool) // the multi-valued comma-ok receive function - aka "some-new--var, ok := <-MyKind"
+// ROnlyChan represents a
+// receive-only
+// channel
+type ROnlyChan interface {
+	Request() (dat complex128)        // the receive function - aka "My := <-MyROnlyChan"
+	Try() (dat complex128, open bool) // the multi-valued comma-ok receive function - aka "My, ok := <-MyROnlyChan"
 }
 
-type SOnlyChan interface { // send-only channel
+// SOnlyChan represents a
+// send-only
+// channel
+type SOnlyChan interface {
 	Provide(dat complex128) // the send function - aka "MyKind <- some "
 }
 
-type DCh struct { // demand channel
+// DCh is a demand channel
+type DCh struct {
 	dat chan complex128
 	req chan struct{}
 }
 
+// MakeDemandChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandChan() *DCh {
 	d := new(DCh)
 	d.dat = make(chan complex128)
@@ -33,6 +47,10 @@ func MakeDemandChan() *DCh {
 	return d
 }
 
+// MakeDemandBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandBuff(cap int) *DCh {
 	d := new(DCh)
 	d.dat = make(chan complex128, cap)

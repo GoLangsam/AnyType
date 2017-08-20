@@ -11,16 +11,25 @@ import (
 	"io"
 )
 
-type LimitedReaderChan interface { // bidirectional channel
+// LimitedReaderChan represents a
+// bidirectional
+// channel
+type LimitedReaderChan interface {
 	LimitedReaderROnlyChan // aka "<-chan" - receive only
 	LimitedReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type LimitedReaderROnlyChan interface { // receive-only channel
-	RequestLimitedReader() (dat *io.LimitedReader)        // the receive function - aka "some-new-LimitedReader-var := <-MyKind"
-	TryLimitedReader() (dat *io.LimitedReader, open bool) // the multi-valued comma-ok receive function - aka "some-new-LimitedReader-var, ok := <-MyKind"
+// LimitedReaderROnlyChan represents a
+// receive-only
+// channel
+type LimitedReaderROnlyChan interface {
+	RequestLimitedReader() (dat *io.LimitedReader)        // the receive function - aka "MyLimitedReader := <-MyLimitedReaderROnlyChan"
+	TryLimitedReader() (dat *io.LimitedReader, open bool) // the multi-valued comma-ok receive function - aka "MyLimitedReader, ok := <-MyLimitedReaderROnlyChan"
 }
 
-type LimitedReaderSOnlyChan interface { // send-only channel
+// LimitedReaderSOnlyChan represents a
+// send-only
+// channel
+type LimitedReaderSOnlyChan interface {
 	ProvideLimitedReader(dat *io.LimitedReader) // the send function - aka "MyKind <- some LimitedReader"
 }

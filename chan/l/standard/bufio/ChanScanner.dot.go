@@ -11,25 +11,39 @@ import (
 	"bufio"
 )
 
-type ScannerChan interface { // bidirectional channel
+// ScannerChan represents a
+// bidirectional
+// channel
+type ScannerChan interface {
 	ScannerROnlyChan // aka "<-chan" - receive only
 	ScannerSOnlyChan // aka "chan<-" - send only
 }
 
-type ScannerROnlyChan interface { // receive-only channel
-	RequestScanner() (dat *bufio.Scanner)        // the receive function - aka "some-new-Scanner-var := <-MyKind"
-	TryScanner() (dat *bufio.Scanner, open bool) // the multi-valued comma-ok receive function - aka "some-new-Scanner-var, ok := <-MyKind"
+// ScannerROnlyChan represents a
+// receive-only
+// channel
+type ScannerROnlyChan interface {
+	RequestScanner() (dat *bufio.Scanner)        // the receive function - aka "MyScanner := <-MyScannerROnlyChan"
+	TryScanner() (dat *bufio.Scanner, open bool) // the multi-valued comma-ok receive function - aka "MyScanner, ok := <-MyScannerROnlyChan"
 }
 
-type ScannerSOnlyChan interface { // send-only channel
+// ScannerSOnlyChan represents a
+// send-only
+// channel
+type ScannerSOnlyChan interface {
 	ProvideScanner(dat *bufio.Scanner) // the send function - aka "MyKind <- some Scanner"
 }
 
-type DChScanner struct { // demand channel
+// DChScanner is a demand channel
+type DChScanner struct {
 	dat chan *bufio.Scanner
 	req chan struct{}
 }
 
+// MakeDemandScannerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandScannerChan() *DChScanner {
 	d := new(DChScanner)
 	d.dat = make(chan *bufio.Scanner)
@@ -37,6 +51,10 @@ func MakeDemandScannerChan() *DChScanner {
 	return d
 }
 
+// MakeDemandScannerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandScannerBuff(cap int) *DChScanner {
 	d := new(DChScanner)
 	d.dat = make(chan *bufio.Scanner, cap)

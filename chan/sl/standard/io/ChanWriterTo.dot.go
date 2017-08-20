@@ -11,16 +11,25 @@ import (
 	"io"
 )
 
-type WriterToChan interface { // bidirectional channel
+// WriterToChan represents a
+// bidirectional
+// channel
+type WriterToChan interface {
 	WriterToROnlyChan // aka "<-chan" - receive only
 	WriterToSOnlyChan // aka "chan<-" - send only
 }
 
-type WriterToROnlyChan interface { // receive-only channel
-	RequestWriterTo() (dat io.WriterTo)        // the receive function - aka "some-new-WriterTo-var := <-MyKind"
-	TryWriterTo() (dat io.WriterTo, open bool) // the multi-valued comma-ok receive function - aka "some-new-WriterTo-var, ok := <-MyKind"
+// WriterToROnlyChan represents a
+// receive-only
+// channel
+type WriterToROnlyChan interface {
+	RequestWriterTo() (dat io.WriterTo)        // the receive function - aka "MyWriterTo := <-MyWriterToROnlyChan"
+	TryWriterTo() (dat io.WriterTo, open bool) // the multi-valued comma-ok receive function - aka "MyWriterTo, ok := <-MyWriterToROnlyChan"
 }
 
-type WriterToSOnlyChan interface { // send-only channel
+// WriterToSOnlyChan represents a
+// send-only
+// channel
+type WriterToSOnlyChan interface {
 	ProvideWriterTo(dat io.WriterTo) // the send function - aka "MyKind <- some WriterTo"
 }

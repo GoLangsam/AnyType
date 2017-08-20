@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type ReadWriteCloserChan interface { // bidirectional channel
+// ReadWriteCloserChan represents a
+// bidirectional
+// channel
+type ReadWriteCloserChan interface {
 	ReadWriteCloserROnlyChan // aka "<-chan" - receive only
 	ReadWriteCloserSOnlyChan // aka "chan<-" - send only
 }
 
-type ReadWriteCloserROnlyChan interface { // receive-only channel
-	RequestReadWriteCloser() (dat io.ReadWriteCloser)        // the receive function - aka "some-new-ReadWriteCloser-var := <-MyKind"
-	TryReadWriteCloser() (dat io.ReadWriteCloser, open bool) // the multi-valued comma-ok receive function - aka "some-new-ReadWriteCloser-var, ok := <-MyKind"
+// ReadWriteCloserROnlyChan represents a
+// receive-only
+// channel
+type ReadWriteCloserROnlyChan interface {
+	RequestReadWriteCloser() (dat io.ReadWriteCloser)        // the receive function - aka "MyReadWriteCloser := <-MyReadWriteCloserROnlyChan"
+	TryReadWriteCloser() (dat io.ReadWriteCloser, open bool) // the multi-valued comma-ok receive function - aka "MyReadWriteCloser, ok := <-MyReadWriteCloserROnlyChan"
 }
 
-type ReadWriteCloserSOnlyChan interface { // send-only channel
+// ReadWriteCloserSOnlyChan represents a
+// send-only
+// channel
+type ReadWriteCloserSOnlyChan interface {
 	ProvideReadWriteCloser(dat io.ReadWriteCloser) // the send function - aka "MyKind <- some ReadWriteCloser"
 }
 
-type DChReadWriteCloser struct { // demand channel
+// DChReadWriteCloser is a demand channel
+type DChReadWriteCloser struct {
 	dat chan io.ReadWriteCloser
 	req chan struct{}
 }
 
+// MakeDemandReadWriteCloserChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandReadWriteCloserChan() *DChReadWriteCloser {
 	d := new(DChReadWriteCloser)
 	d.dat = make(chan io.ReadWriteCloser)
@@ -37,6 +51,10 @@ func MakeDemandReadWriteCloserChan() *DChReadWriteCloser {
 	return d
 }
 
+// MakeDemandReadWriteCloserBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandReadWriteCloserBuff(cap int) *DChReadWriteCloser {
 	d := new(DChReadWriteCloser)
 	d.dat = make(chan io.ReadWriteCloser, cap)

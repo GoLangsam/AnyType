@@ -11,25 +11,39 @@ import (
 	"archive/zip"
 )
 
-type FileHeaderChan interface { // bidirectional channel
+// FileHeaderChan represents a
+// bidirectional
+// channel
+type FileHeaderChan interface {
 	FileHeaderROnlyChan // aka "<-chan" - receive only
 	FileHeaderSOnlyChan // aka "chan<-" - send only
 }
 
-type FileHeaderROnlyChan interface { // receive-only channel
-	RequestFileHeader() (dat zip.FileHeader)        // the receive function - aka "some-new-FileHeader-var := <-MyKind"
-	TryFileHeader() (dat zip.FileHeader, open bool) // the multi-valued comma-ok receive function - aka "some-new-FileHeader-var, ok := <-MyKind"
+// FileHeaderROnlyChan represents a
+// receive-only
+// channel
+type FileHeaderROnlyChan interface {
+	RequestFileHeader() (dat zip.FileHeader)        // the receive function - aka "MyFileHeader := <-MyFileHeaderROnlyChan"
+	TryFileHeader() (dat zip.FileHeader, open bool) // the multi-valued comma-ok receive function - aka "MyFileHeader, ok := <-MyFileHeaderROnlyChan"
 }
 
-type FileHeaderSOnlyChan interface { // send-only channel
+// FileHeaderSOnlyChan represents a
+// send-only
+// channel
+type FileHeaderSOnlyChan interface {
 	ProvideFileHeader(dat zip.FileHeader) // the send function - aka "MyKind <- some FileHeader"
 }
 
-type DChFileHeader struct { // demand channel
+// DChFileHeader is a demand channel
+type DChFileHeader struct {
 	dat chan zip.FileHeader
 	req chan struct{}
 }
 
+// MakeDemandFileHeaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandFileHeaderChan() *DChFileHeader {
 	d := new(DChFileHeader)
 	d.dat = make(chan zip.FileHeader)
@@ -37,6 +51,10 @@ func MakeDemandFileHeaderChan() *DChFileHeader {
 	return d
 }
 
+// MakeDemandFileHeaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandFileHeaderBuff(cap int) *DChFileHeader {
 	d := new(DChFileHeader)
 	d.dat = make(chan zip.FileHeader, cap)

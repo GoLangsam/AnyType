@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type WriteCloserChan interface { // bidirectional channel
+// WriteCloserChan represents a
+// bidirectional
+// channel
+type WriteCloserChan interface {
 	WriteCloserROnlyChan // aka "<-chan" - receive only
 	WriteCloserSOnlyChan // aka "chan<-" - send only
 }
 
-type WriteCloserROnlyChan interface { // receive-only channel
-	RequestWriteCloser() (dat io.WriteCloser)        // the receive function - aka "some-new-WriteCloser-var := <-MyKind"
-	TryWriteCloser() (dat io.WriteCloser, open bool) // the multi-valued comma-ok receive function - aka "some-new-WriteCloser-var, ok := <-MyKind"
+// WriteCloserROnlyChan represents a
+// receive-only
+// channel
+type WriteCloserROnlyChan interface {
+	RequestWriteCloser() (dat io.WriteCloser)        // the receive function - aka "MyWriteCloser := <-MyWriteCloserROnlyChan"
+	TryWriteCloser() (dat io.WriteCloser, open bool) // the multi-valued comma-ok receive function - aka "MyWriteCloser, ok := <-MyWriteCloserROnlyChan"
 }
 
-type WriteCloserSOnlyChan interface { // send-only channel
+// WriteCloserSOnlyChan represents a
+// send-only
+// channel
+type WriteCloserSOnlyChan interface {
 	ProvideWriteCloser(dat io.WriteCloser) // the send function - aka "MyKind <- some WriteCloser"
 }
 
-type SChWriteCloser struct { // supply channel
+// DChWriteCloser is a supply channel
+type SChWriteCloser struct {
 	dat chan io.WriteCloser
 	// req chan struct{}
 }
 
+// MakeSupplyWriteCloserChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyWriteCloserChan() *SChWriteCloser {
 	d := new(SChWriteCloser)
 	d.dat = make(chan io.WriteCloser)
@@ -37,6 +51,10 @@ func MakeSupplyWriteCloserChan() *SChWriteCloser {
 	return d
 }
 
+// MakeSupplyWriteCloserBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyWriteCloserBuff(cap int) *SChWriteCloser {
 	d := new(SChWriteCloser)
 	d.dat = make(chan io.WriteCloser, cap)

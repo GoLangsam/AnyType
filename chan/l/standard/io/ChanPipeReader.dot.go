@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type PipeReaderChan interface { // bidirectional channel
+// PipeReaderChan represents a
+// bidirectional
+// channel
+type PipeReaderChan interface {
 	PipeReaderROnlyChan // aka "<-chan" - receive only
 	PipeReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type PipeReaderROnlyChan interface { // receive-only channel
-	RequestPipeReader() (dat *io.PipeReader)        // the receive function - aka "some-new-PipeReader-var := <-MyKind"
-	TryPipeReader() (dat *io.PipeReader, open bool) // the multi-valued comma-ok receive function - aka "some-new-PipeReader-var, ok := <-MyKind"
+// PipeReaderROnlyChan represents a
+// receive-only
+// channel
+type PipeReaderROnlyChan interface {
+	RequestPipeReader() (dat *io.PipeReader)        // the receive function - aka "MyPipeReader := <-MyPipeReaderROnlyChan"
+	TryPipeReader() (dat *io.PipeReader, open bool) // the multi-valued comma-ok receive function - aka "MyPipeReader, ok := <-MyPipeReaderROnlyChan"
 }
 
-type PipeReaderSOnlyChan interface { // send-only channel
+// PipeReaderSOnlyChan represents a
+// send-only
+// channel
+type PipeReaderSOnlyChan interface {
 	ProvidePipeReader(dat *io.PipeReader) // the send function - aka "MyKind <- some PipeReader"
 }
 
-type DChPipeReader struct { // demand channel
+// DChPipeReader is a demand channel
+type DChPipeReader struct {
 	dat chan *io.PipeReader
 	req chan struct{}
 }
 
+// MakeDemandPipeReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandPipeReaderChan() *DChPipeReader {
 	d := new(DChPipeReader)
 	d.dat = make(chan *io.PipeReader)
@@ -37,6 +51,10 @@ func MakeDemandPipeReaderChan() *DChPipeReader {
 	return d
 }
 
+// MakeDemandPipeReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandPipeReaderBuff(cap int) *DChPipeReader {
 	d := new(DChPipeReader)
 	d.dat = make(chan *io.PipeReader, cap)

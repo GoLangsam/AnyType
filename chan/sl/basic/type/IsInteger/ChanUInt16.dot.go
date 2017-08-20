@@ -7,17 +7,26 @@ package IsInteger
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type UInt16Chan interface { // bidirectional channel
+// UInt16Chan represents a
+// bidirectional
+// channel
+type UInt16Chan interface {
 	UInt16ROnlyChan // aka "<-chan" - receive only
 	UInt16SOnlyChan // aka "chan<-" - send only
 }
 
-type UInt16ROnlyChan interface { // receive-only channel
-	RequestUInt16() (dat uint16)        // the receive function - aka "some-new-UInt16-var := <-MyKind"
-	TryUInt16() (dat uint16, open bool) // the multi-valued comma-ok receive function - aka "some-new-UInt16-var, ok := <-MyKind"
+// UInt16ROnlyChan represents a
+// receive-only
+// channel
+type UInt16ROnlyChan interface {
+	RequestUInt16() (dat uint16)        // the receive function - aka "MyUInt16 := <-MyUInt16ROnlyChan"
+	TryUInt16() (dat uint16, open bool) // the multi-valued comma-ok receive function - aka "MyUInt16, ok := <-MyUInt16ROnlyChan"
 }
 
-type UInt16SOnlyChan interface { // send-only channel
+// UInt16SOnlyChan represents a
+// send-only
+// channel
+type UInt16SOnlyChan interface {
 	ProvideUInt16(dat uint16) // the send function - aka "MyKind <- some UInt16"
 }
 

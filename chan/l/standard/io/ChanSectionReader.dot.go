@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type SectionReaderChan interface { // bidirectional channel
+// SectionReaderChan represents a
+// bidirectional
+// channel
+type SectionReaderChan interface {
 	SectionReaderROnlyChan // aka "<-chan" - receive only
 	SectionReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type SectionReaderROnlyChan interface { // receive-only channel
-	RequestSectionReader() (dat *io.SectionReader)        // the receive function - aka "some-new-SectionReader-var := <-MyKind"
-	TrySectionReader() (dat *io.SectionReader, open bool) // the multi-valued comma-ok receive function - aka "some-new-SectionReader-var, ok := <-MyKind"
+// SectionReaderROnlyChan represents a
+// receive-only
+// channel
+type SectionReaderROnlyChan interface {
+	RequestSectionReader() (dat *io.SectionReader)        // the receive function - aka "MySectionReader := <-MySectionReaderROnlyChan"
+	TrySectionReader() (dat *io.SectionReader, open bool) // the multi-valued comma-ok receive function - aka "MySectionReader, ok := <-MySectionReaderROnlyChan"
 }
 
-type SectionReaderSOnlyChan interface { // send-only channel
+// SectionReaderSOnlyChan represents a
+// send-only
+// channel
+type SectionReaderSOnlyChan interface {
 	ProvideSectionReader(dat *io.SectionReader) // the send function - aka "MyKind <- some SectionReader"
 }
 
-type DChSectionReader struct { // demand channel
+// DChSectionReader is a demand channel
+type DChSectionReader struct {
 	dat chan *io.SectionReader
 	req chan struct{}
 }
 
+// MakeDemandSectionReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandSectionReaderChan() *DChSectionReader {
 	d := new(DChSectionReader)
 	d.dat = make(chan *io.SectionReader)
@@ -37,6 +51,10 @@ func MakeDemandSectionReaderChan() *DChSectionReader {
 	return d
 }
 
+// MakeDemandSectionReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandSectionReaderBuff(cap int) *DChSectionReader {
 	d := new(DChSectionReader)
 	d.dat = make(chan *io.SectionReader, cap)

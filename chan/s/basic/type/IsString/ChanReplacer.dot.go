@@ -11,25 +11,39 @@ import (
 	"strings"
 )
 
-type ReplacerChan interface { // bidirectional channel
+// ReplacerChan represents a
+// bidirectional
+// channel
+type ReplacerChan interface {
 	ReplacerROnlyChan // aka "<-chan" - receive only
 	ReplacerSOnlyChan // aka "chan<-" - send only
 }
 
-type ReplacerROnlyChan interface { // receive-only channel
-	RequestReplacer() (dat *strings.Replacer)        // the receive function - aka "some-new-Replacer-var := <-MyKind"
-	TryReplacer() (dat *strings.Replacer, open bool) // the multi-valued comma-ok receive function - aka "some-new-Replacer-var, ok := <-MyKind"
+// ReplacerROnlyChan represents a
+// receive-only
+// channel
+type ReplacerROnlyChan interface {
+	RequestReplacer() (dat *strings.Replacer)        // the receive function - aka "MyReplacer := <-MyReplacerROnlyChan"
+	TryReplacer() (dat *strings.Replacer, open bool) // the multi-valued comma-ok receive function - aka "MyReplacer, ok := <-MyReplacerROnlyChan"
 }
 
-type ReplacerSOnlyChan interface { // send-only channel
+// ReplacerSOnlyChan represents a
+// send-only
+// channel
+type ReplacerSOnlyChan interface {
 	ProvideReplacer(dat *strings.Replacer) // the send function - aka "MyKind <- some Replacer"
 }
 
-type SChReplacer struct { // supply channel
+// DChReplacer is a supply channel
+type SChReplacer struct {
 	dat chan *strings.Replacer
 	// req chan struct{}
 }
 
+// MakeSupplyReplacerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyReplacerChan() *SChReplacer {
 	d := new(SChReplacer)
 	d.dat = make(chan *strings.Replacer)
@@ -37,6 +51,10 @@ func MakeSupplyReplacerChan() *SChReplacer {
 	return d
 }
 
+// MakeSupplyReplacerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyReplacerBuff(cap int) *SChReplacer {
 	d := new(SChReplacer)
 	d.dat = make(chan *strings.Replacer, cap)

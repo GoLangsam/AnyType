@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/fs"
 )
 
-type FsFoldChan interface { // bidirectional channel
+// FsFoldChan represents a
+// bidirectional
+// channel
+type FsFoldChan interface {
 	FsFoldROnlyChan // aka "<-chan" - receive only
 	FsFoldSOnlyChan // aka "chan<-" - send only
 }
 
-type FsFoldROnlyChan interface { // receive-only channel
-	RequestFsFold() (dat *fs.FsFold)        // the receive function - aka "some-new-FsFold-var := <-MyKind"
-	TryFsFold() (dat *fs.FsFold, open bool) // the multi-valued comma-ok receive function - aka "some-new-FsFold-var, ok := <-MyKind"
+// FsFoldROnlyChan represents a
+// receive-only
+// channel
+type FsFoldROnlyChan interface {
+	RequestFsFold() (dat *fs.FsFold)        // the receive function - aka "MyFsFold := <-MyFsFoldROnlyChan"
+	TryFsFold() (dat *fs.FsFold, open bool) // the multi-valued comma-ok receive function - aka "MyFsFold, ok := <-MyFsFoldROnlyChan"
 }
 
-type FsFoldSOnlyChan interface { // send-only channel
+// FsFoldSOnlyChan represents a
+// send-only
+// channel
+type FsFoldSOnlyChan interface {
 	ProvideFsFold(dat *fs.FsFold) // the send function - aka "MyKind <- some FsFold"
 }
 
-type DChFsFold struct { // demand channel
+// DChFsFold is a demand channel
+type DChFsFold struct {
 	dat chan *fs.FsFold
 	req chan struct{}
 }
 
+// MakeDemandFsFoldChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandFsFoldChan() *DChFsFold {
 	d := new(DChFsFold)
 	d.dat = make(chan *fs.FsFold)
@@ -37,6 +51,10 @@ func MakeDemandFsFoldChan() *DChFsFold {
 	return d
 }
 
+// MakeDemandFsFoldBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandFsFoldBuff(cap int) *DChFsFold {
 	d := new(DChFsFold)
 	d.dat = make(chan *fs.FsFold, cap)

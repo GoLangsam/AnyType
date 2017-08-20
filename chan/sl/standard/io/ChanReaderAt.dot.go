@@ -11,16 +11,25 @@ import (
 	"io"
 )
 
-type ReaderAtChan interface { // bidirectional channel
+// ReaderAtChan represents a
+// bidirectional
+// channel
+type ReaderAtChan interface {
 	ReaderAtROnlyChan // aka "<-chan" - receive only
 	ReaderAtSOnlyChan // aka "chan<-" - send only
 }
 
-type ReaderAtROnlyChan interface { // receive-only channel
-	RequestReaderAt() (dat io.ReaderAt)        // the receive function - aka "some-new-ReaderAt-var := <-MyKind"
-	TryReaderAt() (dat io.ReaderAt, open bool) // the multi-valued comma-ok receive function - aka "some-new-ReaderAt-var, ok := <-MyKind"
+// ReaderAtROnlyChan represents a
+// receive-only
+// channel
+type ReaderAtROnlyChan interface {
+	RequestReaderAt() (dat io.ReaderAt)        // the receive function - aka "MyReaderAt := <-MyReaderAtROnlyChan"
+	TryReaderAt() (dat io.ReaderAt, open bool) // the multi-valued comma-ok receive function - aka "MyReaderAt, ok := <-MyReaderAtROnlyChan"
 }
 
-type ReaderAtSOnlyChan interface { // send-only channel
+// ReaderAtSOnlyChan represents a
+// send-only
+// channel
+type ReaderAtSOnlyChan interface {
 	ProvideReaderAt(dat io.ReaderAt) // the send function - aka "MyKind <- some ReaderAt"
 }

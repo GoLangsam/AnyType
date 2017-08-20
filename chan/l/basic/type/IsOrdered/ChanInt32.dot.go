@@ -7,25 +7,39 @@ package IsOrdered
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Int32Chan interface { // bidirectional channel
+// Int32Chan represents a
+// bidirectional
+// channel
+type Int32Chan interface {
 	Int32ROnlyChan // aka "<-chan" - receive only
 	Int32SOnlyChan // aka "chan<-" - send only
 }
 
-type Int32ROnlyChan interface { // receive-only channel
-	RequestInt32() (dat int32)        // the receive function - aka "some-new-Int32-var := <-MyKind"
-	TryInt32() (dat int32, open bool) // the multi-valued comma-ok receive function - aka "some-new-Int32-var, ok := <-MyKind"
+// Int32ROnlyChan represents a
+// receive-only
+// channel
+type Int32ROnlyChan interface {
+	RequestInt32() (dat int32)        // the receive function - aka "MyInt32 := <-MyInt32ROnlyChan"
+	TryInt32() (dat int32, open bool) // the multi-valued comma-ok receive function - aka "MyInt32, ok := <-MyInt32ROnlyChan"
 }
 
-type Int32SOnlyChan interface { // send-only channel
+// Int32SOnlyChan represents a
+// send-only
+// channel
+type Int32SOnlyChan interface {
 	ProvideInt32(dat int32) // the send function - aka "MyKind <- some Int32"
 }
 
-type DChInt32 struct { // demand channel
+// DChInt32 is a demand channel
+type DChInt32 struct {
 	dat chan int32
 	req chan struct{}
 }
 
+// MakeDemandInt32Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandInt32Chan() *DChInt32 {
 	d := new(DChInt32)
 	d.dat = make(chan int32)
@@ -33,6 +47,10 @@ func MakeDemandInt32Chan() *DChInt32 {
 	return d
 }
 
+// MakeDemandInt32Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandInt32Buff(cap int) *DChInt32 {
 	d := new(DChInt32)
 	d.dat = make(chan int32, cap)

@@ -11,25 +11,39 @@ import (
 	"bytes"
 )
 
-type BufferChan interface { // bidirectional channel
+// BufferChan represents a
+// bidirectional
+// channel
+type BufferChan interface {
 	BufferROnlyChan // aka "<-chan" - receive only
 	BufferSOnlyChan // aka "chan<-" - send only
 }
 
-type BufferROnlyChan interface { // receive-only channel
-	RequestBuffer() (dat bytes.Buffer)        // the receive function - aka "some-new-Buffer-var := <-MyKind"
-	TryBuffer() (dat bytes.Buffer, open bool) // the multi-valued comma-ok receive function - aka "some-new-Buffer-var, ok := <-MyKind"
+// BufferROnlyChan represents a
+// receive-only
+// channel
+type BufferROnlyChan interface {
+	RequestBuffer() (dat bytes.Buffer)        // the receive function - aka "MyBuffer := <-MyBufferROnlyChan"
+	TryBuffer() (dat bytes.Buffer, open bool) // the multi-valued comma-ok receive function - aka "MyBuffer, ok := <-MyBufferROnlyChan"
 }
 
-type BufferSOnlyChan interface { // send-only channel
+// BufferSOnlyChan represents a
+// send-only
+// channel
+type BufferSOnlyChan interface {
 	ProvideBuffer(dat bytes.Buffer) // the send function - aka "MyKind <- some Buffer"
 }
 
-type DChBuffer struct { // demand channel
+// DChBuffer is a demand channel
+type DChBuffer struct {
 	dat chan bytes.Buffer
 	req chan struct{}
 }
 
+// MakeDemandBufferChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandBufferChan() *DChBuffer {
 	d := new(DChBuffer)
 	d.dat = make(chan bytes.Buffer)
@@ -37,6 +51,10 @@ func MakeDemandBufferChan() *DChBuffer {
 	return d
 }
 
+// MakeDemandBufferBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandBufferBuff(cap int) *DChBuffer {
 	d := new(DChBuffer)
 	d.dat = make(chan bytes.Buffer, cap)

@@ -7,25 +7,39 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Int8Chan interface { // bidirectional channel
+// Int8Chan represents a
+// bidirectional
+// channel
+type Int8Chan interface {
 	Int8ROnlyChan // aka "<-chan" - receive only
 	Int8SOnlyChan // aka "chan<-" - send only
 }
 
-type Int8ROnlyChan interface { // receive-only channel
-	RequestInt8() (dat int8)        // the receive function - aka "some-new-Int8-var := <-MyKind"
-	TryInt8() (dat int8, open bool) // the multi-valued comma-ok receive function - aka "some-new-Int8-var, ok := <-MyKind"
+// Int8ROnlyChan represents a
+// receive-only
+// channel
+type Int8ROnlyChan interface {
+	RequestInt8() (dat int8)        // the receive function - aka "MyInt8 := <-MyInt8ROnlyChan"
+	TryInt8() (dat int8, open bool) // the multi-valued comma-ok receive function - aka "MyInt8, ok := <-MyInt8ROnlyChan"
 }
 
-type Int8SOnlyChan interface { // send-only channel
+// Int8SOnlyChan represents a
+// send-only
+// channel
+type Int8SOnlyChan interface {
 	ProvideInt8(dat int8) // the send function - aka "MyKind <- some Int8"
 }
 
-type SChInt8 struct { // supply channel
+// DChInt8 is a supply channel
+type SChInt8 struct {
 	dat chan int8
 	// req chan struct{}
 }
 
+// MakeSupplyInt8Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyInt8Chan() *SChInt8 {
 	d := new(SChInt8)
 	d.dat = make(chan int8)
@@ -33,6 +47,10 @@ func MakeSupplyInt8Chan() *SChInt8 {
 	return d
 }
 
+// MakeSupplyInt8Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyInt8Buff(cap int) *SChInt8 {
 	d := new(SChInt8)
 	d.dat = make(chan int8, cap)

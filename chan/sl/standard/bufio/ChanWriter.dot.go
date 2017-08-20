@@ -11,16 +11,25 @@ import (
 	"bufio"
 )
 
-type WriterChan interface { // bidirectional channel
+// WriterChan represents a
+// bidirectional
+// channel
+type WriterChan interface {
 	WriterROnlyChan // aka "<-chan" - receive only
 	WriterSOnlyChan // aka "chan<-" - send only
 }
 
-type WriterROnlyChan interface { // receive-only channel
-	RequestWriter() (dat *bufio.Writer)        // the receive function - aka "some-new-Writer-var := <-MyKind"
-	TryWriter() (dat *bufio.Writer, open bool) // the multi-valued comma-ok receive function - aka "some-new-Writer-var, ok := <-MyKind"
+// WriterROnlyChan represents a
+// receive-only
+// channel
+type WriterROnlyChan interface {
+	RequestWriter() (dat *bufio.Writer)        // the receive function - aka "MyWriter := <-MyWriterROnlyChan"
+	TryWriter() (dat *bufio.Writer, open bool) // the multi-valued comma-ok receive function - aka "MyWriter, ok := <-MyWriterROnlyChan"
 }
 
-type WriterSOnlyChan interface { // send-only channel
+// WriterSOnlyChan represents a
+// send-only
+// channel
+type WriterSOnlyChan interface {
 	ProvideWriter(dat *bufio.Writer) // the send function - aka "MyKind <- some Writer"
 }

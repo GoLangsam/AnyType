@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type ReaderChan interface { // bidirectional channel
+// ReaderChan represents a
+// bidirectional
+// channel
+type ReaderChan interface {
 	ReaderROnlyChan // aka "<-chan" - receive only
 	ReaderSOnlyChan // aka "chan<-" - send only
 }
 
-type ReaderROnlyChan interface { // receive-only channel
-	RequestReader() (dat io.Reader)        // the receive function - aka "some-new-Reader-var := <-MyKind"
-	TryReader() (dat io.Reader, open bool) // the multi-valued comma-ok receive function - aka "some-new-Reader-var, ok := <-MyKind"
+// ReaderROnlyChan represents a
+// receive-only
+// channel
+type ReaderROnlyChan interface {
+	RequestReader() (dat io.Reader)        // the receive function - aka "MyReader := <-MyReaderROnlyChan"
+	TryReader() (dat io.Reader, open bool) // the multi-valued comma-ok receive function - aka "MyReader, ok := <-MyReaderROnlyChan"
 }
 
-type ReaderSOnlyChan interface { // send-only channel
+// ReaderSOnlyChan represents a
+// send-only
+// channel
+type ReaderSOnlyChan interface {
 	ProvideReader(dat io.Reader) // the send function - aka "MyKind <- some Reader"
 }
 
-type SChReader struct { // supply channel
+// DChReader is a supply channel
+type SChReader struct {
 	dat chan io.Reader
 	// req chan struct{}
 }
 
+// MakeSupplyReaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyReaderChan() *SChReader {
 	d := new(SChReader)
 	d.dat = make(chan io.Reader)
@@ -37,6 +51,10 @@ func MakeSupplyReaderChan() *SChReader {
 	return d
 }
 
+// MakeSupplyReaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyReaderBuff(cap int) *SChReader {
 	d := new(SChReader)
 	d.dat = make(chan io.Reader, cap)

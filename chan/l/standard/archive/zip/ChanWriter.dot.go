@@ -11,25 +11,39 @@ import (
 	"archive/zip"
 )
 
-type WriterChan interface { // bidirectional channel
+// WriterChan represents a
+// bidirectional
+// channel
+type WriterChan interface {
 	WriterROnlyChan // aka "<-chan" - receive only
 	WriterSOnlyChan // aka "chan<-" - send only
 }
 
-type WriterROnlyChan interface { // receive-only channel
-	RequestWriter() (dat zip.Writer)        // the receive function - aka "some-new-Writer-var := <-MyKind"
-	TryWriter() (dat zip.Writer, open bool) // the multi-valued comma-ok receive function - aka "some-new-Writer-var, ok := <-MyKind"
+// WriterROnlyChan represents a
+// receive-only
+// channel
+type WriterROnlyChan interface {
+	RequestWriter() (dat zip.Writer)        // the receive function - aka "MyWriter := <-MyWriterROnlyChan"
+	TryWriter() (dat zip.Writer, open bool) // the multi-valued comma-ok receive function - aka "MyWriter, ok := <-MyWriterROnlyChan"
 }
 
-type WriterSOnlyChan interface { // send-only channel
+// WriterSOnlyChan represents a
+// send-only
+// channel
+type WriterSOnlyChan interface {
 	ProvideWriter(dat zip.Writer) // the send function - aka "MyKind <- some Writer"
 }
 
-type DChWriter struct { // demand channel
+// DChWriter is a demand channel
+type DChWriter struct {
 	dat chan zip.Writer
 	req chan struct{}
 }
 
+// MakeDemandWriterChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandWriterChan() *DChWriter {
 	d := new(DChWriter)
 	d.dat = make(chan zip.Writer)
@@ -37,6 +51,10 @@ func MakeDemandWriterChan() *DChWriter {
 	return d
 }
 
+// MakeDemandWriterBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandWriterBuff(cap int) *DChWriter {
 	d := new(DChWriter)
 	d.dat = make(chan zip.Writer, cap)

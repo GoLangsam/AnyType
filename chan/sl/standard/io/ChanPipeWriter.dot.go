@@ -11,16 +11,25 @@ import (
 	"io"
 )
 
-type PipeWriterChan interface { // bidirectional channel
+// PipeWriterChan represents a
+// bidirectional
+// channel
+type PipeWriterChan interface {
 	PipeWriterROnlyChan // aka "<-chan" - receive only
 	PipeWriterSOnlyChan // aka "chan<-" - send only
 }
 
-type PipeWriterROnlyChan interface { // receive-only channel
-	RequestPipeWriter() (dat *io.PipeWriter)        // the receive function - aka "some-new-PipeWriter-var := <-MyKind"
-	TryPipeWriter() (dat *io.PipeWriter, open bool) // the multi-valued comma-ok receive function - aka "some-new-PipeWriter-var, ok := <-MyKind"
+// PipeWriterROnlyChan represents a
+// receive-only
+// channel
+type PipeWriterROnlyChan interface {
+	RequestPipeWriter() (dat *io.PipeWriter)        // the receive function - aka "MyPipeWriter := <-MyPipeWriterROnlyChan"
+	TryPipeWriter() (dat *io.PipeWriter, open bool) // the multi-valued comma-ok receive function - aka "MyPipeWriter, ok := <-MyPipeWriterROnlyChan"
 }
 
-type PipeWriterSOnlyChan interface { // send-only channel
+// PipeWriterSOnlyChan represents a
+// send-only
+// channel
+type PipeWriterSOnlyChan interface {
 	ProvidePipeWriter(dat *io.PipeWriter) // the send function - aka "MyKind <- some PipeWriter"
 }

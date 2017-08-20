@@ -11,25 +11,39 @@ import (
 	"io"
 )
 
-type WriteSeekerChan interface { // bidirectional channel
+// WriteSeekerChan represents a
+// bidirectional
+// channel
+type WriteSeekerChan interface {
 	WriteSeekerROnlyChan // aka "<-chan" - receive only
 	WriteSeekerSOnlyChan // aka "chan<-" - send only
 }
 
-type WriteSeekerROnlyChan interface { // receive-only channel
-	RequestWriteSeeker() (dat io.WriteSeeker)        // the receive function - aka "some-new-WriteSeeker-var := <-MyKind"
-	TryWriteSeeker() (dat io.WriteSeeker, open bool) // the multi-valued comma-ok receive function - aka "some-new-WriteSeeker-var, ok := <-MyKind"
+// WriteSeekerROnlyChan represents a
+// receive-only
+// channel
+type WriteSeekerROnlyChan interface {
+	RequestWriteSeeker() (dat io.WriteSeeker)        // the receive function - aka "MyWriteSeeker := <-MyWriteSeekerROnlyChan"
+	TryWriteSeeker() (dat io.WriteSeeker, open bool) // the multi-valued comma-ok receive function - aka "MyWriteSeeker, ok := <-MyWriteSeekerROnlyChan"
 }
 
-type WriteSeekerSOnlyChan interface { // send-only channel
+// WriteSeekerSOnlyChan represents a
+// send-only
+// channel
+type WriteSeekerSOnlyChan interface {
 	ProvideWriteSeeker(dat io.WriteSeeker) // the send function - aka "MyKind <- some WriteSeeker"
 }
 
-type DChWriteSeeker struct { // demand channel
+// DChWriteSeeker is a demand channel
+type DChWriteSeeker struct {
 	dat chan io.WriteSeeker
 	req chan struct{}
 }
 
+// MakeDemandWriteSeekerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandWriteSeekerChan() *DChWriteSeeker {
 	d := new(DChWriteSeeker)
 	d.dat = make(chan io.WriteSeeker)
@@ -37,6 +51,10 @@ func MakeDemandWriteSeekerChan() *DChWriteSeeker {
 	return d
 }
 
+// MakeDemandWriteSeekerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandWriteSeekerBuff(cap int) *DChWriteSeeker {
 	d := new(DChWriteSeeker)
 	d.dat = make(chan io.WriteSeeker, cap)

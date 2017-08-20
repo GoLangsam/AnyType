@@ -7,25 +7,39 @@ package test
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type PointerSChan interface { // bidirectional channel
+// PointerSChan represents a
+// bidirectional
+// channel
+type PointerSChan interface {
 	PointerSROnlyChan // aka "<-chan" - receive only
 	PointerSSOnlyChan // aka "chan<-" - send only
 }
 
-type PointerSROnlyChan interface { // receive-only channel
-	RequestPointerS() (dat []*SomeType)        // the receive function - aka "some-new-PointerS-var := <-MyKind"
-	TryPointerS() (dat []*SomeType, open bool) // the multi-valued comma-ok receive function - aka "some-new-PointerS-var, ok := <-MyKind"
+// PointerSROnlyChan represents a
+// receive-only
+// channel
+type PointerSROnlyChan interface {
+	RequestPointerS() (dat []*SomeType)        // the receive function - aka "MyPointerS := <-MyPointerSROnlyChan"
+	TryPointerS() (dat []*SomeType, open bool) // the multi-valued comma-ok receive function - aka "MyPointerS, ok := <-MyPointerSROnlyChan"
 }
 
-type PointerSSOnlyChan interface { // send-only channel
+// PointerSSOnlyChan represents a
+// send-only
+// channel
+type PointerSSOnlyChan interface {
 	ProvidePointerS(dat []*SomeType) // the send function - aka "MyKind <- some PointerS"
 }
 
-type SChPointerS struct { // supply channel
+// DChPointerS is a supply channel
+type SChPointerS struct {
 	dat chan []*SomeType
 	// req chan struct{}
 }
 
+// MakeSupplyPointerSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyPointerSChan() *SChPointerS {
 	d := new(SChPointerS)
 	d.dat = make(chan []*SomeType)
@@ -33,6 +47,10 @@ func MakeSupplyPointerSChan() *SChPointerS {
 	return d
 }
 
+// MakeSupplyPointerSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyPointerSBuff(cap int) *SChPointerS {
 	d := new(SChPointerS)
 	d.dat = make(chan []*SomeType, cap)

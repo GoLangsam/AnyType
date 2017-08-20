@@ -11,25 +11,39 @@ import (
 	"archive/tar"
 )
 
-type HeaderChan interface { // bidirectional channel
+// HeaderChan represents a
+// bidirectional
+// channel
+type HeaderChan interface {
 	HeaderROnlyChan // aka "<-chan" - receive only
 	HeaderSOnlyChan // aka "chan<-" - send only
 }
 
-type HeaderROnlyChan interface { // receive-only channel
-	RequestHeader() (dat *tar.Header)        // the receive function - aka "some-new-Header-var := <-MyKind"
-	TryHeader() (dat *tar.Header, open bool) // the multi-valued comma-ok receive function - aka "some-new-Header-var, ok := <-MyKind"
+// HeaderROnlyChan represents a
+// receive-only
+// channel
+type HeaderROnlyChan interface {
+	RequestHeader() (dat *tar.Header)        // the receive function - aka "MyHeader := <-MyHeaderROnlyChan"
+	TryHeader() (dat *tar.Header, open bool) // the multi-valued comma-ok receive function - aka "MyHeader, ok := <-MyHeaderROnlyChan"
 }
 
-type HeaderSOnlyChan interface { // send-only channel
+// HeaderSOnlyChan represents a
+// send-only
+// channel
+type HeaderSOnlyChan interface {
 	ProvideHeader(dat *tar.Header) // the send function - aka "MyKind <- some Header"
 }
 
-type SChHeader struct { // supply channel
+// DChHeader is a supply channel
+type SChHeader struct {
 	dat chan *tar.Header
 	// req chan struct{}
 }
 
+// MakeSupplyHeaderChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyHeaderChan() *SChHeader {
 	d := new(SChHeader)
 	d.dat = make(chan *tar.Header)
@@ -37,6 +51,10 @@ func MakeSupplyHeaderChan() *SChHeader {
 	return d
 }
 
+// MakeSupplyHeaderBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyHeaderBuff(cap int) *SChHeader {
 	d := new(SChHeader)
 	d.dat = make(chan *tar.Header, cap)

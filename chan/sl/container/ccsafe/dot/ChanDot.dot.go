@@ -11,16 +11,25 @@ import (
 	"github.com/golangsam/container/ccsafe/dot"
 )
 
-type DotChan interface { // bidirectional channel
+// DotChan represents a
+// bidirectional
+// channel
+type DotChan interface {
 	DotROnlyChan // aka "<-chan" - receive only
 	DotSOnlyChan // aka "chan<-" - send only
 }
 
-type DotROnlyChan interface { // receive-only channel
-	RequestDot() (dat dot.Dot)        // the receive function - aka "some-new-Dot-var := <-MyKind"
-	TryDot() (dat dot.Dot, open bool) // the multi-valued comma-ok receive function - aka "some-new-Dot-var, ok := <-MyKind"
+// DotROnlyChan represents a
+// receive-only
+// channel
+type DotROnlyChan interface {
+	RequestDot() (dat dot.Dot)        // the receive function - aka "MyDot := <-MyDotROnlyChan"
+	TryDot() (dat dot.Dot, open bool) // the multi-valued comma-ok receive function - aka "MyDot, ok := <-MyDotROnlyChan"
 }
 
-type DotSOnlyChan interface { // send-only channel
+// DotSOnlyChan represents a
+// send-only
+// channel
+type DotSOnlyChan interface {
 	ProvideDot(dat dot.Dot) // the send function - aka "MyKind <- some Dot"
 }

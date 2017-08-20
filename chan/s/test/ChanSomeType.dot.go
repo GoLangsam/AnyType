@@ -7,25 +7,39 @@ package test
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type SomeTypeChan interface { // bidirectional channel
+// SomeTypeChan represents a
+// bidirectional
+// channel
+type SomeTypeChan interface {
 	SomeTypeROnlyChan // aka "<-chan" - receive only
 	SomeTypeSOnlyChan // aka "chan<-" - send only
 }
 
-type SomeTypeROnlyChan interface { // receive-only channel
-	RequestSomeType() (dat SomeType)        // the receive function - aka "some-new-SomeType-var := <-MyKind"
-	TrySomeType() (dat SomeType, open bool) // the multi-valued comma-ok receive function - aka "some-new-SomeType-var, ok := <-MyKind"
+// SomeTypeROnlyChan represents a
+// receive-only
+// channel
+type SomeTypeROnlyChan interface {
+	RequestSomeType() (dat SomeType)        // the receive function - aka "MySomeType := <-MySomeTypeROnlyChan"
+	TrySomeType() (dat SomeType, open bool) // the multi-valued comma-ok receive function - aka "MySomeType, ok := <-MySomeTypeROnlyChan"
 }
 
-type SomeTypeSOnlyChan interface { // send-only channel
+// SomeTypeSOnlyChan represents a
+// send-only
+// channel
+type SomeTypeSOnlyChan interface {
 	ProvideSomeType(dat SomeType) // the send function - aka "MyKind <- some SomeType"
 }
 
-type SChSomeType struct { // supply channel
+// DChSomeType is a supply channel
+type SChSomeType struct {
 	dat chan SomeType
 	// req chan struct{}
 }
 
+// MakeSupplySomeTypeChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplySomeTypeChan() *SChSomeType {
 	d := new(SChSomeType)
 	d.dat = make(chan SomeType)
@@ -33,6 +47,10 @@ func MakeSupplySomeTypeChan() *SChSomeType {
 	return d
 }
 
+// MakeSupplySomeTypeBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplySomeTypeBuff(cap int) *SChSomeType {
 	d := new(SChSomeType)
 	d.dat = make(chan SomeType, cap)

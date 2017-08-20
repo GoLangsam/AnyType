@@ -11,25 +11,39 @@ import (
 	"archive/zip"
 )
 
-type ReadCloserChan interface { // bidirectional channel
+// ReadCloserChan represents a
+// bidirectional
+// channel
+type ReadCloserChan interface {
 	ReadCloserROnlyChan // aka "<-chan" - receive only
 	ReadCloserSOnlyChan // aka "chan<-" - send only
 }
 
-type ReadCloserROnlyChan interface { // receive-only channel
-	RequestReadCloser() (dat zip.ReadCloser)        // the receive function - aka "some-new-ReadCloser-var := <-MyKind"
-	TryReadCloser() (dat zip.ReadCloser, open bool) // the multi-valued comma-ok receive function - aka "some-new-ReadCloser-var, ok := <-MyKind"
+// ReadCloserROnlyChan represents a
+// receive-only
+// channel
+type ReadCloserROnlyChan interface {
+	RequestReadCloser() (dat zip.ReadCloser)        // the receive function - aka "MyReadCloser := <-MyReadCloserROnlyChan"
+	TryReadCloser() (dat zip.ReadCloser, open bool) // the multi-valued comma-ok receive function - aka "MyReadCloser, ok := <-MyReadCloserROnlyChan"
 }
 
-type ReadCloserSOnlyChan interface { // send-only channel
+// ReadCloserSOnlyChan represents a
+// send-only
+// channel
+type ReadCloserSOnlyChan interface {
 	ProvideReadCloser(dat zip.ReadCloser) // the send function - aka "MyKind <- some ReadCloser"
 }
 
-type DChReadCloser struct { // demand channel
+// DChReadCloser is a demand channel
+type DChReadCloser struct {
 	dat chan zip.ReadCloser
 	req chan struct{}
 }
 
+// MakeDemandReadCloserChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandReadCloserChan() *DChReadCloser {
 	d := new(DChReadCloser)
 	d.dat = make(chan zip.ReadCloser)
@@ -37,6 +51,10 @@ func MakeDemandReadCloserChan() *DChReadCloser {
 	return d
 }
 
+// MakeDemandReadCloserBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandReadCloserBuff(cap int) *DChReadCloser {
 	d := new(DChReadCloser)
 	d.dat = make(chan zip.ReadCloser, cap)

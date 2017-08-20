@@ -11,16 +11,25 @@ import (
 	"io"
 )
 
-type ByteScannerChan interface { // bidirectional channel
+// ByteScannerChan represents a
+// bidirectional
+// channel
+type ByteScannerChan interface {
 	ByteScannerROnlyChan // aka "<-chan" - receive only
 	ByteScannerSOnlyChan // aka "chan<-" - send only
 }
 
-type ByteScannerROnlyChan interface { // receive-only channel
-	RequestByteScanner() (dat io.ByteScanner)        // the receive function - aka "some-new-ByteScanner-var := <-MyKind"
-	TryByteScanner() (dat io.ByteScanner, open bool) // the multi-valued comma-ok receive function - aka "some-new-ByteScanner-var, ok := <-MyKind"
+// ByteScannerROnlyChan represents a
+// receive-only
+// channel
+type ByteScannerROnlyChan interface {
+	RequestByteScanner() (dat io.ByteScanner)        // the receive function - aka "MyByteScanner := <-MyByteScannerROnlyChan"
+	TryByteScanner() (dat io.ByteScanner, open bool) // the multi-valued comma-ok receive function - aka "MyByteScanner, ok := <-MyByteScannerROnlyChan"
 }
 
-type ByteScannerSOnlyChan interface { // send-only channel
+// ByteScannerSOnlyChan represents a
+// send-only
+// channel
+type ByteScannerSOnlyChan interface {
 	ProvideByteScanner(dat io.ByteScanner) // the send function - aka "MyKind <- some ByteScanner"
 }

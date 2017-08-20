@@ -11,16 +11,25 @@ import (
 	"io"
 )
 
-type ReadWriteCloserChan interface { // bidirectional channel
+// ReadWriteCloserChan represents a
+// bidirectional
+// channel
+type ReadWriteCloserChan interface {
 	ReadWriteCloserROnlyChan // aka "<-chan" - receive only
 	ReadWriteCloserSOnlyChan // aka "chan<-" - send only
 }
 
-type ReadWriteCloserROnlyChan interface { // receive-only channel
-	RequestReadWriteCloser() (dat io.ReadWriteCloser)        // the receive function - aka "some-new-ReadWriteCloser-var := <-MyKind"
-	TryReadWriteCloser() (dat io.ReadWriteCloser, open bool) // the multi-valued comma-ok receive function - aka "some-new-ReadWriteCloser-var, ok := <-MyKind"
+// ReadWriteCloserROnlyChan represents a
+// receive-only
+// channel
+type ReadWriteCloserROnlyChan interface {
+	RequestReadWriteCloser() (dat io.ReadWriteCloser)        // the receive function - aka "MyReadWriteCloser := <-MyReadWriteCloserROnlyChan"
+	TryReadWriteCloser() (dat io.ReadWriteCloser, open bool) // the multi-valued comma-ok receive function - aka "MyReadWriteCloser, ok := <-MyReadWriteCloserROnlyChan"
 }
 
-type ReadWriteCloserSOnlyChan interface { // send-only channel
+// ReadWriteCloserSOnlyChan represents a
+// send-only
+// channel
+type ReadWriteCloserSOnlyChan interface {
 	ProvideReadWriteCloser(dat io.ReadWriteCloser) // the send function - aka "MyKind <- some ReadWriteCloser"
 }

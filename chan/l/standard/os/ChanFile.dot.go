@@ -11,25 +11,39 @@ import (
 	"os"
 )
 
-type FileChan interface { // bidirectional channel
+// FileChan represents a
+// bidirectional
+// channel
+type FileChan interface {
 	FileROnlyChan // aka "<-chan" - receive only
 	FileSOnlyChan // aka "chan<-" - send only
 }
 
-type FileROnlyChan interface { // receive-only channel
-	RequestFile() (dat *os.File)        // the receive function - aka "some-new-File-var := <-MyKind"
-	TryFile() (dat *os.File, open bool) // the multi-valued comma-ok receive function - aka "some-new-File-var, ok := <-MyKind"
+// FileROnlyChan represents a
+// receive-only
+// channel
+type FileROnlyChan interface {
+	RequestFile() (dat *os.File)        // the receive function - aka "MyFile := <-MyFileROnlyChan"
+	TryFile() (dat *os.File, open bool) // the multi-valued comma-ok receive function - aka "MyFile, ok := <-MyFileROnlyChan"
 }
 
-type FileSOnlyChan interface { // send-only channel
+// FileSOnlyChan represents a
+// send-only
+// channel
+type FileSOnlyChan interface {
 	ProvideFile(dat *os.File) // the send function - aka "MyKind <- some File"
 }
 
-type DChFile struct { // demand channel
+// DChFile is a demand channel
+type DChFile struct {
 	dat chan *os.File
 	req chan struct{}
 }
 
+// MakeDemandFileChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandFileChan() *DChFile {
 	d := new(DChFile)
 	d.dat = make(chan *os.File)
@@ -37,6 +51,10 @@ func MakeDemandFileChan() *DChFile {
 	return d
 }
 
+// MakeDemandFileBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandFileBuff(cap int) *DChFile {
 	d := new(DChFile)
 	d.dat = make(chan *os.File, cap)

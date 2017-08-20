@@ -7,25 +7,39 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Complex128Chan interface { // bidirectional channel
+// Complex128Chan represents a
+// bidirectional
+// channel
+type Complex128Chan interface {
 	Complex128ROnlyChan // aka "<-chan" - receive only
 	Complex128SOnlyChan // aka "chan<-" - send only
 }
 
-type Complex128ROnlyChan interface { // receive-only channel
-	RequestComplex128() (dat complex128)        // the receive function - aka "some-new-Complex128-var := <-MyKind"
-	TryComplex128() (dat complex128, open bool) // the multi-valued comma-ok receive function - aka "some-new-Complex128-var, ok := <-MyKind"
+// Complex128ROnlyChan represents a
+// receive-only
+// channel
+type Complex128ROnlyChan interface {
+	RequestComplex128() (dat complex128)        // the receive function - aka "MyComplex128 := <-MyComplex128ROnlyChan"
+	TryComplex128() (dat complex128, open bool) // the multi-valued comma-ok receive function - aka "MyComplex128, ok := <-MyComplex128ROnlyChan"
 }
 
-type Complex128SOnlyChan interface { // send-only channel
+// Complex128SOnlyChan represents a
+// send-only
+// channel
+type Complex128SOnlyChan interface {
 	ProvideComplex128(dat complex128) // the send function - aka "MyKind <- some Complex128"
 }
 
-type SChComplex128 struct { // supply channel
+// DChComplex128 is a supply channel
+type SChComplex128 struct {
 	dat chan complex128
 	// req chan struct{}
 }
 
+// MakeSupplyComplex128Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyComplex128Chan() *SChComplex128 {
 	d := new(SChComplex128)
 	d.dat = make(chan complex128)
@@ -33,6 +47,10 @@ func MakeSupplyComplex128Chan() *SChComplex128 {
 	return d
 }
 
+// MakeSupplyComplex128Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyComplex128Buff(cap int) *SChComplex128 {
 	d := new(SChComplex128)
 	d.dat = make(chan complex128, cap)

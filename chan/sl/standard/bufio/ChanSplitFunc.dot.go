@@ -11,16 +11,25 @@ import (
 	"bufio"
 )
 
-type SplitFuncChan interface { // bidirectional channel
+// SplitFuncChan represents a
+// bidirectional
+// channel
+type SplitFuncChan interface {
 	SplitFuncROnlyChan // aka "<-chan" - receive only
 	SplitFuncSOnlyChan // aka "chan<-" - send only
 }
 
-type SplitFuncROnlyChan interface { // receive-only channel
-	RequestSplitFunc() (dat bufio.SplitFunc)        // the receive function - aka "some-new-SplitFunc-var := <-MyKind"
-	TrySplitFunc() (dat bufio.SplitFunc, open bool) // the multi-valued comma-ok receive function - aka "some-new-SplitFunc-var, ok := <-MyKind"
+// SplitFuncROnlyChan represents a
+// receive-only
+// channel
+type SplitFuncROnlyChan interface {
+	RequestSplitFunc() (dat bufio.SplitFunc)        // the receive function - aka "MySplitFunc := <-MySplitFuncROnlyChan"
+	TrySplitFunc() (dat bufio.SplitFunc, open bool) // the multi-valued comma-ok receive function - aka "MySplitFunc, ok := <-MySplitFuncROnlyChan"
 }
 
-type SplitFuncSOnlyChan interface { // send-only channel
+// SplitFuncSOnlyChan represents a
+// send-only
+// channel
+type SplitFuncSOnlyChan interface {
 	ProvideSplitFunc(dat bufio.SplitFunc) // the send function - aka "MyKind <- some SplitFunc"
 }

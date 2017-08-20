@@ -7,25 +7,39 @@ package IsString
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type StringSChan interface { // bidirectional channel
+// StringSChan represents a
+// bidirectional
+// channel
+type StringSChan interface {
 	StringSROnlyChan // aka "<-chan" - receive only
 	StringSSOnlyChan // aka "chan<-" - send only
 }
 
-type StringSROnlyChan interface { // receive-only channel
-	RequestStringS() (dat []string)        // the receive function - aka "some-new-StringS-var := <-MyKind"
-	TryStringS() (dat []string, open bool) // the multi-valued comma-ok receive function - aka "some-new-StringS-var, ok := <-MyKind"
+// StringSROnlyChan represents a
+// receive-only
+// channel
+type StringSROnlyChan interface {
+	RequestStringS() (dat []string)        // the receive function - aka "MyStringS := <-MyStringSROnlyChan"
+	TryStringS() (dat []string, open bool) // the multi-valued comma-ok receive function - aka "MyStringS, ok := <-MyStringSROnlyChan"
 }
 
-type StringSSOnlyChan interface { // send-only channel
+// StringSSOnlyChan represents a
+// send-only
+// channel
+type StringSSOnlyChan interface {
 	ProvideStringS(dat []string) // the send function - aka "MyKind <- some StringS"
 }
 
-type SChStringS struct { // supply channel
+// DChStringS is a supply channel
+type SChStringS struct {
 	dat chan []string
 	// req chan struct{}
 }
 
+// MakeSupplyStringSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyStringSChan() *SChStringS {
 	d := new(SChStringS)
 	d.dat = make(chan []string)
@@ -33,6 +47,10 @@ func MakeSupplyStringSChan() *SChStringS {
 	return d
 }
 
+// MakeSupplyStringSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyStringSBuff(cap int) *SChStringS {
 	d := new(SChStringS)
 	d.dat = make(chan []string, cap)

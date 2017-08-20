@@ -7,17 +7,26 @@ package IsInteger
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Chan interface { // bidirectional channel
+// Chan represents a
+// bidirectional
+// channel
+type Chan interface {
 	ROnlyChan // aka "<-chan" - receive only
 	SOnlyChan // aka "chan<-" - send only
 }
 
-type ROnlyChan interface { // receive-only channel
-	Request() (dat int)        // the receive function - aka "some-new--var := <-MyKind"
-	Try() (dat int, open bool) // the multi-valued comma-ok receive function - aka "some-new--var, ok := <-MyKind"
+// ROnlyChan represents a
+// receive-only
+// channel
+type ROnlyChan interface {
+	Request() (dat int)        // the receive function - aka "My := <-MyROnlyChan"
+	Try() (dat int, open bool) // the multi-valued comma-ok receive function - aka "My, ok := <-MyROnlyChan"
 }
 
-type SOnlyChan interface { // send-only channel
+// SOnlyChan represents a
+// send-only
+// channel
+type SOnlyChan interface {
 	Provide(dat int) // the send function - aka "MyKind <- some "
 }
 

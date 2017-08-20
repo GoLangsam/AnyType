@@ -7,25 +7,39 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type UInt16Chan interface { // bidirectional channel
+// UInt16Chan represents a
+// bidirectional
+// channel
+type UInt16Chan interface {
 	UInt16ROnlyChan // aka "<-chan" - receive only
 	UInt16SOnlyChan // aka "chan<-" - send only
 }
 
-type UInt16ROnlyChan interface { // receive-only channel
-	RequestUInt16() (dat uint16)        // the receive function - aka "some-new-UInt16-var := <-MyKind"
-	TryUInt16() (dat uint16, open bool) // the multi-valued comma-ok receive function - aka "some-new-UInt16-var, ok := <-MyKind"
+// UInt16ROnlyChan represents a
+// receive-only
+// channel
+type UInt16ROnlyChan interface {
+	RequestUInt16() (dat uint16)        // the receive function - aka "MyUInt16 := <-MyUInt16ROnlyChan"
+	TryUInt16() (dat uint16, open bool) // the multi-valued comma-ok receive function - aka "MyUInt16, ok := <-MyUInt16ROnlyChan"
 }
 
-type UInt16SOnlyChan interface { // send-only channel
+// UInt16SOnlyChan represents a
+// send-only
+// channel
+type UInt16SOnlyChan interface {
 	ProvideUInt16(dat uint16) // the send function - aka "MyKind <- some UInt16"
 }
 
-type DChUInt16 struct { // demand channel
+// DChUInt16 is a demand channel
+type DChUInt16 struct {
 	dat chan uint16
 	req chan struct{}
 }
 
+// MakeDemandUInt16Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandUInt16Chan() *DChUInt16 {
 	d := new(DChUInt16)
 	d.dat = make(chan uint16)
@@ -33,6 +47,10 @@ func MakeDemandUInt16Chan() *DChUInt16 {
 	return d
 }
 
+// MakeDemandUInt16Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandUInt16Buff(cap int) *DChUInt16 {
 	d := new(DChUInt16)
 	d.dat = make(chan uint16, cap)

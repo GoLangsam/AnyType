@@ -7,16 +7,25 @@ package test
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type SomeTypeSChan interface { // bidirectional channel
+// SomeTypeSChan represents a
+// bidirectional
+// channel
+type SomeTypeSChan interface {
 	SomeTypeSROnlyChan // aka "<-chan" - receive only
 	SomeTypeSSOnlyChan // aka "chan<-" - send only
 }
 
-type SomeTypeSROnlyChan interface { // receive-only channel
-	RequestSomeTypeS() (dat []SomeType)        // the receive function - aka "some-new-SomeTypeS-var := <-MyKind"
-	TrySomeTypeS() (dat []SomeType, open bool) // the multi-valued comma-ok receive function - aka "some-new-SomeTypeS-var, ok := <-MyKind"
+// SomeTypeSROnlyChan represents a
+// receive-only
+// channel
+type SomeTypeSROnlyChan interface {
+	RequestSomeTypeS() (dat []SomeType)        // the receive function - aka "MySomeTypeS := <-MySomeTypeSROnlyChan"
+	TrySomeTypeS() (dat []SomeType, open bool) // the multi-valued comma-ok receive function - aka "MySomeTypeS, ok := <-MySomeTypeSROnlyChan"
 }
 
-type SomeTypeSSOnlyChan interface { // send-only channel
+// SomeTypeSSOnlyChan represents a
+// send-only
+// channel
+type SomeTypeSSOnlyChan interface {
 	ProvideSomeTypeS(dat []SomeType) // the send function - aka "MyKind <- some SomeTypeS"
 }

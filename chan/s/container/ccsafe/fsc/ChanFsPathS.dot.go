@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/fs"
 )
 
-type FsPathSChan interface { // bidirectional channel
+// FsPathSChan represents a
+// bidirectional
+// channel
+type FsPathSChan interface {
 	FsPathSROnlyChan // aka "<-chan" - receive only
 	FsPathSSOnlyChan // aka "chan<-" - send only
 }
 
-type FsPathSROnlyChan interface { // receive-only channel
-	RequestFsPathS() (dat fs.FsPathS)        // the receive function - aka "some-new-FsPathS-var := <-MyKind"
-	TryFsPathS() (dat fs.FsPathS, open bool) // the multi-valued comma-ok receive function - aka "some-new-FsPathS-var, ok := <-MyKind"
+// FsPathSROnlyChan represents a
+// receive-only
+// channel
+type FsPathSROnlyChan interface {
+	RequestFsPathS() (dat fs.FsPathS)        // the receive function - aka "MyFsPathS := <-MyFsPathSROnlyChan"
+	TryFsPathS() (dat fs.FsPathS, open bool) // the multi-valued comma-ok receive function - aka "MyFsPathS, ok := <-MyFsPathSROnlyChan"
 }
 
-type FsPathSSOnlyChan interface { // send-only channel
+// FsPathSSOnlyChan represents a
+// send-only
+// channel
+type FsPathSSOnlyChan interface {
 	ProvideFsPathS(dat fs.FsPathS) // the send function - aka "MyKind <- some FsPathS"
 }
 
-type SChFsPathS struct { // supply channel
+// DChFsPathS is a supply channel
+type SChFsPathS struct {
 	dat chan fs.FsPathS
 	// req chan struct{}
 }
 
+// MakeSupplyFsPathSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyFsPathSChan() *SChFsPathS {
 	d := new(SChFsPathS)
 	d.dat = make(chan fs.FsPathS)
@@ -37,6 +51,10 @@ func MakeSupplyFsPathSChan() *SChFsPathS {
 	return d
 }
 
+// MakeSupplyFsPathSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyFsPathSBuff(cap int) *SChFsPathS {
 	d := new(SChFsPathS)
 	d.dat = make(chan fs.FsPathS, cap)

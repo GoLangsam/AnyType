@@ -7,25 +7,39 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Int16Chan interface { // bidirectional channel
+// Int16Chan represents a
+// bidirectional
+// channel
+type Int16Chan interface {
 	Int16ROnlyChan // aka "<-chan" - receive only
 	Int16SOnlyChan // aka "chan<-" - send only
 }
 
-type Int16ROnlyChan interface { // receive-only channel
-	RequestInt16() (dat int16)        // the receive function - aka "some-new-Int16-var := <-MyKind"
-	TryInt16() (dat int16, open bool) // the multi-valued comma-ok receive function - aka "some-new-Int16-var, ok := <-MyKind"
+// Int16ROnlyChan represents a
+// receive-only
+// channel
+type Int16ROnlyChan interface {
+	RequestInt16() (dat int16)        // the receive function - aka "MyInt16 := <-MyInt16ROnlyChan"
+	TryInt16() (dat int16, open bool) // the multi-valued comma-ok receive function - aka "MyInt16, ok := <-MyInt16ROnlyChan"
 }
 
-type Int16SOnlyChan interface { // send-only channel
+// Int16SOnlyChan represents a
+// send-only
+// channel
+type Int16SOnlyChan interface {
 	ProvideInt16(dat int16) // the send function - aka "MyKind <- some Int16"
 }
 
-type SChInt16 struct { // supply channel
+// DChInt16 is a supply channel
+type SChInt16 struct {
 	dat chan int16
 	// req chan struct{}
 }
 
+// MakeSupplyInt16Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyInt16Chan() *SChInt16 {
 	d := new(SChInt16)
 	d.dat = make(chan int16)
@@ -33,6 +47,10 @@ func MakeSupplyInt16Chan() *SChInt16 {
 	return d
 }
 
+// MakeSupplyInt16Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyInt16Buff(cap int) *SChInt16 {
 	d := new(SChInt16)
 	d.dat = make(chan int16, cap)

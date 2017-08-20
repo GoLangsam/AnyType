@@ -7,25 +7,39 @@ package IsRune
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type RuneSChan interface { // bidirectional channel
+// RuneSChan represents a
+// bidirectional
+// channel
+type RuneSChan interface {
 	RuneSROnlyChan // aka "<-chan" - receive only
 	RuneSSOnlyChan // aka "chan<-" - send only
 }
 
-type RuneSROnlyChan interface { // receive-only channel
-	RequestRuneS() (dat []rune)        // the receive function - aka "some-new-RuneS-var := <-MyKind"
-	TryRuneS() (dat []rune, open bool) // the multi-valued comma-ok receive function - aka "some-new-RuneS-var, ok := <-MyKind"
+// RuneSROnlyChan represents a
+// receive-only
+// channel
+type RuneSROnlyChan interface {
+	RequestRuneS() (dat []rune)        // the receive function - aka "MyRuneS := <-MyRuneSROnlyChan"
+	TryRuneS() (dat []rune, open bool) // the multi-valued comma-ok receive function - aka "MyRuneS, ok := <-MyRuneSROnlyChan"
 }
 
-type RuneSSOnlyChan interface { // send-only channel
+// RuneSSOnlyChan represents a
+// send-only
+// channel
+type RuneSSOnlyChan interface {
 	ProvideRuneS(dat []rune) // the send function - aka "MyKind <- some RuneS"
 }
 
-type DChRuneS struct { // demand channel
+// DChRuneS is a demand channel
+type DChRuneS struct {
 	dat chan []rune
 	req chan struct{}
 }
 
+// MakeDemandRuneSChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandRuneSChan() *DChRuneS {
 	d := new(DChRuneS)
 	d.dat = make(chan []rune)
@@ -33,6 +47,10 @@ func MakeDemandRuneSChan() *DChRuneS {
 	return d
 }
 
+// MakeDemandRuneSBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandRuneSBuff(cap int) *DChRuneS {
 	d := new(DChRuneS)
 	d.dat = make(chan []rune, cap)

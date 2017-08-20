@@ -11,25 +11,39 @@ import (
 	"strings"
 )
 
-type ReplacerChan interface { // bidirectional channel
+// ReplacerChan represents a
+// bidirectional
+// channel
+type ReplacerChan interface {
 	ReplacerROnlyChan // aka "<-chan" - receive only
 	ReplacerSOnlyChan // aka "chan<-" - send only
 }
 
-type ReplacerROnlyChan interface { // receive-only channel
-	RequestReplacer() (dat *strings.Replacer)        // the receive function - aka "some-new-Replacer-var := <-MyKind"
-	TryReplacer() (dat *strings.Replacer, open bool) // the multi-valued comma-ok receive function - aka "some-new-Replacer-var, ok := <-MyKind"
+// ReplacerROnlyChan represents a
+// receive-only
+// channel
+type ReplacerROnlyChan interface {
+	RequestReplacer() (dat *strings.Replacer)        // the receive function - aka "MyReplacer := <-MyReplacerROnlyChan"
+	TryReplacer() (dat *strings.Replacer, open bool) // the multi-valued comma-ok receive function - aka "MyReplacer, ok := <-MyReplacerROnlyChan"
 }
 
-type ReplacerSOnlyChan interface { // send-only channel
+// ReplacerSOnlyChan represents a
+// send-only
+// channel
+type ReplacerSOnlyChan interface {
 	ProvideReplacer(dat *strings.Replacer) // the send function - aka "MyKind <- some Replacer"
 }
 
-type DChReplacer struct { // demand channel
+// DChReplacer is a demand channel
+type DChReplacer struct {
 	dat chan *strings.Replacer
 	req chan struct{}
 }
 
+// MakeDemandReplacerChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandReplacerChan() *DChReplacer {
 	d := new(DChReplacer)
 	d.dat = make(chan *strings.Replacer)
@@ -37,6 +51,10 @@ func MakeDemandReplacerChan() *DChReplacer {
 	return d
 }
 
+// MakeDemandReplacerBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandReplacerBuff(cap int) *DChReplacer {
 	d := new(DChReplacer)
 	d.dat = make(chan *strings.Replacer, cap)

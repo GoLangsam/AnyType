@@ -7,25 +7,39 @@ package IsOrdered
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type UInt64Chan interface { // bidirectional channel
+// UInt64Chan represents a
+// bidirectional
+// channel
+type UInt64Chan interface {
 	UInt64ROnlyChan // aka "<-chan" - receive only
 	UInt64SOnlyChan // aka "chan<-" - send only
 }
 
-type UInt64ROnlyChan interface { // receive-only channel
-	RequestUInt64() (dat uint64)        // the receive function - aka "some-new-UInt64-var := <-MyKind"
-	TryUInt64() (dat uint64, open bool) // the multi-valued comma-ok receive function - aka "some-new-UInt64-var, ok := <-MyKind"
+// UInt64ROnlyChan represents a
+// receive-only
+// channel
+type UInt64ROnlyChan interface {
+	RequestUInt64() (dat uint64)        // the receive function - aka "MyUInt64 := <-MyUInt64ROnlyChan"
+	TryUInt64() (dat uint64, open bool) // the multi-valued comma-ok receive function - aka "MyUInt64, ok := <-MyUInt64ROnlyChan"
 }
 
-type UInt64SOnlyChan interface { // send-only channel
+// UInt64SOnlyChan represents a
+// send-only
+// channel
+type UInt64SOnlyChan interface {
 	ProvideUInt64(dat uint64) // the send function - aka "MyKind <- some UInt64"
 }
 
-type SChUInt64 struct { // supply channel
+// DChUInt64 is a supply channel
+type SChUInt64 struct {
 	dat chan uint64
 	// req chan struct{}
 }
 
+// MakeSupplyUInt64Chan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplyUInt64Chan() *SChUInt64 {
 	d := new(SChUInt64)
 	d.dat = make(chan uint64)
@@ -33,6 +47,10 @@ func MakeSupplyUInt64Chan() *SChUInt64 {
 	return d
 }
 
+// MakeSupplyUInt64Buff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplyUInt64Buff(cap int) *SChUInt64 {
 	d := new(SChUInt64)
 	d.dat = make(chan uint64, cap)

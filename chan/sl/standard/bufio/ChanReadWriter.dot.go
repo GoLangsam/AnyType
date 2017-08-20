@@ -11,16 +11,25 @@ import (
 	"bufio"
 )
 
-type ReadWriterChan interface { // bidirectional channel
+// ReadWriterChan represents a
+// bidirectional
+// channel
+type ReadWriterChan interface {
 	ReadWriterROnlyChan // aka "<-chan" - receive only
 	ReadWriterSOnlyChan // aka "chan<-" - send only
 }
 
-type ReadWriterROnlyChan interface { // receive-only channel
-	RequestReadWriter() (dat *bufio.ReadWriter)        // the receive function - aka "some-new-ReadWriter-var := <-MyKind"
-	TryReadWriter() (dat *bufio.ReadWriter, open bool) // the multi-valued comma-ok receive function - aka "some-new-ReadWriter-var, ok := <-MyKind"
+// ReadWriterROnlyChan represents a
+// receive-only
+// channel
+type ReadWriterROnlyChan interface {
+	RequestReadWriter() (dat *bufio.ReadWriter)        // the receive function - aka "MyReadWriter := <-MyReadWriterROnlyChan"
+	TryReadWriter() (dat *bufio.ReadWriter, open bool) // the multi-valued comma-ok receive function - aka "MyReadWriter, ok := <-MyReadWriterROnlyChan"
 }
 
-type ReadWriterSOnlyChan interface { // send-only channel
+// ReadWriterSOnlyChan represents a
+// send-only
+// channel
+type ReadWriterSOnlyChan interface {
 	ProvideReadWriter(dat *bufio.ReadWriter) // the send function - aka "MyKind <- some ReadWriter"
 }

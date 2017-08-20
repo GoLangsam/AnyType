@@ -11,25 +11,39 @@ import (
 	"github.com/golangsam/container/ccsafe/fs"
 )
 
-type PatternChan interface { // bidirectional channel
+// PatternChan represents a
+// bidirectional
+// channel
+type PatternChan interface {
 	PatternROnlyChan // aka "<-chan" - receive only
 	PatternSOnlyChan // aka "chan<-" - send only
 }
 
-type PatternROnlyChan interface { // receive-only channel
-	RequestPattern() (dat *fs.Pattern)        // the receive function - aka "some-new-Pattern-var := <-MyKind"
-	TryPattern() (dat *fs.Pattern, open bool) // the multi-valued comma-ok receive function - aka "some-new-Pattern-var, ok := <-MyKind"
+// PatternROnlyChan represents a
+// receive-only
+// channel
+type PatternROnlyChan interface {
+	RequestPattern() (dat *fs.Pattern)        // the receive function - aka "MyPattern := <-MyPatternROnlyChan"
+	TryPattern() (dat *fs.Pattern, open bool) // the multi-valued comma-ok receive function - aka "MyPattern, ok := <-MyPatternROnlyChan"
 }
 
-type PatternSOnlyChan interface { // send-only channel
+// PatternSOnlyChan represents a
+// send-only
+// channel
+type PatternSOnlyChan interface {
 	ProvidePattern(dat *fs.Pattern) // the send function - aka "MyKind <- some Pattern"
 }
 
-type DChPattern struct { // demand channel
+// DChPattern is a demand channel
+type DChPattern struct {
 	dat chan *fs.Pattern
 	req chan struct{}
 }
 
+// MakeDemandPatternChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// demand channel
 func MakeDemandPatternChan() *DChPattern {
 	d := new(DChPattern)
 	d.dat = make(chan *fs.Pattern)
@@ -37,6 +51,10 @@ func MakeDemandPatternChan() *DChPattern {
 	return d
 }
 
+// MakeDemandPatternBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// demand channel
 func MakeDemandPatternBuff(cap int) *DChPattern {
 	d := new(DChPattern)
 	d.dat = make(chan *fs.Pattern, cap)

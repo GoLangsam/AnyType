@@ -11,25 +11,39 @@ import (
 	"os"
 )
 
-type SignalChan interface { // bidirectional channel
+// SignalChan represents a
+// bidirectional
+// channel
+type SignalChan interface {
 	SignalROnlyChan // aka "<-chan" - receive only
 	SignalSOnlyChan // aka "chan<-" - send only
 }
 
-type SignalROnlyChan interface { // receive-only channel
-	RequestSignal() (dat os.Signal)        // the receive function - aka "some-new-Signal-var := <-MyKind"
-	TrySignal() (dat os.Signal, open bool) // the multi-valued comma-ok receive function - aka "some-new-Signal-var, ok := <-MyKind"
+// SignalROnlyChan represents a
+// receive-only
+// channel
+type SignalROnlyChan interface {
+	RequestSignal() (dat os.Signal)        // the receive function - aka "MySignal := <-MySignalROnlyChan"
+	TrySignal() (dat os.Signal, open bool) // the multi-valued comma-ok receive function - aka "MySignal, ok := <-MySignalROnlyChan"
 }
 
-type SignalSOnlyChan interface { // send-only channel
+// SignalSOnlyChan represents a
+// send-only
+// channel
+type SignalSOnlyChan interface {
 	ProvideSignal(dat os.Signal) // the send function - aka "MyKind <- some Signal"
 }
 
-type SChSignal struct { // supply channel
+// DChSignal is a supply channel
+type SChSignal struct {
 	dat chan os.Signal
 	// req chan struct{}
 }
 
+// MakeSupplySignalChan() returns
+// a (pointer to a) fresh
+// unbuffered
+// supply channel
 func MakeSupplySignalChan() *SChSignal {
 	d := new(SChSignal)
 	d.dat = make(chan os.Signal)
@@ -37,6 +51,10 @@ func MakeSupplySignalChan() *SChSignal {
 	return d
 }
 
+// MakeSupplySignalBuff() returns
+// a (pointer to a) fresh
+// buffered (with capacity cap)
+// supply channel
 func MakeSupplySignalBuff(cap int) *SChSignal {
 	d := new(SChSignal)
 	d.dat = make(chan os.Signal, cap)

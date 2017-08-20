@@ -11,16 +11,25 @@ import (
 	"github.com/golangsam/container/ccsafe/fs"
 )
 
-type FsBaseSChan interface { // bidirectional channel
+// FsBaseSChan represents a
+// bidirectional
+// channel
+type FsBaseSChan interface {
 	FsBaseSROnlyChan // aka "<-chan" - receive only
 	FsBaseSSOnlyChan // aka "chan<-" - send only
 }
 
-type FsBaseSROnlyChan interface { // receive-only channel
-	RequestFsBaseS() (dat fs.FsBaseS)        // the receive function - aka "some-new-FsBaseS-var := <-MyKind"
-	TryFsBaseS() (dat fs.FsBaseS, open bool) // the multi-valued comma-ok receive function - aka "some-new-FsBaseS-var, ok := <-MyKind"
+// FsBaseSROnlyChan represents a
+// receive-only
+// channel
+type FsBaseSROnlyChan interface {
+	RequestFsBaseS() (dat fs.FsBaseS)        // the receive function - aka "MyFsBaseS := <-MyFsBaseSROnlyChan"
+	TryFsBaseS() (dat fs.FsBaseS, open bool) // the multi-valued comma-ok receive function - aka "MyFsBaseS, ok := <-MyFsBaseSROnlyChan"
 }
 
-type FsBaseSSOnlyChan interface { // send-only channel
+// FsBaseSSOnlyChan represents a
+// send-only
+// channel
+type FsBaseSSOnlyChan interface {
 	ProvideFsBaseS(dat fs.FsBaseS) // the send function - aka "MyKind <- some FsBaseS"
 }

@@ -7,16 +7,25 @@ package IsNumeric
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-type Float64Chan interface { // bidirectional channel
+// Float64Chan represents a
+// bidirectional
+// channel
+type Float64Chan interface {
 	Float64ROnlyChan // aka "<-chan" - receive only
 	Float64SOnlyChan // aka "chan<-" - send only
 }
 
-type Float64ROnlyChan interface { // receive-only channel
-	RequestFloat64() (dat float64)        // the receive function - aka "some-new-Float64-var := <-MyKind"
-	TryFloat64() (dat float64, open bool) // the multi-valued comma-ok receive function - aka "some-new-Float64-var, ok := <-MyKind"
+// Float64ROnlyChan represents a
+// receive-only
+// channel
+type Float64ROnlyChan interface {
+	RequestFloat64() (dat float64)        // the receive function - aka "MyFloat64 := <-MyFloat64ROnlyChan"
+	TryFloat64() (dat float64, open bool) // the multi-valued comma-ok receive function - aka "MyFloat64, ok := <-MyFloat64ROnlyChan"
 }
 
-type Float64SOnlyChan interface { // send-only channel
+// Float64SOnlyChan represents a
+// send-only
+// channel
+type Float64SOnlyChan interface {
 	ProvideFloat64(dat float64) // the send function - aka "MyKind <- some Float64"
 }
