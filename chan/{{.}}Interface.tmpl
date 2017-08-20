@@ -10,14 +10,13 @@ type {{.}}Chan interface {
 // receive-only
 // channel
 type {{.}}ROnlyChan interface {
-	Request{{.}}() (dat {{.Dot}}) // the receive function - aka "some-new-{{.}}-var := <-MyKind"
-	Try{{.}}() (dat {{.Dot}}, open bool) // the multi-valued comma-ok receive function - aka "some-new-{{.}}-var, ok := <-MyKind"
+	Request{{.}}() (dat {{.Dot}}) // the receive function - aka "My{{.}} := <-My{{.}}ROnlyChan"
+	Try{{.}}() (dat {{.Dot}}, open bool) // the multi-valued comma-ok receive function - aka "My{{.}}, ok := <-My{{.}}ROnlyChan"
 }
 
 // {{.}}SOnlyChan represents a
 // send-only
 // channel
-a receive-only channel
 type {{.}}SOnlyChan interface {
 	Provide{{.}}(dat {{.Dot}}) // the send function - aka "MyKind <- some {{.}}"
 }
