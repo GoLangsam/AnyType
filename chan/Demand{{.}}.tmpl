@@ -4,7 +4,7 @@ type DCh{{.}} struct {
 	req chan struct{}
 }
 
-// MakeDemand{{.}}Chan() returns
+// MakeDemand{{.}}Chan returns
 // a (pointer to a) fresh
 // unbuffered
 // demand channel
@@ -15,7 +15,7 @@ func MakeDemand{{.}}Chan() *DCh{{.}} {
 	return d
 }
 
-// MakeDemand{{.}}Buff() returns
+// MakeDemand{{.}}Buff returns
 // a (pointer to a) fresh
 // buffered (with capacity cap)
 // demand channel
