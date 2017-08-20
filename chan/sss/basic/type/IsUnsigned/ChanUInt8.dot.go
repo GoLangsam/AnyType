@@ -58,7 +58,7 @@ func ChanUInt8Slice(inp ...[]uint8) (out <-chan uint8) {
 	return cha
 }
 
-// JoinUInt8
+// JoinUInt8 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt8(out chan<- uint8, inp ...uint8) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint8, inp ...uint8) {
@@ -71,7 +71,7 @@ func JoinUInt8(out chan<- uint8, inp ...uint8) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinUInt8Slice
+// JoinUInt8Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt8Slice(out chan<- uint8, inp ...[]uint8) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint8, inp ...[]uint8) {
@@ -86,7 +86,7 @@ func JoinUInt8Slice(out chan<- uint8, inp ...[]uint8) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinUInt8Chan
+// JoinUInt8Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt8Chan(out chan<- uint8, inp <-chan uint8) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint8, inp <-chan uint8) {
@@ -229,6 +229,7 @@ func main() {
 	fmt.Println(<-leftmost)
 }
 */
+
 // MergeUInt8 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed UInt8channel is returned.

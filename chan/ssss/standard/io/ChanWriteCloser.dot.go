@@ -62,7 +62,7 @@ func ChanWriteCloserSlice(inp ...[]io.WriteCloser) chan io.WriteCloser {
 	return out
 }
 
-// JoinWriteCloser
+// JoinWriteCloser sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriteCloser(out chan<- io.WriteCloser, inp ...io.WriteCloser) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinWriteCloser(out chan<- io.WriteCloser, inp ...io.WriteCloser) chan stru
 	return done
 }
 
-// JoinWriteCloserSlice
+// JoinWriteCloserSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriteCloserSlice(out chan<- io.WriteCloser, inp ...[]io.WriteCloser) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinWriteCloserSlice(out chan<- io.WriteCloser, inp ...[]io.WriteCloser) ch
 	return done
 }
 
-// JoinWriteCloserChan
+// JoinWriteCloserChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriteCloserChan(out chan<- io.WriteCloser, inp <-chan io.WriteCloser) chan struct{} {
 	done := make(chan struct{})
 	go func() {

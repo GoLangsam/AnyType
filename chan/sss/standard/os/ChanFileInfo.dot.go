@@ -62,7 +62,7 @@ func ChanFileInfoSlice(inp ...[]os.FileInfo) (out <-chan os.FileInfo) {
 	return cha
 }
 
-// JoinFileInfo
+// JoinFileInfo sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFileInfo(out chan<- os.FileInfo, inp ...os.FileInfo) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.FileInfo, inp ...os.FileInfo) {
@@ -75,7 +75,7 @@ func JoinFileInfo(out chan<- os.FileInfo, inp ...os.FileInfo) (done <-chan struc
 	return cha
 }
 
-// JoinFileInfoSlice
+// JoinFileInfoSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFileInfoSlice(out chan<- os.FileInfo, inp ...[]os.FileInfo) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.FileInfo, inp ...[]os.FileInfo) {
@@ -90,7 +90,7 @@ func JoinFileInfoSlice(out chan<- os.FileInfo, inp ...[]os.FileInfo) (done <-cha
 	return cha
 }
 
-// JoinFileInfoChan
+// JoinFileInfoChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFileInfoChan(out chan<- os.FileInfo, inp <-chan os.FileInfo) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.FileInfo, inp <-chan os.FileInfo) {

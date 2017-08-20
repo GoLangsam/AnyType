@@ -58,7 +58,7 @@ func ChanSlice(inp ...[]float64) (out <-chan float64) {
 	return cha
 }
 
-// Join
+// Join sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func Join(out chan<- float64, inp ...float64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float64, inp ...float64) {
@@ -71,7 +71,7 @@ func Join(out chan<- float64, inp ...float64) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinSlice
+// JoinSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSlice(out chan<- float64, inp ...[]float64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float64, inp ...[]float64) {
@@ -86,7 +86,7 @@ func JoinSlice(out chan<- float64, inp ...[]float64) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinChan
+// JoinChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinChan(out chan<- float64, inp <-chan float64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float64, inp <-chan float64) {
@@ -229,6 +229,7 @@ func main() {
 	fmt.Println(<-leftmost)
 }
 */
+
 // Merge returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed channel is returned.

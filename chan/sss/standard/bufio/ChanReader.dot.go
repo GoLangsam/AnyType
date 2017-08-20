@@ -62,7 +62,7 @@ func ChanReaderSlice(inp ...[]*bufio.Reader) (out <-chan *bufio.Reader) {
 	return cha
 }
 
-// JoinReader
+// JoinReader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReader(out chan<- *bufio.Reader, inp ...*bufio.Reader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Reader, inp ...*bufio.Reader) {
@@ -75,7 +75,7 @@ func JoinReader(out chan<- *bufio.Reader, inp ...*bufio.Reader) (done <-chan str
 	return cha
 }
 
-// JoinReaderSlice
+// JoinReaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReaderSlice(out chan<- *bufio.Reader, inp ...[]*bufio.Reader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Reader, inp ...[]*bufio.Reader) {
@@ -90,7 +90,7 @@ func JoinReaderSlice(out chan<- *bufio.Reader, inp ...[]*bufio.Reader) (done <-c
 	return cha
 }
 
-// JoinReaderChan
+// JoinReaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReaderChan(out chan<- *bufio.Reader, inp <-chan *bufio.Reader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Reader, inp <-chan *bufio.Reader) {

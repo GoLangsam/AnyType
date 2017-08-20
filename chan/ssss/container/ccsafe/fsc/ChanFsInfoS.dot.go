@@ -62,7 +62,7 @@ func ChanFsInfoSSlice(inp ...[]fs.FsInfoS) chan fs.FsInfoS {
 	return out
 }
 
-// JoinFsInfoS
+// JoinFsInfoS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsInfoS(out chan<- fs.FsInfoS, inp ...fs.FsInfoS) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinFsInfoS(out chan<- fs.FsInfoS, inp ...fs.FsInfoS) chan struct{} {
 	return done
 }
 
-// JoinFsInfoSSlice
+// JoinFsInfoSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsInfoSSlice(out chan<- fs.FsInfoS, inp ...[]fs.FsInfoS) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinFsInfoSSlice(out chan<- fs.FsInfoS, inp ...[]fs.FsInfoS) chan struct{} 
 	return done
 }
 
-// JoinFsInfoSChan
+// JoinFsInfoSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsInfoSChan(out chan<- fs.FsInfoS, inp <-chan fs.FsInfoS) chan struct{} {
 	done := make(chan struct{})
 	go func() {

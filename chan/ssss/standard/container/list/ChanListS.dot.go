@@ -62,7 +62,7 @@ func ChanListSSlice(inp ...[][]list.List) chan []list.List {
 	return out
 }
 
-// JoinListS
+// JoinListS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinListS(out chan<- []list.List, inp ...[]list.List) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinListS(out chan<- []list.List, inp ...[]list.List) chan struct{} {
 	return done
 }
 
-// JoinListSSlice
+// JoinListSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinListSSlice(out chan<- []list.List, inp ...[][]list.List) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinListSSlice(out chan<- []list.List, inp ...[][]list.List) chan struct{} 
 	return done
 }
 
-// JoinListSChan
+// JoinListSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinListSChan(out chan<- []list.List, inp <-chan []list.List) chan struct{} {
 	done := make(chan struct{})
 	go func() {

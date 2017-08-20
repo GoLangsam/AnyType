@@ -74,7 +74,7 @@ func joinRuneReader(done chan<- struct{}, out chan<- io.RuneReader, inp ...io.Ru
 	done <- struct{}{}
 }
 
-// JoinRuneReader
+// JoinRuneReader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneReader(out chan<- io.RuneReader, inp ...io.RuneReader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneReader(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinRuneReaderSlice(done chan<- struct{}, out chan<- io.RuneReader, inp ...
 	done <- struct{}{}
 }
 
-// JoinRuneReaderSlice
+// JoinRuneReaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneReaderSlice(out chan<- io.RuneReader, inp ...[]io.RuneReader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneReaderSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinRuneReaderChan(done chan<- struct{}, out chan<- io.RuneReader, inp <-ch
 	done <- struct{}{}
 }
 
-// JoinRuneReaderChan
+// JoinRuneReaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneReaderChan(out chan<- io.RuneReader, inp <-chan io.RuneReader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneReaderChan(cha, out, inp)

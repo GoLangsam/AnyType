@@ -62,7 +62,7 @@ func ChanDotSlice(inp ...[]dot.Dot) (out <-chan dot.Dot) {
 	return cha
 }
 
-// JoinDot
+// JoinDot sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinDot(out chan<- dot.Dot, inp ...dot.Dot) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- dot.Dot, inp ...dot.Dot) {
@@ -75,7 +75,7 @@ func JoinDot(out chan<- dot.Dot, inp ...dot.Dot) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinDotSlice
+// JoinDotSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinDotSlice(out chan<- dot.Dot, inp ...[]dot.Dot) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- dot.Dot, inp ...[]dot.Dot) {
@@ -90,7 +90,7 @@ func JoinDotSlice(out chan<- dot.Dot, inp ...[]dot.Dot) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinDotChan
+// JoinDotChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinDotChan(out chan<- dot.Dot, inp <-chan dot.Dot) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- dot.Dot, inp <-chan dot.Dot) {

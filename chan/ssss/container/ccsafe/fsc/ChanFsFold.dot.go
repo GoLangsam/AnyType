@@ -62,7 +62,7 @@ func ChanFsFoldSlice(inp ...[]*fs.FsFold) chan *fs.FsFold {
 	return out
 }
 
-// JoinFsFold
+// JoinFsFold sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsFold(out chan<- *fs.FsFold, inp ...*fs.FsFold) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinFsFold(out chan<- *fs.FsFold, inp ...*fs.FsFold) chan struct{} {
 	return done
 }
 
-// JoinFsFoldSlice
+// JoinFsFoldSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsFoldSlice(out chan<- *fs.FsFold, inp ...[]*fs.FsFold) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinFsFoldSlice(out chan<- *fs.FsFold, inp ...[]*fs.FsFold) chan struct{} {
 	return done
 }
 
-// JoinFsFoldChan
+// JoinFsFoldChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsFoldChan(out chan<- *fs.FsFold, inp <-chan *fs.FsFold) chan struct{} {
 	done := make(chan struct{})
 	go func() {

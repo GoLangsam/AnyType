@@ -74,7 +74,7 @@ func joinPatternS(done chan<- struct{}, out chan<- fs.PatternS, inp ...fs.Patter
 	done <- struct{}{}
 }
 
-// JoinPatternS
+// JoinPatternS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPatternS(out chan<- fs.PatternS, inp ...fs.PatternS) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinPatternS(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinPatternSSlice(done chan<- struct{}, out chan<- fs.PatternS, inp ...[]fs
 	done <- struct{}{}
 }
 
-// JoinPatternSSlice
+// JoinPatternSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPatternSSlice(out chan<- fs.PatternS, inp ...[]fs.PatternS) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinPatternSSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinPatternSChan(done chan<- struct{}, out chan<- fs.PatternS, inp <-chan f
 	done <- struct{}{}
 }
 
-// JoinPatternSChan
+// JoinPatternSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPatternSChan(out chan<- fs.PatternS, inp <-chan fs.PatternS) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinPatternSChan(cha, out, inp)

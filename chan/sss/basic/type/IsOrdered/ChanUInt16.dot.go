@@ -58,7 +58,7 @@ func ChanUInt16Slice(inp ...[]uint16) (out <-chan uint16) {
 	return cha
 }
 
-// JoinUInt16
+// JoinUInt16 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt16(out chan<- uint16, inp ...uint16) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint16, inp ...uint16) {
@@ -71,7 +71,7 @@ func JoinUInt16(out chan<- uint16, inp ...uint16) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinUInt16Slice
+// JoinUInt16Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt16Slice(out chan<- uint16, inp ...[]uint16) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint16, inp ...[]uint16) {
@@ -86,7 +86,7 @@ func JoinUInt16Slice(out chan<- uint16, inp ...[]uint16) (done <-chan struct{}) 
 	return cha
 }
 
-// JoinUInt16Chan
+// JoinUInt16Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt16Chan(out chan<- uint16, inp <-chan uint16) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint16, inp <-chan uint16) {
@@ -229,6 +229,7 @@ func main() {
 	fmt.Println(<-leftmost)
 }
 */
+
 // MergeUInt16 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed UInt16channel is returned.

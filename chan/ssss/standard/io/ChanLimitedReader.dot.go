@@ -62,7 +62,7 @@ func ChanLimitedReaderSlice(inp ...[]*io.LimitedReader) chan *io.LimitedReader {
 	return out
 }
 
-// JoinLimitedReader
+// JoinLimitedReader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinLimitedReader(out chan<- *io.LimitedReader, inp ...*io.LimitedReader) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinLimitedReader(out chan<- *io.LimitedReader, inp ...*io.LimitedReader) c
 	return done
 }
 
-// JoinLimitedReaderSlice
+// JoinLimitedReaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinLimitedReaderSlice(out chan<- *io.LimitedReader, inp ...[]*io.LimitedReader) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinLimitedReaderSlice(out chan<- *io.LimitedReader, inp ...[]*io.LimitedRe
 	return done
 }
 
-// JoinLimitedReaderChan
+// JoinLimitedReaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinLimitedReaderChan(out chan<- *io.LimitedReader, inp <-chan *io.LimitedReader) chan struct{} {
 	done := make(chan struct{})
 	go func() {

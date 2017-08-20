@@ -74,7 +74,7 @@ func joinReaderFrom(done chan<- struct{}, out chan<- io.ReaderFrom, inp ...io.Re
 	done <- struct{}{}
 }
 
-// JoinReaderFrom
+// JoinReaderFrom sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReaderFrom(out chan<- io.ReaderFrom, inp ...io.ReaderFrom) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinReaderFrom(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinReaderFromSlice(done chan<- struct{}, out chan<- io.ReaderFrom, inp ...
 	done <- struct{}{}
 }
 
-// JoinReaderFromSlice
+// JoinReaderFromSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReaderFromSlice(out chan<- io.ReaderFrom, inp ...[]io.ReaderFrom) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinReaderFromSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinReaderFromChan(done chan<- struct{}, out chan<- io.ReaderFrom, inp <-ch
 	done <- struct{}{}
 }
 
-// JoinReaderFromChan
+// JoinReaderFromChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReaderFromChan(out chan<- io.ReaderFrom, inp <-chan io.ReaderFrom) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinReaderFromChan(cha, out, inp)

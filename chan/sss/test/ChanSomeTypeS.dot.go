@@ -58,7 +58,7 @@ func ChanSomeTypeSSlice(inp ...[][]SomeType) (out <-chan []SomeType) {
 	return cha
 }
 
-// JoinSomeTypeS
+// JoinSomeTypeS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSomeTypeS(out chan<- []SomeType, inp ...[]SomeType) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- []SomeType, inp ...[]SomeType) {
@@ -71,7 +71,7 @@ func JoinSomeTypeS(out chan<- []SomeType, inp ...[]SomeType) (done <-chan struct
 	return cha
 }
 
-// JoinSomeTypeSSlice
+// JoinSomeTypeSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSomeTypeSSlice(out chan<- []SomeType, inp ...[][]SomeType) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- []SomeType, inp ...[][]SomeType) {
@@ -86,7 +86,7 @@ func JoinSomeTypeSSlice(out chan<- []SomeType, inp ...[][]SomeType) (done <-chan
 	return cha
 }
 
-// JoinSomeTypeSChan
+// JoinSomeTypeSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSomeTypeSChan(out chan<- []SomeType, inp <-chan []SomeType) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- []SomeType, inp <-chan []SomeType) {

@@ -61,6 +61,7 @@ func (c *SChUInt32) TryUInt32() (dat uint32, open bool) {
 }
 
 // TODO(apa): close, cap & len
+
 // MergeUInt32 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed UInt32channel is returned.

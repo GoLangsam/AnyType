@@ -58,7 +58,7 @@ func ChanComplex128Slice(inp ...[]complex128) chan complex128 {
 	return out
 }
 
-// JoinComplex128
+// JoinComplex128 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinComplex128(out chan<- complex128, inp ...complex128) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -71,7 +71,7 @@ func JoinComplex128(out chan<- complex128, inp ...complex128) chan struct{} {
 	return done
 }
 
-// JoinComplex128Slice
+// JoinComplex128Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinComplex128Slice(out chan<- complex128, inp ...[]complex128) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -86,7 +86,7 @@ func JoinComplex128Slice(out chan<- complex128, inp ...[]complex128) chan struct
 	return done
 }
 
-// JoinComplex128Chan
+// JoinComplex128Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinComplex128Chan(out chan<- complex128, inp <-chan complex128) chan struct{} {
 	done := make(chan struct{})
 	go func() {

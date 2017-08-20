@@ -74,7 +74,7 @@ func joinWriterAt(done chan<- struct{}, out chan<- io.WriterAt, inp ...io.Writer
 	done <- struct{}{}
 }
 
-// JoinWriterAt
+// JoinWriterAt sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterAt(out chan<- io.WriterAt, inp ...io.WriterAt) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinWriterAt(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinWriterAtSlice(done chan<- struct{}, out chan<- io.WriterAt, inp ...[]io
 	done <- struct{}{}
 }
 
-// JoinWriterAtSlice
+// JoinWriterAtSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterAtSlice(out chan<- io.WriterAt, inp ...[]io.WriterAt) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinWriterAtSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinWriterAtChan(done chan<- struct{}, out chan<- io.WriterAt, inp <-chan i
 	done <- struct{}{}
 }
 
-// JoinWriterAtChan
+// JoinWriterAtChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterAtChan(out chan<- io.WriterAt, inp <-chan io.WriterAt) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinWriterAtChan(cha, out, inp)

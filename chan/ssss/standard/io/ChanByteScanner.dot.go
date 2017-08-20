@@ -62,7 +62,7 @@ func ChanByteScannerSlice(inp ...[]io.ByteScanner) chan io.ByteScanner {
 	return out
 }
 
-// JoinByteScanner
+// JoinByteScanner sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteScanner(out chan<- io.ByteScanner, inp ...io.ByteScanner) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinByteScanner(out chan<- io.ByteScanner, inp ...io.ByteScanner) chan stru
 	return done
 }
 
-// JoinByteScannerSlice
+// JoinByteScannerSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteScannerSlice(out chan<- io.ByteScanner, inp ...[]io.ByteScanner) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinByteScannerSlice(out chan<- io.ByteScanner, inp ...[]io.ByteScanner) ch
 	return done
 }
 
-// JoinByteScannerChan
+// JoinByteScannerChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteScannerChan(out chan<- io.ByteScanner, inp <-chan io.ByteScanner) chan struct{} {
 	done := make(chan struct{})
 	go func() {

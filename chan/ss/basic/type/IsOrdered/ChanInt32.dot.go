@@ -70,7 +70,7 @@ func joinInt32(done chan<- struct{}, out chan<- int32, inp ...int32) {
 	done <- struct{}{}
 }
 
-// JoinInt32
+// JoinInt32 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinInt32(out chan<- int32, inp ...int32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinInt32(cha, out, inp...)
@@ -87,7 +87,7 @@ func joinInt32Slice(done chan<- struct{}, out chan<- int32, inp ...[]int32) {
 	done <- struct{}{}
 }
 
-// JoinInt32Slice
+// JoinInt32Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinInt32Slice(out chan<- int32, inp ...[]int32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinInt32Slice(cha, out, inp...)
@@ -102,7 +102,7 @@ func joinInt32Chan(done chan<- struct{}, out chan<- int32, inp <-chan int32) {
 	done <- struct{}{}
 }
 
-// JoinInt32Chan
+// JoinInt32Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinInt32Chan(out chan<- int32, inp <-chan int32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinInt32Chan(cha, out, inp)

@@ -58,7 +58,7 @@ func ChanByteSlice(inp ...[]byte) chan byte {
 	return out
 }
 
-// JoinByte
+// JoinByte sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByte(out chan<- byte, inp ...byte) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -71,7 +71,7 @@ func JoinByte(out chan<- byte, inp ...byte) chan struct{} {
 	return done
 }
 
-// JoinByteSlice
+// JoinByteSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteSlice(out chan<- byte, inp ...[]byte) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -86,7 +86,7 @@ func JoinByteSlice(out chan<- byte, inp ...[]byte) chan struct{} {
 	return done
 }
 
-// JoinByteChan
+// JoinByteChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteChan(out chan<- byte, inp <-chan byte) chan struct{} {
 	done := make(chan struct{})
 	go func() {

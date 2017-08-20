@@ -74,7 +74,7 @@ func joinPipeReader(done chan<- struct{}, out chan<- *io.PipeReader, inp ...*io.
 	done <- struct{}{}
 }
 
-// JoinPipeReader
+// JoinPipeReader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPipeReader(out chan<- *io.PipeReader, inp ...*io.PipeReader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinPipeReader(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinPipeReaderSlice(done chan<- struct{}, out chan<- *io.PipeReader, inp ..
 	done <- struct{}{}
 }
 
-// JoinPipeReaderSlice
+// JoinPipeReaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPipeReaderSlice(out chan<- *io.PipeReader, inp ...[]*io.PipeReader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinPipeReaderSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinPipeReaderChan(done chan<- struct{}, out chan<- *io.PipeReader, inp <-c
 	done <- struct{}{}
 }
 
-// JoinPipeReaderChan
+// JoinPipeReaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPipeReaderChan(out chan<- *io.PipeReader, inp <-chan *io.PipeReader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinPipeReaderChan(cha, out, inp)

@@ -62,7 +62,7 @@ func ChanSignalSlice(inp ...[]os.Signal) (out <-chan os.Signal) {
 	return cha
 }
 
-// JoinSignal
+// JoinSignal sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSignal(out chan<- os.Signal, inp ...os.Signal) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.Signal, inp ...os.Signal) {
@@ -75,7 +75,7 @@ func JoinSignal(out chan<- os.Signal, inp ...os.Signal) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinSignalSlice
+// JoinSignalSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSignalSlice(out chan<- os.Signal, inp ...[]os.Signal) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.Signal, inp ...[]os.Signal) {
@@ -90,7 +90,7 @@ func JoinSignalSlice(out chan<- os.Signal, inp ...[]os.Signal) (done <-chan stru
 	return cha
 }
 
-// JoinSignalChan
+// JoinSignalChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSignalChan(out chan<- os.Signal, inp <-chan os.Signal) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.Signal, inp <-chan os.Signal) {

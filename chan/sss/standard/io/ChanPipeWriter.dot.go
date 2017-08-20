@@ -62,7 +62,7 @@ func ChanPipeWriterSlice(inp ...[]*io.PipeWriter) (out <-chan *io.PipeWriter) {
 	return cha
 }
 
-// JoinPipeWriter
+// JoinPipeWriter sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPipeWriter(out chan<- *io.PipeWriter, inp ...*io.PipeWriter) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *io.PipeWriter, inp ...*io.PipeWriter) {
@@ -75,7 +75,7 @@ func JoinPipeWriter(out chan<- *io.PipeWriter, inp ...*io.PipeWriter) (done <-ch
 	return cha
 }
 
-// JoinPipeWriterSlice
+// JoinPipeWriterSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPipeWriterSlice(out chan<- *io.PipeWriter, inp ...[]*io.PipeWriter) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *io.PipeWriter, inp ...[]*io.PipeWriter) {
@@ -90,7 +90,7 @@ func JoinPipeWriterSlice(out chan<- *io.PipeWriter, inp ...[]*io.PipeWriter) (do
 	return cha
 }
 
-// JoinPipeWriterChan
+// JoinPipeWriterChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPipeWriterChan(out chan<- *io.PipeWriter, inp <-chan *io.PipeWriter) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *io.PipeWriter, inp <-chan *io.PipeWriter) {

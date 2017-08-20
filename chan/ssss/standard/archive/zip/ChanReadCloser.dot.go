@@ -62,7 +62,7 @@ func ChanReadCloserSlice(inp ...[]zip.ReadCloser) chan zip.ReadCloser {
 	return out
 }
 
-// JoinReadCloser
+// JoinReadCloser sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReadCloser(out chan<- zip.ReadCloser, inp ...zip.ReadCloser) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinReadCloser(out chan<- zip.ReadCloser, inp ...zip.ReadCloser) chan struc
 	return done
 }
 
-// JoinReadCloserSlice
+// JoinReadCloserSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReadCloserSlice(out chan<- zip.ReadCloser, inp ...[]zip.ReadCloser) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinReadCloserSlice(out chan<- zip.ReadCloser, inp ...[]zip.ReadCloser) cha
 	return done
 }
 
-// JoinReadCloserChan
+// JoinReadCloserChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReadCloserChan(out chan<- zip.ReadCloser, inp <-chan zip.ReadCloser) chan struct{} {
 	done := make(chan struct{})
 	go func() {

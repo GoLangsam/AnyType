@@ -62,7 +62,7 @@ func ChanSplitFuncSlice(inp ...[]bufio.SplitFunc) (out <-chan bufio.SplitFunc) {
 	return cha
 }
 
-// JoinSplitFunc
+// JoinSplitFunc sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSplitFunc(out chan<- bufio.SplitFunc, inp ...bufio.SplitFunc) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- bufio.SplitFunc, inp ...bufio.SplitFunc) {
@@ -75,7 +75,7 @@ func JoinSplitFunc(out chan<- bufio.SplitFunc, inp ...bufio.SplitFunc) (done <-c
 	return cha
 }
 
-// JoinSplitFuncSlice
+// JoinSplitFuncSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSplitFuncSlice(out chan<- bufio.SplitFunc, inp ...[]bufio.SplitFunc) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- bufio.SplitFunc, inp ...[]bufio.SplitFunc) {
@@ -90,7 +90,7 @@ func JoinSplitFuncSlice(out chan<- bufio.SplitFunc, inp ...[]bufio.SplitFunc) (d
 	return cha
 }
 
-// JoinSplitFuncChan
+// JoinSplitFuncChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSplitFuncChan(out chan<- bufio.SplitFunc, inp <-chan bufio.SplitFunc) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- bufio.SplitFunc, inp <-chan bufio.SplitFunc) {

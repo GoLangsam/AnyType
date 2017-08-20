@@ -62,7 +62,7 @@ func ChanFsFileSSlice(inp ...[]fs.FsFileS) chan fs.FsFileS {
 	return out
 }
 
-// JoinFsFileS
+// JoinFsFileS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsFileS(out chan<- fs.FsFileS, inp ...fs.FsFileS) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinFsFileS(out chan<- fs.FsFileS, inp ...fs.FsFileS) chan struct{} {
 	return done
 }
 
-// JoinFsFileSSlice
+// JoinFsFileSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsFileSSlice(out chan<- fs.FsFileS, inp ...[]fs.FsFileS) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinFsFileSSlice(out chan<- fs.FsFileS, inp ...[]fs.FsFileS) chan struct{} 
 	return done
 }
 
-// JoinFsFileSChan
+// JoinFsFileSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsFileSChan(out chan<- fs.FsFileS, inp <-chan fs.FsFileS) chan struct{} {
 	done := make(chan struct{})
 	go func() {

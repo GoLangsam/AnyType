@@ -62,7 +62,7 @@ func ChanReaderSlice(inp ...[]zip.Reader) (out <-chan zip.Reader) {
 	return cha
 }
 
-// JoinReader
+// JoinReader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReader(out chan<- zip.Reader, inp ...zip.Reader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- zip.Reader, inp ...zip.Reader) {
@@ -75,7 +75,7 @@ func JoinReader(out chan<- zip.Reader, inp ...zip.Reader) (done <-chan struct{})
 	return cha
 }
 
-// JoinReaderSlice
+// JoinReaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReaderSlice(out chan<- zip.Reader, inp ...[]zip.Reader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- zip.Reader, inp ...[]zip.Reader) {
@@ -90,7 +90,7 @@ func JoinReaderSlice(out chan<- zip.Reader, inp ...[]zip.Reader) (done <-chan st
 	return cha
 }
 
-// JoinReaderChan
+// JoinReaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReaderChan(out chan<- zip.Reader, inp <-chan zip.Reader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- zip.Reader, inp <-chan zip.Reader) {

@@ -58,7 +58,7 @@ func ChanUIntSlice(inp ...[]uint) (out <-chan uint) {
 	return cha
 }
 
-// JoinUInt
+// JoinUInt sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt(out chan<- uint, inp ...uint) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint, inp ...uint) {
@@ -71,7 +71,7 @@ func JoinUInt(out chan<- uint, inp ...uint) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinUIntSlice
+// JoinUIntSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUIntSlice(out chan<- uint, inp ...[]uint) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint, inp ...[]uint) {
@@ -86,7 +86,7 @@ func JoinUIntSlice(out chan<- uint, inp ...[]uint) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinUIntChan
+// JoinUIntChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUIntChan(out chan<- uint, inp <-chan uint) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint, inp <-chan uint) {

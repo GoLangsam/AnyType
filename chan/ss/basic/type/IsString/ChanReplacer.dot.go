@@ -74,7 +74,7 @@ func joinReplacer(done chan<- struct{}, out chan<- *strings.Replacer, inp ...*st
 	done <- struct{}{}
 }
 
-// JoinReplacer
+// JoinReplacer sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReplacer(out chan<- *strings.Replacer, inp ...*strings.Replacer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinReplacer(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinReplacerSlice(done chan<- struct{}, out chan<- *strings.Replacer, inp .
 	done <- struct{}{}
 }
 
-// JoinReplacerSlice
+// JoinReplacerSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReplacerSlice(out chan<- *strings.Replacer, inp ...[]*strings.Replacer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinReplacerSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinReplacerChan(done chan<- struct{}, out chan<- *strings.Replacer, inp <-
 	done <- struct{}{}
 }
 
-// JoinReplacerChan
+// JoinReplacerChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReplacerChan(out chan<- *strings.Replacer, inp <-chan *strings.Replacer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinReplacerChan(cha, out, inp)

@@ -70,7 +70,7 @@ func joinRuneS(done chan<- struct{}, out chan<- []rune, inp ...[]rune) {
 	done <- struct{}{}
 }
 
-// JoinRuneS
+// JoinRuneS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneS(out chan<- []rune, inp ...[]rune) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneS(cha, out, inp...)
@@ -87,7 +87,7 @@ func joinRuneSSlice(done chan<- struct{}, out chan<- []rune, inp ...[][]rune) {
 	done <- struct{}{}
 }
 
-// JoinRuneSSlice
+// JoinRuneSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneSSlice(out chan<- []rune, inp ...[][]rune) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneSSlice(cha, out, inp...)
@@ -102,7 +102,7 @@ func joinRuneSChan(done chan<- struct{}, out chan<- []rune, inp <-chan []rune) {
 	done <- struct{}{}
 }
 
-// JoinRuneSChan
+// JoinRuneSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneSChan(out chan<- []rune, inp <-chan []rune) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneSChan(cha, out, inp)

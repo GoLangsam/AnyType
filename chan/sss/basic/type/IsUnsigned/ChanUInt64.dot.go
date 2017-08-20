@@ -58,7 +58,7 @@ func ChanUInt64Slice(inp ...[]uint64) (out <-chan uint64) {
 	return cha
 }
 
-// JoinUInt64
+// JoinUInt64 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt64(out chan<- uint64, inp ...uint64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint64, inp ...uint64) {
@@ -71,7 +71,7 @@ func JoinUInt64(out chan<- uint64, inp ...uint64) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinUInt64Slice
+// JoinUInt64Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt64Slice(out chan<- uint64, inp ...[]uint64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint64, inp ...[]uint64) {
@@ -86,7 +86,7 @@ func JoinUInt64Slice(out chan<- uint64, inp ...[]uint64) (done <-chan struct{}) 
 	return cha
 }
 
-// JoinUInt64Chan
+// JoinUInt64Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt64Chan(out chan<- uint64, inp <-chan uint64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- uint64, inp <-chan uint64) {
@@ -229,6 +229,7 @@ func main() {
 	fmt.Println(<-leftmost)
 }
 */
+
 // MergeUInt64 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed UInt64channel is returned.

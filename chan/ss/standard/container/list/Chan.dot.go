@@ -74,7 +74,7 @@ func join(done chan<- struct{}, out chan<- list.List, inp ...list.List) {
 	done <- struct{}{}
 }
 
-// Join
+// Join sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func Join(out chan<- list.List, inp ...list.List) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go join(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinSlice(done chan<- struct{}, out chan<- list.List, inp ...[]list.List) {
 	done <- struct{}{}
 }
 
-// JoinSlice
+// JoinSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinSlice(out chan<- list.List, inp ...[]list.List) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinChan(done chan<- struct{}, out chan<- list.List, inp <-chan list.List) 
 	done <- struct{}{}
 }
 
-// JoinChan
+// JoinChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinChan(out chan<- list.List, inp <-chan list.List) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinChan(cha, out, inp)

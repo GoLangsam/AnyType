@@ -62,7 +62,7 @@ func ChanWriterSlice(inp ...[]*bufio.Writer) (out <-chan *bufio.Writer) {
 	return cha
 }
 
-// JoinWriter
+// JoinWriter sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriter(out chan<- *bufio.Writer, inp ...*bufio.Writer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Writer, inp ...*bufio.Writer) {
@@ -75,7 +75,7 @@ func JoinWriter(out chan<- *bufio.Writer, inp ...*bufio.Writer) (done <-chan str
 	return cha
 }
 
-// JoinWriterSlice
+// JoinWriterSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterSlice(out chan<- *bufio.Writer, inp ...[]*bufio.Writer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Writer, inp ...[]*bufio.Writer) {
@@ -90,7 +90,7 @@ func JoinWriterSlice(out chan<- *bufio.Writer, inp ...[]*bufio.Writer) (done <-c
 	return cha
 }
 
-// JoinWriterChan
+// JoinWriterChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterChan(out chan<- *bufio.Writer, inp <-chan *bufio.Writer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Writer, inp <-chan *bufio.Writer) {

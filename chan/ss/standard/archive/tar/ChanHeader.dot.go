@@ -74,7 +74,7 @@ func joinHeader(done chan<- struct{}, out chan<- *tar.Header, inp ...*tar.Header
 	done <- struct{}{}
 }
 
-// JoinHeader
+// JoinHeader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinHeader(out chan<- *tar.Header, inp ...*tar.Header) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinHeader(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinHeaderSlice(done chan<- struct{}, out chan<- *tar.Header, inp ...[]*tar
 	done <- struct{}{}
 }
 
-// JoinHeaderSlice
+// JoinHeaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinHeaderSlice(out chan<- *tar.Header, inp ...[]*tar.Header) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinHeaderSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinHeaderChan(done chan<- struct{}, out chan<- *tar.Header, inp <-chan *ta
 	done <- struct{}{}
 }
 
-// JoinHeaderChan
+// JoinHeaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinHeaderChan(out chan<- *tar.Header, inp <-chan *tar.Header) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinHeaderChan(cha, out, inp)

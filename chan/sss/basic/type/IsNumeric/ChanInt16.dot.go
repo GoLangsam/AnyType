@@ -58,7 +58,7 @@ func ChanInt16Slice(inp ...[]int16) (out <-chan int16) {
 	return cha
 }
 
-// JoinInt16
+// JoinInt16 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinInt16(out chan<- int16, inp ...int16) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- int16, inp ...int16) {
@@ -71,7 +71,7 @@ func JoinInt16(out chan<- int16, inp ...int16) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinInt16Slice
+// JoinInt16Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinInt16Slice(out chan<- int16, inp ...[]int16) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- int16, inp ...[]int16) {
@@ -86,7 +86,7 @@ func JoinInt16Slice(out chan<- int16, inp ...[]int16) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinInt16Chan
+// JoinInt16Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinInt16Chan(out chan<- int16, inp <-chan int16) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- int16, inp <-chan int16) {

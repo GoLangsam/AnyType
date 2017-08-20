@@ -62,7 +62,7 @@ func ChanScannerSlice(inp ...[]*bufio.Scanner) chan *bufio.Scanner {
 	return out
 }
 
-// JoinScanner
+// JoinScanner sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinScanner(out chan<- *bufio.Scanner, inp ...*bufio.Scanner) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinScanner(out chan<- *bufio.Scanner, inp ...*bufio.Scanner) chan struct{}
 	return done
 }
 
-// JoinScannerSlice
+// JoinScannerSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinScannerSlice(out chan<- *bufio.Scanner, inp ...[]*bufio.Scanner) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinScannerSlice(out chan<- *bufio.Scanner, inp ...[]*bufio.Scanner) chan s
 	return done
 }
 
-// JoinScannerChan
+// JoinScannerChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinScannerChan(out chan<- *bufio.Scanner, inp <-chan *bufio.Scanner) chan struct{} {
 	done := make(chan struct{})
 	go func() {

@@ -10,6 +10,7 @@ package IsOrdered
 var _ int // silence import
 
 // No functionality yet associated with this source file.
+
 // MergeInt returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed Intchannel is returned.

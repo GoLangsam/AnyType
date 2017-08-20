@@ -58,7 +58,7 @@ func ChanFloat32Slice(inp ...[]float32) chan float32 {
 	return out
 }
 
-// JoinFloat32
+// JoinFloat32 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat32(out chan<- float32, inp ...float32) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -71,7 +71,7 @@ func JoinFloat32(out chan<- float32, inp ...float32) chan struct{} {
 	return done
 }
 
-// JoinFloat32Slice
+// JoinFloat32Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat32Slice(out chan<- float32, inp ...[]float32) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -86,7 +86,7 @@ func JoinFloat32Slice(out chan<- float32, inp ...[]float32) chan struct{} {
 	return done
 }
 
-// JoinFloat32Chan
+// JoinFloat32Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat32Chan(out chan<- float32, inp <-chan float32) chan struct{} {
 	done := make(chan struct{})
 	go func() {

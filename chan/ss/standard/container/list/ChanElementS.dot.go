@@ -74,7 +74,7 @@ func joinElementS(done chan<- struct{}, out chan<- []list.Element, inp ...[]list
 	done <- struct{}{}
 }
 
-// JoinElementS
+// JoinElementS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinElementS(out chan<- []list.Element, inp ...[]list.Element) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinElementS(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinElementSSlice(done chan<- struct{}, out chan<- []list.Element, inp ...[
 	done <- struct{}{}
 }
 
-// JoinElementSSlice
+// JoinElementSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinElementSSlice(out chan<- []list.Element, inp ...[][]list.Element) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinElementSSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinElementSChan(done chan<- struct{}, out chan<- []list.Element, inp <-cha
 	done <- struct{}{}
 }
 
-// JoinElementSChan
+// JoinElementSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinElementSChan(out chan<- []list.Element, inp <-chan []list.Element) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinElementSChan(cha, out, inp)

@@ -74,7 +74,7 @@ func joinWriteSeeker(done chan<- struct{}, out chan<- io.WriteSeeker, inp ...io.
 	done <- struct{}{}
 }
 
-// JoinWriteSeeker
+// JoinWriteSeeker sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriteSeeker(out chan<- io.WriteSeeker, inp ...io.WriteSeeker) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinWriteSeeker(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinWriteSeekerSlice(done chan<- struct{}, out chan<- io.WriteSeeker, inp .
 	done <- struct{}{}
 }
 
-// JoinWriteSeekerSlice
+// JoinWriteSeekerSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriteSeekerSlice(out chan<- io.WriteSeeker, inp ...[]io.WriteSeeker) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinWriteSeekerSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinWriteSeekerChan(done chan<- struct{}, out chan<- io.WriteSeeker, inp <-
 	done <- struct{}{}
 }
 
-// JoinWriteSeekerChan
+// JoinWriteSeekerChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriteSeekerChan(out chan<- io.WriteSeeker, inp <-chan io.WriteSeeker) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinWriteSeekerChan(cha, out, inp)

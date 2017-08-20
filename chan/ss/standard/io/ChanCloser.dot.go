@@ -74,7 +74,7 @@ func joinCloser(done chan<- struct{}, out chan<- io.Closer, inp ...io.Closer) {
 	done <- struct{}{}
 }
 
-// JoinCloser
+// JoinCloser sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinCloser(out chan<- io.Closer, inp ...io.Closer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinCloser(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinCloserSlice(done chan<- struct{}, out chan<- io.Closer, inp ...[]io.Clo
 	done <- struct{}{}
 }
 
-// JoinCloserSlice
+// JoinCloserSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinCloserSlice(out chan<- io.Closer, inp ...[]io.Closer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinCloserSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinCloserChan(done chan<- struct{}, out chan<- io.Closer, inp <-chan io.Cl
 	done <- struct{}{}
 }
 
-// JoinCloserChan
+// JoinCloserChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinCloserChan(out chan<- io.Closer, inp <-chan io.Closer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinCloserChan(cha, out, inp)

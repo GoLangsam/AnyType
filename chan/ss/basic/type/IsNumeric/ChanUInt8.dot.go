@@ -70,7 +70,7 @@ func joinUInt8(done chan<- struct{}, out chan<- uint8, inp ...uint8) {
 	done <- struct{}{}
 }
 
-// JoinUInt8
+// JoinUInt8 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt8(out chan<- uint8, inp ...uint8) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinUInt8(cha, out, inp...)
@@ -87,7 +87,7 @@ func joinUInt8Slice(done chan<- struct{}, out chan<- uint8, inp ...[]uint8) {
 	done <- struct{}{}
 }
 
-// JoinUInt8Slice
+// JoinUInt8Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt8Slice(out chan<- uint8, inp ...[]uint8) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinUInt8Slice(cha, out, inp...)
@@ -102,7 +102,7 @@ func joinUInt8Chan(done chan<- struct{}, out chan<- uint8, inp <-chan uint8) {
 	done <- struct{}{}
 }
 
-// JoinUInt8Chan
+// JoinUInt8Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt8Chan(out chan<- uint8, inp <-chan uint8) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinUInt8Chan(cha, out, inp)

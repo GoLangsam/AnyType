@@ -58,7 +58,7 @@ func ChanFloat64Slice(inp ...[]float64) chan float64 {
 	return out
 }
 
-// JoinFloat64
+// JoinFloat64 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat64(out chan<- float64, inp ...float64) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -71,7 +71,7 @@ func JoinFloat64(out chan<- float64, inp ...float64) chan struct{} {
 	return done
 }
 
-// JoinFloat64Slice
+// JoinFloat64Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat64Slice(out chan<- float64, inp ...[]float64) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -86,7 +86,7 @@ func JoinFloat64Slice(out chan<- float64, inp ...[]float64) chan struct{} {
 	return done
 }
 
-// JoinFloat64Chan
+// JoinFloat64Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat64Chan(out chan<- float64, inp <-chan float64) chan struct{} {
 	done := make(chan struct{})
 	go func() {

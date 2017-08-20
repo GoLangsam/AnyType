@@ -58,7 +58,7 @@ func ChanFloat32Slice(inp ...[]float32) (out <-chan float32) {
 	return cha
 }
 
-// JoinFloat32
+// JoinFloat32 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat32(out chan<- float32, inp ...float32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float32, inp ...float32) {
@@ -71,7 +71,7 @@ func JoinFloat32(out chan<- float32, inp ...float32) (done <-chan struct{}) {
 	return cha
 }
 
-// JoinFloat32Slice
+// JoinFloat32Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat32Slice(out chan<- float32, inp ...[]float32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float32, inp ...[]float32) {
@@ -86,7 +86,7 @@ func JoinFloat32Slice(out chan<- float32, inp ...[]float32) (done <-chan struct{
 	return cha
 }
 
-// JoinFloat32Chan
+// JoinFloat32Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFloat32Chan(out chan<- float32, inp <-chan float32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float32, inp <-chan float32) {
@@ -229,6 +229,7 @@ func main() {
 	fmt.Println(<-leftmost)
 }
 */
+
 // MergeFloat32 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed Float32channel is returned.

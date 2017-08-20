@@ -74,7 +74,7 @@ func joinRuneScanner(done chan<- struct{}, out chan<- io.RuneScanner, inp ...io.
 	done <- struct{}{}
 }
 
-// JoinRuneScanner
+// JoinRuneScanner sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneScanner(out chan<- io.RuneScanner, inp ...io.RuneScanner) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneScanner(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinRuneScannerSlice(done chan<- struct{}, out chan<- io.RuneScanner, inp .
 	done <- struct{}{}
 }
 
-// JoinRuneScannerSlice
+// JoinRuneScannerSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneScannerSlice(out chan<- io.RuneScanner, inp ...[]io.RuneScanner) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneScannerSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinRuneScannerChan(done chan<- struct{}, out chan<- io.RuneScanner, inp <-
 	done <- struct{}{}
 }
 
-// JoinRuneScannerChan
+// JoinRuneScannerChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinRuneScannerChan(out chan<- io.RuneScanner, inp <-chan io.RuneScanner) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinRuneScannerChan(cha, out, inp)

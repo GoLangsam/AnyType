@@ -62,7 +62,7 @@ func ChanReadSeekerSlice(inp ...[]io.ReadSeeker) (out <-chan io.ReadSeeker) {
 	return cha
 }
 
-// JoinReadSeeker
+// JoinReadSeeker sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReadSeeker(out chan<- io.ReadSeeker, inp ...io.ReadSeeker) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.ReadSeeker, inp ...io.ReadSeeker) {
@@ -75,7 +75,7 @@ func JoinReadSeeker(out chan<- io.ReadSeeker, inp ...io.ReadSeeker) (done <-chan
 	return cha
 }
 
-// JoinReadSeekerSlice
+// JoinReadSeekerSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReadSeekerSlice(out chan<- io.ReadSeeker, inp ...[]io.ReadSeeker) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.ReadSeeker, inp ...[]io.ReadSeeker) {
@@ -90,7 +90,7 @@ func JoinReadSeekerSlice(out chan<- io.ReadSeeker, inp ...[]io.ReadSeeker) (done
 	return cha
 }
 
-// JoinReadSeekerChan
+// JoinReadSeekerChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinReadSeekerChan(out chan<- io.ReadSeeker, inp <-chan io.ReadSeeker) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.ReadSeeker, inp <-chan io.ReadSeeker) {

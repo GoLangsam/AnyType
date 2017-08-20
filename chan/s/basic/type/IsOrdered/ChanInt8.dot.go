@@ -61,6 +61,7 @@ func (c *SChInt8) TryInt8() (dat int8, open bool) {
 }
 
 // TODO(apa): close, cap & len
+
 // MergeInt8 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed Int8channel is returned.

@@ -62,7 +62,7 @@ func ChanPatternSlice(inp ...[]*fs.Pattern) chan *fs.Pattern {
 	return out
 }
 
-// JoinPattern
+// JoinPattern sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPattern(out chan<- *fs.Pattern, inp ...*fs.Pattern) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinPattern(out chan<- *fs.Pattern, inp ...*fs.Pattern) chan struct{} {
 	return done
 }
 
-// JoinPatternSlice
+// JoinPatternSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPatternSlice(out chan<- *fs.Pattern, inp ...[]*fs.Pattern) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinPatternSlice(out chan<- *fs.Pattern, inp ...[]*fs.Pattern) chan struct{
 	return done
 }
 
-// JoinPatternChan
+// JoinPatternChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPatternChan(out chan<- *fs.Pattern, inp <-chan *fs.Pattern) chan struct{} {
 	done := make(chan struct{})
 	go func() {

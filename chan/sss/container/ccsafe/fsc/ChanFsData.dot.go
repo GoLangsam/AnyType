@@ -62,7 +62,7 @@ func ChanFsDataSlice(inp ...[]*fs.FsData) (out <-chan *fs.FsData) {
 	return cha
 }
 
-// JoinFsData
+// JoinFsData sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsData(out chan<- *fs.FsData, inp ...*fs.FsData) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.FsData, inp ...*fs.FsData) {
@@ -75,7 +75,7 @@ func JoinFsData(out chan<- *fs.FsData, inp ...*fs.FsData) (done <-chan struct{})
 	return cha
 }
 
-// JoinFsDataSlice
+// JoinFsDataSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsDataSlice(out chan<- *fs.FsData, inp ...[]*fs.FsData) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.FsData, inp ...[]*fs.FsData) {
@@ -90,7 +90,7 @@ func JoinFsDataSlice(out chan<- *fs.FsData, inp ...[]*fs.FsData) (done <-chan st
 	return cha
 }
 
-// JoinFsDataChan
+// JoinFsDataChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFsDataChan(out chan<- *fs.FsData, inp <-chan *fs.FsData) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.FsData, inp <-chan *fs.FsData) {

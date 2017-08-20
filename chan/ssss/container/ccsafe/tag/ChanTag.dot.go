@@ -62,7 +62,7 @@ func ChanTagSlice(inp ...[]tag.TagAny) chan tag.TagAny {
 	return out
 }
 
-// JoinTag
+// JoinTag sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinTag(out chan<- tag.TagAny, inp ...tag.TagAny) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinTag(out chan<- tag.TagAny, inp ...tag.TagAny) chan struct{} {
 	return done
 }
 
-// JoinTagSlice
+// JoinTagSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinTagSlice(out chan<- tag.TagAny, inp ...[]tag.TagAny) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinTagSlice(out chan<- tag.TagAny, inp ...[]tag.TagAny) chan struct{} {
 	return done
 }
 
-// JoinTagChan
+// JoinTagChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinTagChan(out chan<- tag.TagAny, inp <-chan tag.TagAny) chan struct{} {
 	done := make(chan struct{})
 	go func() {

@@ -62,7 +62,7 @@ func ChanLSMSlice(inp ...[]lsm.LazyStringerMap) (out <-chan lsm.LazyStringerMap)
 	return cha
 }
 
-// JoinLSM
+// JoinLSM sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinLSM(out chan<- lsm.LazyStringerMap, inp ...lsm.LazyStringerMap) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- lsm.LazyStringerMap, inp ...lsm.LazyStringerMap) {
@@ -75,7 +75,7 @@ func JoinLSM(out chan<- lsm.LazyStringerMap, inp ...lsm.LazyStringerMap) (done <
 	return cha
 }
 
-// JoinLSMSlice
+// JoinLSMSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinLSMSlice(out chan<- lsm.LazyStringerMap, inp ...[]lsm.LazyStringerMap) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- lsm.LazyStringerMap, inp ...[]lsm.LazyStringerMap) {
@@ -90,7 +90,7 @@ func JoinLSMSlice(out chan<- lsm.LazyStringerMap, inp ...[]lsm.LazyStringerMap) 
 	return cha
 }
 
-// JoinLSMChan
+// JoinLSMChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinLSMChan(out chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap) {

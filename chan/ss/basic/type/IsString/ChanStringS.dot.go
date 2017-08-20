@@ -70,7 +70,7 @@ func joinStringS(done chan<- struct{}, out chan<- []string, inp ...[]string) {
 	done <- struct{}{}
 }
 
-// JoinStringS
+// JoinStringS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinStringS(out chan<- []string, inp ...[]string) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinStringS(cha, out, inp...)
@@ -87,7 +87,7 @@ func joinStringSSlice(done chan<- struct{}, out chan<- []string, inp ...[][]stri
 	done <- struct{}{}
 }
 
-// JoinStringSSlice
+// JoinStringSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinStringSSlice(out chan<- []string, inp ...[][]string) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinStringSSlice(cha, out, inp...)
@@ -102,7 +102,7 @@ func joinStringSChan(done chan<- struct{}, out chan<- []string, inp <-chan []str
 	done <- struct{}{}
 }
 
-// JoinStringSChan
+// JoinStringSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinStringSChan(out chan<- []string, inp <-chan []string) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinStringSChan(cha, out, inp)

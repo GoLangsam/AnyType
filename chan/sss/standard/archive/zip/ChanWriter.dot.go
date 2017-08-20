@@ -62,7 +62,7 @@ func ChanWriterSlice(inp ...[]zip.Writer) (out <-chan zip.Writer) {
 	return cha
 }
 
-// JoinWriter
+// JoinWriter sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriter(out chan<- zip.Writer, inp ...zip.Writer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- zip.Writer, inp ...zip.Writer) {
@@ -75,7 +75,7 @@ func JoinWriter(out chan<- zip.Writer, inp ...zip.Writer) (done <-chan struct{})
 	return cha
 }
 
-// JoinWriterSlice
+// JoinWriterSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterSlice(out chan<- zip.Writer, inp ...[]zip.Writer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- zip.Writer, inp ...[]zip.Writer) {
@@ -90,7 +90,7 @@ func JoinWriterSlice(out chan<- zip.Writer, inp ...[]zip.Writer) (done <-chan st
 	return cha
 }
 
-// JoinWriterChan
+// JoinWriterChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterChan(out chan<- zip.Writer, inp <-chan zip.Writer) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- zip.Writer, inp <-chan zip.Writer) {

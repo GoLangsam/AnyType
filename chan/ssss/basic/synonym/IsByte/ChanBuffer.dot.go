@@ -62,7 +62,7 @@ func ChanBufferSlice(inp ...[]bytes.Buffer) chan bytes.Buffer {
 	return out
 }
 
-// JoinBuffer
+// JoinBuffer sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinBuffer(out chan<- bytes.Buffer, inp ...bytes.Buffer) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinBuffer(out chan<- bytes.Buffer, inp ...bytes.Buffer) chan struct{} {
 	return done
 }
 
-// JoinBufferSlice
+// JoinBufferSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinBufferSlice(out chan<- bytes.Buffer, inp ...[]bytes.Buffer) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinBufferSlice(out chan<- bytes.Buffer, inp ...[]bytes.Buffer) chan struct
 	return done
 }
 
-// JoinBufferChan
+// JoinBufferChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinBufferChan(out chan<- bytes.Buffer, inp <-chan bytes.Buffer) chan struct{} {
 	done := make(chan struct{})
 	go func() {

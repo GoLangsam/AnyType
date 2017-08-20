@@ -62,7 +62,7 @@ func ChanWriterToSlice(inp ...[]io.WriterTo) (out <-chan io.WriterTo) {
 	return cha
 }
 
-// JoinWriterTo
+// JoinWriterTo sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterTo(out chan<- io.WriterTo, inp ...io.WriterTo) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriterTo, inp ...io.WriterTo) {
@@ -75,7 +75,7 @@ func JoinWriterTo(out chan<- io.WriterTo, inp ...io.WriterTo) (done <-chan struc
 	return cha
 }
 
-// JoinWriterToSlice
+// JoinWriterToSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterToSlice(out chan<- io.WriterTo, inp ...[]io.WriterTo) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriterTo, inp ...[]io.WriterTo) {
@@ -90,7 +90,7 @@ func JoinWriterToSlice(out chan<- io.WriterTo, inp ...[]io.WriterTo) (done <-cha
 	return cha
 }
 
-// JoinWriterToChan
+// JoinWriterToChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinWriterToChan(out chan<- io.WriterTo, inp <-chan io.WriterTo) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriterTo, inp <-chan io.WriterTo) {

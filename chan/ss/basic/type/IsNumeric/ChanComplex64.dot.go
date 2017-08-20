@@ -70,7 +70,7 @@ func joinComplex64(done chan<- struct{}, out chan<- complex64, inp ...complex64)
 	done <- struct{}{}
 }
 
-// JoinComplex64
+// JoinComplex64 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinComplex64(out chan<- complex64, inp ...complex64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinComplex64(cha, out, inp...)
@@ -87,7 +87,7 @@ func joinComplex64Slice(done chan<- struct{}, out chan<- complex64, inp ...[]com
 	done <- struct{}{}
 }
 
-// JoinComplex64Slice
+// JoinComplex64Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinComplex64Slice(out chan<- complex64, inp ...[]complex64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinComplex64Slice(cha, out, inp...)
@@ -102,7 +102,7 @@ func joinComplex64Chan(done chan<- struct{}, out chan<- complex64, inp <-chan co
 	done <- struct{}{}
 }
 
-// JoinComplex64Chan
+// JoinComplex64Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinComplex64Chan(out chan<- complex64, inp <-chan complex64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinComplex64Chan(cha, out, inp)

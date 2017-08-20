@@ -70,7 +70,7 @@ func joinUInt64(done chan<- struct{}, out chan<- uint64, inp ...uint64) {
 	done <- struct{}{}
 }
 
-// JoinUInt64
+// JoinUInt64 sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt64(out chan<- uint64, inp ...uint64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinUInt64(cha, out, inp...)
@@ -87,7 +87,7 @@ func joinUInt64Slice(done chan<- struct{}, out chan<- uint64, inp ...[]uint64) {
 	done <- struct{}{}
 }
 
-// JoinUInt64Slice
+// JoinUInt64Slice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt64Slice(out chan<- uint64, inp ...[]uint64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinUInt64Slice(cha, out, inp...)
@@ -102,7 +102,7 @@ func joinUInt64Chan(done chan<- struct{}, out chan<- uint64, inp <-chan uint64) 
 	done <- struct{}{}
 }
 
-// JoinUInt64Chan
+// JoinUInt64Chan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinUInt64Chan(out chan<- uint64, inp <-chan uint64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinUInt64Chan(cha, out, inp)

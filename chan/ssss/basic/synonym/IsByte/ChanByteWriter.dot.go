@@ -62,7 +62,7 @@ func ChanByteWriterSlice(inp ...[]io.ByteWriter) chan io.ByteWriter {
 	return out
 }
 
-// JoinByteWriter
+// JoinByteWriter sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteWriter(out chan<- io.ByteWriter, inp ...io.ByteWriter) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -75,7 +75,7 @@ func JoinByteWriter(out chan<- io.ByteWriter, inp ...io.ByteWriter) chan struct{
 	return done
 }
 
-// JoinByteWriterSlice
+// JoinByteWriterSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteWriterSlice(out chan<- io.ByteWriter, inp ...[]io.ByteWriter) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -90,7 +90,7 @@ func JoinByteWriterSlice(out chan<- io.ByteWriter, inp ...[]io.ByteWriter) chan 
 	return done
 }
 
-// JoinByteWriterChan
+// JoinByteWriterChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinByteWriterChan(out chan<- io.ByteWriter, inp <-chan io.ByteWriter) chan struct{} {
 	done := make(chan struct{})
 	go func() {

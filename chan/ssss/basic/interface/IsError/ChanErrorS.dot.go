@@ -58,7 +58,7 @@ func ChanErrorSSlice(inp ...[][]error) chan []error {
 	return out
 }
 
-// JoinErrorS
+// JoinErrorS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinErrorS(out chan<- []error, inp ...[]error) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -71,7 +71,7 @@ func JoinErrorS(out chan<- []error, inp ...[]error) chan struct{} {
 	return done
 }
 
-// JoinErrorSSlice
+// JoinErrorSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinErrorSSlice(out chan<- []error, inp ...[][]error) chan struct{} {
 	done := make(chan struct{})
 	go func() {
@@ -86,7 +86,7 @@ func JoinErrorSSlice(out chan<- []error, inp ...[][]error) chan struct{} {
 	return done
 }
 
-// JoinErrorSChan
+// JoinErrorSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinErrorSChan(out chan<- []error, inp <-chan []error) chan struct{} {
 	done := make(chan struct{})
 	go func() {

@@ -74,7 +74,7 @@ func joinFileHeader(done chan<- struct{}, out chan<- zip.FileHeader, inp ...zip.
 	done <- struct{}{}
 }
 
-// JoinFileHeader
+// JoinFileHeader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFileHeader(out chan<- zip.FileHeader, inp ...zip.FileHeader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileHeader(cha, out, inp...)
@@ -91,7 +91,7 @@ func joinFileHeaderSlice(done chan<- struct{}, out chan<- zip.FileHeader, inp ..
 	done <- struct{}{}
 }
 
-// JoinFileHeaderSlice
+// JoinFileHeaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFileHeaderSlice(out chan<- zip.FileHeader, inp ...[]zip.FileHeader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileHeaderSlice(cha, out, inp...)
@@ -106,7 +106,7 @@ func joinFileHeaderChan(done chan<- struct{}, out chan<- zip.FileHeader, inp <-c
 	done <- struct{}{}
 }
 
-// JoinFileHeaderChan
+// JoinFileHeaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinFileHeaderChan(out chan<- zip.FileHeader, inp <-chan zip.FileHeader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileHeaderChan(cha, out, inp)

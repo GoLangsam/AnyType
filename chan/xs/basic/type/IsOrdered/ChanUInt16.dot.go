@@ -10,6 +10,7 @@ package IsOrdered
 var _ uint16 // silence import
 
 // No functionality yet associated with this source file.
+
 // MergeUInt16 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
 //  Note: If no inputs are given, a closed UInt16channel is returned.

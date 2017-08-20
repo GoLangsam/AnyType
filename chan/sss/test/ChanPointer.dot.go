@@ -58,7 +58,7 @@ func ChanPointerSlice(inp ...[]*SomeType) (out <-chan *SomeType) {
 	return cha
 }
 
-// JoinPointer
+// JoinPointer sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPointer(out chan<- *SomeType, inp ...*SomeType) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *SomeType, inp ...*SomeType) {
@@ -71,7 +71,7 @@ func JoinPointer(out chan<- *SomeType, inp ...*SomeType) (done <-chan struct{}) 
 	return cha
 }
 
-// JoinPointerSlice
+// JoinPointerSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPointerSlice(out chan<- *SomeType, inp ...[]*SomeType) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *SomeType, inp ...[]*SomeType) {
@@ -86,7 +86,7 @@ func JoinPointerSlice(out chan<- *SomeType, inp ...[]*SomeType) (done <-chan str
 	return cha
 }
 
-// JoinPointerChan
+// JoinPointerChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
 func JoinPointerChan(out chan<- *SomeType, inp <-chan *SomeType) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *SomeType, inp <-chan *SomeType) {
