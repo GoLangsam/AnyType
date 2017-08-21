@@ -3,6 +3,9 @@
 {{/* Generators				*/}}
 {{-  template "Chan{{.}}"		. }}
 {{   template "Chan{{.}}Slice" 		. }}
+{{   template "Chan{{.}}FuncNil"	. }}
+{{   template "Chan{{.}}FuncNok"	. }}
+{{   template "Chan{{.}}FuncErr"	. }}
 {{/* Joiners                		*/}}
 {{-  template "Join{{.}}"      		. }}
 {{   template "Join{{.}}Slice" 		. }}
@@ -15,3 +18,5 @@
 {{-  template "Pipe{{.}}Buffer"		. }}
 {{   template "Pipe{{.}}Func"  		. }}
 {{   template "Pipe{{.}}Fork"  		. }}
+{{/* Tube & DaisyChain         		*/}}
+{{-  template "{{.}}Tube"  		. }}
