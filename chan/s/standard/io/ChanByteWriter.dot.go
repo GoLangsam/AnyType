@@ -34,7 +34,7 @@ type ByteWriterSOnlyChan interface {
 	ProvideByteWriter(dat io.ByteWriter) // the send function - aka "MyKind <- some ByteWriter"
 }
 
-// DChByteWriter is a supply channel
+// SChByteWriter is a supply channel
 type SChByteWriter struct {
 	dat chan io.ByteWriter
 	// req chan struct{}

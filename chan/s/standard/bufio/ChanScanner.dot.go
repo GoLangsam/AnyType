@@ -34,7 +34,7 @@ type ScannerSOnlyChan interface {
 	ProvideScanner(dat *bufio.Scanner) // the send function - aka "MyKind <- some Scanner"
 }
 
-// DChScanner is a supply channel
+// SChScanner is a supply channel
 type SChScanner struct {
 	dat chan *bufio.Scanner
 	// req chan struct{}

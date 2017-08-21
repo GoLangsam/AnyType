@@ -34,7 +34,7 @@ type FsDataSOnlyChan interface {
 	ProvideFsData(dat *fs.FsData) // the send function - aka "MyKind <- some FsData"
 }
 
-// DChFsData is a supply channel
+// SChFsData is a supply channel
 type SChFsData struct {
 	dat chan *fs.FsData
 	// req chan struct{}

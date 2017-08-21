@@ -34,7 +34,7 @@ type CloserSOnlyChan interface {
 	ProvideCloser(dat io.Closer) // the send function - aka "MyKind <- some Closer"
 }
 
-// DChCloser is a supply channel
+// SChCloser is a supply channel
 type SChCloser struct {
 	dat chan io.Closer
 	// req chan struct{}

@@ -80,7 +80,7 @@ func (c *DChBoolS) TryBoolS() (dat []bool, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChBoolS is a supply channel
+// SChBoolS is a supply channel
 type SChBoolS struct {
 	dat chan []bool
 	// req chan struct{}

@@ -34,7 +34,7 @@ type BufferSOnlyChan interface {
 	ProvideBuffer(dat bytes.Buffer) // the send function - aka "MyKind <- some Buffer"
 }
 
-// DChBuffer is a supply channel
+// SChBuffer is a supply channel
 type SChBuffer struct {
 	dat chan bytes.Buffer
 	// req chan struct{}

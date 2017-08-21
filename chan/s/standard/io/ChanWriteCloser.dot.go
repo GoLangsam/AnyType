@@ -34,7 +34,7 @@ type WriteCloserSOnlyChan interface {
 	ProvideWriteCloser(dat io.WriteCloser) // the send function - aka "MyKind <- some WriteCloser"
 }
 
-// DChWriteCloser is a supply channel
+// SChWriteCloser is a supply channel
 type SChWriteCloser struct {
 	dat chan io.WriteCloser
 	// req chan struct{}

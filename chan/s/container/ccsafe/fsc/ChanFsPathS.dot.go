@@ -34,7 +34,7 @@ type FsPathSSOnlyChan interface {
 	ProvideFsPathS(dat fs.FsPathS) // the send function - aka "MyKind <- some FsPathS"
 }
 
-// DChFsPathS is a supply channel
+// SChFsPathS is a supply channel
 type SChFsPathS struct {
 	dat chan fs.FsPathS
 	// req chan struct{}

@@ -34,7 +34,7 @@ type ReaderSOnlyChan interface {
 	ProvideReader(dat zip.Reader) // the send function - aka "MyKind <- some Reader"
 }
 
-// DChReader is a supply channel
+// SChReader is a supply channel
 type SChReader struct {
 	dat chan zip.Reader
 	// req chan struct{}

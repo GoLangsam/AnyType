@@ -84,7 +84,7 @@ func (c *DChPipeReader) TryPipeReader() (dat *io.PipeReader, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChPipeReader is a supply channel
+// SChPipeReader is a supply channel
 type SChPipeReader struct {
 	dat chan *io.PipeReader
 	// req chan struct{}

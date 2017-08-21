@@ -84,7 +84,7 @@ func (c *DChFileInfo) TryFileInfo() (dat os.FileInfo, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChFileInfo is a supply channel
+// SChFileInfo is a supply channel
 type SChFileInfo struct {
 	dat chan os.FileInfo
 	// req chan struct{}

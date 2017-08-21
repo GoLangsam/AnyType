@@ -34,7 +34,7 @@ type ReadCloserSOnlyChan interface {
 	ProvideReadCloser(dat zip.ReadCloser) // the send function - aka "MyKind <- some ReadCloser"
 }
 
-// DChReadCloser is a supply channel
+// SChReadCloser is a supply channel
 type SChReadCloser struct {
 	dat chan zip.ReadCloser
 	// req chan struct{}

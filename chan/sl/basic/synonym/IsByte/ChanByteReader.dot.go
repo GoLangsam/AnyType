@@ -84,7 +84,7 @@ func (c *DChByteReader) TryByteReader() (dat io.ByteReader, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChByteReader is a supply channel
+// SChByteReader is a supply channel
 type SChByteReader struct {
 	dat chan io.ByteReader
 	// req chan struct{}

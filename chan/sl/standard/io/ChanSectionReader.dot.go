@@ -84,7 +84,7 @@ func (c *DChSectionReader) TrySectionReader() (dat *io.SectionReader, open bool)
 
 // TODO(apa): close, cap & len
 
-// DChSectionReader is a supply channel
+// SChSectionReader is a supply channel
 type SChSectionReader struct {
 	dat chan *io.SectionReader
 	// req chan struct{}

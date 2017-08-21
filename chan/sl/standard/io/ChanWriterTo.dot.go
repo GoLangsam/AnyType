@@ -84,7 +84,7 @@ func (c *DChWriterTo) TryWriterTo() (dat io.WriterTo, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChWriterTo is a supply channel
+// SChWriterTo is a supply channel
 type SChWriterTo struct {
 	dat chan io.WriterTo
 	// req chan struct{}

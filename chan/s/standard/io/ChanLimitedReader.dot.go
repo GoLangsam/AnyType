@@ -34,7 +34,7 @@ type LimitedReaderSOnlyChan interface {
 	ProvideLimitedReader(dat *io.LimitedReader) // the send function - aka "MyKind <- some LimitedReader"
 }
 
-// DChLimitedReader is a supply channel
+// SChLimitedReader is a supply channel
 type SChLimitedReader struct {
 	dat chan *io.LimitedReader
 	// req chan struct{}

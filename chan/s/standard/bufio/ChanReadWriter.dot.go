@@ -34,7 +34,7 @@ type ReadWriterSOnlyChan interface {
 	ProvideReadWriter(dat *bufio.ReadWriter) // the send function - aka "MyKind <- some ReadWriter"
 }
 
-// DChReadWriter is a supply channel
+// SChReadWriter is a supply channel
 type SChReadWriter struct {
 	dat chan *bufio.ReadWriter
 	// req chan struct{}

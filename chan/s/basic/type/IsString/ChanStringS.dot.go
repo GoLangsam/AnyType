@@ -30,7 +30,7 @@ type StringSSOnlyChan interface {
 	ProvideStringS(dat []string) // the send function - aka "MyKind <- some StringS"
 }
 
-// DChStringS is a supply channel
+// SChStringS is a supply channel
 type SChStringS struct {
 	dat chan []string
 	// req chan struct{}

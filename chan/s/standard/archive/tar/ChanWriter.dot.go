@@ -34,7 +34,7 @@ type WriterSOnlyChan interface {
 	ProvideWriter(dat *tar.Writer) // the send function - aka "MyKind <- some Writer"
 }
 
-// DChWriter is a supply channel
+// SChWriter is a supply channel
 type SChWriter struct {
 	dat chan *tar.Writer
 	// req chan struct{}

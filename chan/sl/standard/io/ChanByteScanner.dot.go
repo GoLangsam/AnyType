@@ -84,7 +84,7 @@ func (c *DChByteScanner) TryByteScanner() (dat io.ByteScanner, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChByteScanner is a supply channel
+// SChByteScanner is a supply channel
 type SChByteScanner struct {
 	dat chan io.ByteScanner
 	// req chan struct{}

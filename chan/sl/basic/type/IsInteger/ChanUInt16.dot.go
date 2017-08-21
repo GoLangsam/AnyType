@@ -80,7 +80,7 @@ func (c *DChUInt16) TryUInt16() (dat uint16, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChUInt16 is a supply channel
+// SChUInt16 is a supply channel
 type SChUInt16 struct {
 	dat chan uint16
 	// req chan struct{}

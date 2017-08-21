@@ -84,7 +84,7 @@ func (c *DChDot) TryDot() (dat dot.Dot, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChDot is a supply channel
+// SChDot is a supply channel
 type SChDot struct {
 	dat chan dot.Dot
 	// req chan struct{}

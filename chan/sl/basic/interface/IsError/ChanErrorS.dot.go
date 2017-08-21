@@ -80,7 +80,7 @@ func (c *DChErrorS) TryErrorS() (dat []error, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChErrorS is a supply channel
+// SChErrorS is a supply channel
 type SChErrorS struct {
 	dat chan []error
 	// req chan struct{}

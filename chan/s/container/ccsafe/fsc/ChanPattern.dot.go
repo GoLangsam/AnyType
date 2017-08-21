@@ -34,7 +34,7 @@ type PatternSOnlyChan interface {
 	ProvidePattern(dat *fs.Pattern) // the send function - aka "MyKind <- some Pattern"
 }
 
-// DChPattern is a supply channel
+// SChPattern is a supply channel
 type SChPattern struct {
 	dat chan *fs.Pattern
 	// req chan struct{}

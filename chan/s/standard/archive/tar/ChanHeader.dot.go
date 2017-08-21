@@ -34,7 +34,7 @@ type HeaderSOnlyChan interface {
 	ProvideHeader(dat *tar.Header) // the send function - aka "MyKind <- some Header"
 }
 
-// DChHeader is a supply channel
+// SChHeader is a supply channel
 type SChHeader struct {
 	dat chan *tar.Header
 	// req chan struct{}

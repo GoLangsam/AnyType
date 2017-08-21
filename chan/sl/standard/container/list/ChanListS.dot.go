@@ -84,7 +84,7 @@ func (c *DChListS) TryListS() (dat []list.List, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChListS is a supply channel
+// SChListS is a supply channel
 type SChListS struct {
 	dat chan []list.List
 	// req chan struct{}

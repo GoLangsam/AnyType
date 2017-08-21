@@ -84,7 +84,7 @@ func (c *DChLSM) TryLSM() (dat lsm.LazyStringerMap, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChLSM is a supply channel
+// SChLSM is a supply channel
 type SChLSM struct {
 	dat chan lsm.LazyStringerMap
 	// req chan struct{}

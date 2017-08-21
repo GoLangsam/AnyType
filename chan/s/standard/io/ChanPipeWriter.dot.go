@@ -34,7 +34,7 @@ type PipeWriterSOnlyChan interface {
 	ProvidePipeWriter(dat *io.PipeWriter) // the send function - aka "MyKind <- some PipeWriter"
 }
 
-// DChPipeWriter is a supply channel
+// SChPipeWriter is a supply channel
 type SChPipeWriter struct {
 	dat chan *io.PipeWriter
 	// req chan struct{}

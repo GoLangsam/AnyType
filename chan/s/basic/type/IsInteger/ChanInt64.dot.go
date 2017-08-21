@@ -30,7 +30,7 @@ type Int64SOnlyChan interface {
 	ProvideInt64(dat int64) // the send function - aka "MyKind <- some Int64"
 }
 
-// DChInt64 is a supply channel
+// SChInt64 is a supply channel
 type SChInt64 struct {
 	dat chan int64
 	// req chan struct{}

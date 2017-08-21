@@ -34,7 +34,7 @@ type ReadWriteCloserSOnlyChan interface {
 	ProvideReadWriteCloser(dat io.ReadWriteCloser) // the send function - aka "MyKind <- some ReadWriteCloser"
 }
 
-// DChReadWriteCloser is a supply channel
+// SChReadWriteCloser is a supply channel
 type SChReadWriteCloser struct {
 	dat chan io.ReadWriteCloser
 	// req chan struct{}

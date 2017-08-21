@@ -34,7 +34,7 @@ type SectionReaderSOnlyChan interface {
 	ProvideSectionReader(dat *io.SectionReader) // the send function - aka "MyKind <- some SectionReader"
 }
 
-// DChSectionReader is a supply channel
+// SChSectionReader is a supply channel
 type SChSectionReader struct {
 	dat chan *io.SectionReader
 	// req chan struct{}

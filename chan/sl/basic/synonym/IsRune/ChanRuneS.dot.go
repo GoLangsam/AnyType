@@ -80,7 +80,7 @@ func (c *DChRuneS) TryRuneS() (dat []rune, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChRuneS is a supply channel
+// SChRuneS is a supply channel
 type SChRuneS struct {
 	dat chan []rune
 	// req chan struct{}

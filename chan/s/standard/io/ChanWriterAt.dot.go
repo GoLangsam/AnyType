@@ -34,7 +34,7 @@ type WriterAtSOnlyChan interface {
 	ProvideWriterAt(dat io.WriterAt) // the send function - aka "MyKind <- some WriterAt"
 }
 
-// DChWriterAt is a supply channel
+// SChWriterAt is a supply channel
 type SChWriterAt struct {
 	dat chan io.WriterAt
 	// req chan struct{}

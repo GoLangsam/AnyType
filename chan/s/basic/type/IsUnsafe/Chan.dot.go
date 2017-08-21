@@ -30,7 +30,7 @@ type SOnlyChan interface {
 	Provide(dat uintptr) // the send function - aka "MyKind <- some "
 }
 
-// DCh is a supply channel
+// SCh is a supply channel
 type SCh struct {
 	dat chan uintptr
 	// req chan struct{}

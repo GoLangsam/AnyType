@@ -30,7 +30,7 @@ type RuneSSOnlyChan interface {
 	ProvideRuneS(dat []rune) // the send function - aka "MyKind <- some RuneS"
 }
 
-// DChRuneS is a supply channel
+// SChRuneS is a supply channel
 type SChRuneS struct {
 	dat chan []rune
 	// req chan struct{}

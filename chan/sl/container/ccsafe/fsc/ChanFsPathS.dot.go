@@ -84,7 +84,7 @@ func (c *DChFsPathS) TryFsPathS() (dat fs.FsPathS, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChFsPathS is a supply channel
+// SChFsPathS is a supply channel
 type SChFsPathS struct {
 	dat chan fs.FsPathS
 	// req chan struct{}

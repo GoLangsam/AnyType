@@ -84,7 +84,7 @@ func (c *DChSplitFunc) TrySplitFunc() (dat bufio.SplitFunc, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChSplitFunc is a supply channel
+// SChSplitFunc is a supply channel
 type SChSplitFunc struct {
 	dat chan bufio.SplitFunc
 	// req chan struct{}

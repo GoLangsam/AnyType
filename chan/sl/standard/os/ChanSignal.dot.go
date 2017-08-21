@@ -84,7 +84,7 @@ func (c *DChSignal) TrySignal() (dat os.Signal, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChSignal is a supply channel
+// SChSignal is a supply channel
 type SChSignal struct {
 	dat chan os.Signal
 	// req chan struct{}

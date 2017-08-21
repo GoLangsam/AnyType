@@ -84,7 +84,7 @@ func (c *DChPatternS) TryPatternS() (dat fs.PatternS, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChPatternS is a supply channel
+// SChPatternS is a supply channel
 type SChPatternS struct {
 	dat chan fs.PatternS
 	// req chan struct{}

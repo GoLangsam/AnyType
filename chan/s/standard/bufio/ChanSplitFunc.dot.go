@@ -34,7 +34,7 @@ type SplitFuncSOnlyChan interface {
 	ProvideSplitFunc(dat bufio.SplitFunc) // the send function - aka "MyKind <- some SplitFunc"
 }
 
-// DChSplitFunc is a supply channel
+// SChSplitFunc is a supply channel
 type SChSplitFunc struct {
 	dat chan bufio.SplitFunc
 	// req chan struct{}

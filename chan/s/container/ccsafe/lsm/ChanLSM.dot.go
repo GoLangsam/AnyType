@@ -34,7 +34,7 @@ type LSMSOnlyChan interface {
 	ProvideLSM(dat lsm.LazyStringerMap) // the send function - aka "MyKind <- some LSM"
 }
 
-// DChLSM is a supply channel
+// SChLSM is a supply channel
 type SChLSM struct {
 	dat chan lsm.LazyStringerMap
 	// req chan struct{}

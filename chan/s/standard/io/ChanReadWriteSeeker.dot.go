@@ -34,7 +34,7 @@ type ReadWriteSeekerSOnlyChan interface {
 	ProvideReadWriteSeeker(dat io.ReadWriteSeeker) // the send function - aka "MyKind <- some ReadWriteSeeker"
 }
 
-// DChReadWriteSeeker is a supply channel
+// SChReadWriteSeeker is a supply channel
 type SChReadWriteSeeker struct {
 	dat chan io.ReadWriteSeeker
 	// req chan struct{}

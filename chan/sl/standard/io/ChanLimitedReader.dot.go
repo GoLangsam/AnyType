@@ -84,7 +84,7 @@ func (c *DChLimitedReader) TryLimitedReader() (dat *io.LimitedReader, open bool)
 
 // TODO(apa): close, cap & len
 
-// DChLimitedReader is a supply channel
+// SChLimitedReader is a supply channel
 type SChLimitedReader struct {
 	dat chan *io.LimitedReader
 	// req chan struct{}

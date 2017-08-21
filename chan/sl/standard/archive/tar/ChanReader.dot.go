@@ -84,7 +84,7 @@ func (c *DChReader) TryReader() (dat *tar.Reader, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChReader is a supply channel
+// SChReader is a supply channel
 type SChReader struct {
 	dat chan *tar.Reader
 	// req chan struct{}

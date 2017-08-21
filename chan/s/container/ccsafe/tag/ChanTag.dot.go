@@ -34,7 +34,7 @@ type TagSOnlyChan interface {
 	ProvideTag(dat tag.TagAny) // the send function - aka "MyKind <- some Tag"
 }
 
-// DChTag is a supply channel
+// SChTag is a supply channel
 type SChTag struct {
 	dat chan tag.TagAny
 	// req chan struct{}

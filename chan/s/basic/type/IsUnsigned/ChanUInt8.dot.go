@@ -30,7 +30,7 @@ type UInt8SOnlyChan interface {
 	ProvideUInt8(dat uint8) // the send function - aka "MyKind <- some UInt8"
 }
 
-// DChUInt8 is a supply channel
+// SChUInt8 is a supply channel
 type SChUInt8 struct {
 	dat chan uint8
 	// req chan struct{}

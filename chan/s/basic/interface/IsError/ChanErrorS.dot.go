@@ -30,7 +30,7 @@ type ErrorSSOnlyChan interface {
 	ProvideErrorS(dat []error) // the send function - aka "MyKind <- some ErrorS"
 }
 
-// DChErrorS is a supply channel
+// SChErrorS is a supply channel
 type SChErrorS struct {
 	dat chan []error
 	// req chan struct{}

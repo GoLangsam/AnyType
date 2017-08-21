@@ -84,7 +84,7 @@ func (c *DChFsData) TryFsData() (dat *fs.FsData, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChFsData is a supply channel
+// SChFsData is a supply channel
 type SChFsData struct {
 	dat chan *fs.FsData
 	// req chan struct{}

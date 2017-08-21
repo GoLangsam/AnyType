@@ -34,7 +34,7 @@ type ReplacerSOnlyChan interface {
 	ProvideReplacer(dat *strings.Replacer) // the send function - aka "MyKind <- some Replacer"
 }
 
-// DChReplacer is a supply channel
+// SChReplacer is a supply channel
 type SChReplacer struct {
 	dat chan *strings.Replacer
 	// req chan struct{}

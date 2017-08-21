@@ -84,7 +84,7 @@ func (c *DChByteWriter) TryByteWriter() (dat io.ByteWriter, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChByteWriter is a supply channel
+// SChByteWriter is a supply channel
 type SChByteWriter struct {
 	dat chan io.ByteWriter
 	// req chan struct{}

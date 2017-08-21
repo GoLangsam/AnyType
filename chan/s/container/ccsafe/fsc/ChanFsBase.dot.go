@@ -34,7 +34,7 @@ type FsBaseSOnlyChan interface {
 	ProvideFsBase(dat *fs.FsBase) // the send function - aka "MyKind <- some FsBase"
 }
 
-// DChFsBase is a supply channel
+// SChFsBase is a supply channel
 type SChFsBase struct {
 	dat chan *fs.FsBase
 	// req chan struct{}

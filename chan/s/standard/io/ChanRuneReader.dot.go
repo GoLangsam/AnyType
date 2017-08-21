@@ -34,7 +34,7 @@ type RuneReaderSOnlyChan interface {
 	ProvideRuneReader(dat io.RuneReader) // the send function - aka "MyKind <- some RuneReader"
 }
 
-// DChRuneReader is a supply channel
+// SChRuneReader is a supply channel
 type SChRuneReader struct {
 	dat chan io.RuneReader
 	// req chan struct{}

@@ -34,7 +34,7 @@ type ElementSOnlyChan interface {
 	ProvideElement(dat list.Element) // the send function - aka "MyKind <- some Element"
 }
 
-// DChElement is a supply channel
+// SChElement is a supply channel
 type SChElement struct {
 	dat chan list.Element
 	// req chan struct{}

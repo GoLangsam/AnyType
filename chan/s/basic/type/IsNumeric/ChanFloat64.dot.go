@@ -30,7 +30,7 @@ type Float64SOnlyChan interface {
 	ProvideFloat64(dat float64) // the send function - aka "MyKind <- some Float64"
 }
 
-// DChFloat64 is a supply channel
+// SChFloat64 is a supply channel
 type SChFloat64 struct {
 	dat chan float64
 	// req chan struct{}

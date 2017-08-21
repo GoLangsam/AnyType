@@ -34,7 +34,7 @@ type SignalSOnlyChan interface {
 	ProvideSignal(dat os.Signal) // the send function - aka "MyKind <- some Signal"
 }
 
-// DChSignal is a supply channel
+// SChSignal is a supply channel
 type SChSignal struct {
 	dat chan os.Signal
 	// req chan struct{}

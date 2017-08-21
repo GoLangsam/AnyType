@@ -30,7 +30,7 @@ type UInt32SOnlyChan interface {
 	ProvideUInt32(dat uint32) // the send function - aka "MyKind <- some UInt32"
 }
 
-// DChUInt32 is a supply channel
+// SChUInt32 is a supply channel
 type SChUInt32 struct {
 	dat chan uint32
 	// req chan struct{}

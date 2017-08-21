@@ -80,7 +80,7 @@ func (c *DChSomeTypeS) TrySomeTypeS() (dat []SomeType, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChSomeTypeS is a supply channel
+// SChSomeTypeS is a supply channel
 type SChSomeTypeS struct {
 	dat chan []SomeType
 	// req chan struct{}

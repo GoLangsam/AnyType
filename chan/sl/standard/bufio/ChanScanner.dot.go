@@ -84,7 +84,7 @@ func (c *DChScanner) TryScanner() (dat *bufio.Scanner, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChScanner is a supply channel
+// SChScanner is a supply channel
 type SChScanner struct {
 	dat chan *bufio.Scanner
 	// req chan struct{}

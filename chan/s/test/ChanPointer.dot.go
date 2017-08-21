@@ -30,7 +30,7 @@ type PointerSOnlyChan interface {
 	ProvidePointer(dat *SomeType) // the send function - aka "MyKind <- some Pointer"
 }
 
-// DChPointer is a supply channel
+// SChPointer is a supply channel
 type SChPointer struct {
 	dat chan *SomeType
 	// req chan struct{}

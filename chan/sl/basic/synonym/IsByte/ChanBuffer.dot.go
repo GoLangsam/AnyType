@@ -84,7 +84,7 @@ func (c *DChBuffer) TryBuffer() (dat bytes.Buffer, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChBuffer is a supply channel
+// SChBuffer is a supply channel
 type SChBuffer struct {
 	dat chan bytes.Buffer
 	// req chan struct{}

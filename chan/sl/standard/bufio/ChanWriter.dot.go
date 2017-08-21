@@ -84,7 +84,7 @@ func (c *DChWriter) TryWriter() (dat *bufio.Writer, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChWriter is a supply channel
+// SChWriter is a supply channel
 type SChWriter struct {
 	dat chan *bufio.Writer
 	// req chan struct{}

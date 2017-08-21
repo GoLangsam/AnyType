@@ -84,7 +84,7 @@ func (c *DChReplacer) TryReplacer() (dat *strings.Replacer, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChReplacer is a supply channel
+// SChReplacer is a supply channel
 type SChReplacer struct {
 	dat chan *strings.Replacer
 	// req chan struct{}

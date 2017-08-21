@@ -34,7 +34,7 @@ type ListSSOnlyChan interface {
 	ProvideListS(dat []list.List) // the send function - aka "MyKind <- some ListS"
 }
 
-// DChListS is a supply channel
+// SChListS is a supply channel
 type SChListS struct {
 	dat chan []list.List
 	// req chan struct{}

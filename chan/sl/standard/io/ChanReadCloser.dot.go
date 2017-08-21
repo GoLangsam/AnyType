@@ -84,7 +84,7 @@ func (c *DChReadCloser) TryReadCloser() (dat io.ReadCloser, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChReadCloser is a supply channel
+// SChReadCloser is a supply channel
 type SChReadCloser struct {
 	dat chan io.ReadCloser
 	// req chan struct{}

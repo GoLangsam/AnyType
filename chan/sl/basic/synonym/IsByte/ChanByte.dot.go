@@ -80,7 +80,7 @@ func (c *DChByte) TryByte() (dat byte, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChByte is a supply channel
+// SChByte is a supply channel
 type SChByte struct {
 	dat chan byte
 	// req chan struct{}

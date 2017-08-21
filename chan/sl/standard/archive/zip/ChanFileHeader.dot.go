@@ -84,7 +84,7 @@ func (c *DChFileHeader) TryFileHeader() (dat zip.FileHeader, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChFileHeader is a supply channel
+// SChFileHeader is a supply channel
 type SChFileHeader struct {
 	dat chan zip.FileHeader
 	// req chan struct{}

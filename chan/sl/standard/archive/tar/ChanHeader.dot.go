@@ -84,7 +84,7 @@ func (c *DChHeader) TryHeader() (dat *tar.Header, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChHeader is a supply channel
+// SChHeader is a supply channel
 type SChHeader struct {
 	dat chan *tar.Header
 	// req chan struct{}

@@ -80,7 +80,7 @@ func (c *DChInt64) TryInt64() (dat int64, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChInt64 is a supply channel
+// SChInt64 is a supply channel
 type SChInt64 struct {
 	dat chan int64
 	// req chan struct{}

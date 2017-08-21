@@ -84,7 +84,7 @@ func (c *DChRuneReader) TryRuneReader() (dat io.RuneReader, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChRuneReader is a supply channel
+// SChRuneReader is a supply channel
 type SChRuneReader struct {
 	dat chan io.RuneReader
 	// req chan struct{}

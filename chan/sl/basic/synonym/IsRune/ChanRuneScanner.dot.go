@@ -84,7 +84,7 @@ func (c *DChRuneScanner) TryRuneScanner() (dat io.RuneScanner, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChRuneScanner is a supply channel
+// SChRuneScanner is a supply channel
 type SChRuneScanner struct {
 	dat chan io.RuneScanner
 	// req chan struct{}

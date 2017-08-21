@@ -84,7 +84,7 @@ func (c *DChFsBaseS) TryFsBaseS() (dat fs.FsBaseS, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChFsBaseS is a supply channel
+// SChFsBaseS is a supply channel
 type SChFsBaseS struct {
 	dat chan fs.FsBaseS
 	// req chan struct{}

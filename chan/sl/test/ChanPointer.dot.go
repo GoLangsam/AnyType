@@ -80,7 +80,7 @@ func (c *DChPointer) TryPointer() (dat *SomeType, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChPointer is a supply channel
+// SChPointer is a supply channel
 type SChPointer struct {
 	dat chan *SomeType
 	// req chan struct{}

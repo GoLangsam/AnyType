@@ -80,7 +80,7 @@ func (c *DChUInt) TryUInt() (dat uint, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChUInt is a supply channel
+// SChUInt is a supply channel
 type SChUInt struct {
 	dat chan uint
 	// req chan struct{}

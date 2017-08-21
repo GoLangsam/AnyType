@@ -30,7 +30,7 @@ type SomeTypeSSOnlyChan interface {
 	ProvideSomeTypeS(dat []SomeType) // the send function - aka "MyKind <- some SomeTypeS"
 }
 
-// DChSomeTypeS is a supply channel
+// SChSomeTypeS is a supply channel
 type SChSomeTypeS struct {
 	dat chan []SomeType
 	// req chan struct{}

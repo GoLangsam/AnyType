@@ -84,7 +84,7 @@ func (c *DChTag) TryTag() (dat tag.TagAny, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChTag is a supply channel
+// SChTag is a supply channel
 type SChTag struct {
 	dat chan tag.TagAny
 	// req chan struct{}

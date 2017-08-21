@@ -34,7 +34,7 @@ type FileInfoSOnlyChan interface {
 	ProvideFileInfo(dat os.FileInfo) // the send function - aka "MyKind <- some FileInfo"
 }
 
-// DChFileInfo is a supply channel
+// SChFileInfo is a supply channel
 type SChFileInfo struct {
 	dat chan os.FileInfo
 	// req chan struct{}

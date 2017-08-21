@@ -34,7 +34,7 @@ type ByteScannerSOnlyChan interface {
 	ProvideByteScanner(dat io.ByteScanner) // the send function - aka "MyKind <- some ByteScanner"
 }
 
-// DChByteScanner is a supply channel
+// SChByteScanner is a supply channel
 type SChByteScanner struct {
 	dat chan io.ByteScanner
 	// req chan struct{}

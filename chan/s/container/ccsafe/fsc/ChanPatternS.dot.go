@@ -34,7 +34,7 @@ type PatternSSOnlyChan interface {
 	ProvidePatternS(dat fs.PatternS) // the send function - aka "MyKind <- some PatternS"
 }
 
-// DChPatternS is a supply channel
+// SChPatternS is a supply channel
 type SChPatternS struct {
 	dat chan fs.PatternS
 	// req chan struct{}

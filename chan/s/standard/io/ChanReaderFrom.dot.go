@@ -34,7 +34,7 @@ type ReaderFromSOnlyChan interface {
 	ProvideReaderFrom(dat io.ReaderFrom) // the send function - aka "MyKind <- some ReaderFrom"
 }
 
-// DChReaderFrom is a supply channel
+// SChReaderFrom is a supply channel
 type SChReaderFrom struct {
 	dat chan io.ReaderFrom
 	// req chan struct{}

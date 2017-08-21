@@ -80,7 +80,7 @@ func (c *DChFloat32) TryFloat32() (dat float32, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChFloat32 is a supply channel
+// SChFloat32 is a supply channel
 type SChFloat32 struct {
 	dat chan float32
 	// req chan struct{}

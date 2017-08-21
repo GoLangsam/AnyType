@@ -34,7 +34,7 @@ type DotSOnlyChan interface {
 	ProvideDot(dat dot.Dot) // the send function - aka "MyKind <- some Dot"
 }
 
-// DChDot is a supply channel
+// SChDot is a supply channel
 type SChDot struct {
 	dat chan dot.Dot
 	// req chan struct{}

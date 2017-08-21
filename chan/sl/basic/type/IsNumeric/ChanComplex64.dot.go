@@ -80,7 +80,7 @@ func (c *DChComplex64) TryComplex64() (dat complex64, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChComplex64 is a supply channel
+// SChComplex64 is a supply channel
 type SChComplex64 struct {
 	dat chan complex64
 	// req chan struct{}

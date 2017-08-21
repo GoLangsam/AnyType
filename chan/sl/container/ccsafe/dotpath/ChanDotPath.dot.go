@@ -84,7 +84,7 @@ func (c *DChDotPath) TryDotPath() (dat dotpath.DotPath, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChDotPath is a supply channel
+// SChDotPath is a supply channel
 type SChDotPath struct {
 	dat chan dotpath.DotPath
 	// req chan struct{}

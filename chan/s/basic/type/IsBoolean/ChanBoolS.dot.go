@@ -30,7 +30,7 @@ type BoolSSOnlyChan interface {
 	ProvideBoolS(dat []bool) // the send function - aka "MyKind <- some BoolS"
 }
 
-// DChBoolS is a supply channel
+// SChBoolS is a supply channel
 type SChBoolS struct {
 	dat chan []bool
 	// req chan struct{}

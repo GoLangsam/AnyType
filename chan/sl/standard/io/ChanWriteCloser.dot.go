@@ -84,7 +84,7 @@ func (c *DChWriteCloser) TryWriteCloser() (dat io.WriteCloser, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChWriteCloser is a supply channel
+// SChWriteCloser is a supply channel
 type SChWriteCloser struct {
 	dat chan io.WriteCloser
 	// req chan struct{}

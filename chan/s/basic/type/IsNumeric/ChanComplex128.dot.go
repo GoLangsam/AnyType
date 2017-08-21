@@ -30,7 +30,7 @@ type Complex128SOnlyChan interface {
 	ProvideComplex128(dat complex128) // the send function - aka "MyKind <- some Complex128"
 }
 
-// DChComplex128 is a supply channel
+// SChComplex128 is a supply channel
 type SChComplex128 struct {
 	dat chan complex128
 	// req chan struct{}

@@ -34,7 +34,7 @@ type FileHeaderSOnlyChan interface {
 	ProvideFileHeader(dat zip.FileHeader) // the send function - aka "MyKind <- some FileHeader"
 }
 
-// DChFileHeader is a supply channel
+// SChFileHeader is a supply channel
 type SChFileHeader struct {
 	dat chan zip.FileHeader
 	// req chan struct{}

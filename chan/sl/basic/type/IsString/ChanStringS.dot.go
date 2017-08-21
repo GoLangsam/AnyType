@@ -80,7 +80,7 @@ func (c *DChStringS) TryStringS() (dat []string, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChStringS is a supply channel
+// SChStringS is a supply channel
 type SChStringS struct {
 	dat chan []string
 	// req chan struct{}

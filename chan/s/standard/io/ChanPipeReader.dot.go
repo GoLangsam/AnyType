@@ -34,7 +34,7 @@ type PipeReaderSOnlyChan interface {
 	ProvidePipeReader(dat *io.PipeReader) // the send function - aka "MyKind <- some PipeReader"
 }
 
-// DChPipeReader is a supply channel
+// SChPipeReader is a supply channel
 type SChPipeReader struct {
 	dat chan *io.PipeReader
 	// req chan struct{}

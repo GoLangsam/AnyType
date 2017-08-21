@@ -84,7 +84,7 @@ func (c *DChElementS) TryElementS() (dat []list.Element, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChElementS is a supply channel
+// SChElementS is a supply channel
 type SChElementS struct {
 	dat chan []list.Element
 	// req chan struct{}

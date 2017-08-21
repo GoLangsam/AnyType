@@ -84,7 +84,7 @@ func (c *DChReadSeeker) TryReadSeeker() (dat io.ReadSeeker, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChReadSeeker is a supply channel
+// SChReadSeeker is a supply channel
 type SChReadSeeker struct {
 	dat chan io.ReadSeeker
 	// req chan struct{}

@@ -30,7 +30,7 @@ type ByteSOnlyChan interface {
 	ProvideByte(dat byte) // the send function - aka "MyKind <- some Byte"
 }
 
-// DChByte is a supply channel
+// SChByte is a supply channel
 type SChByte struct {
 	dat chan byte
 	// req chan struct{}

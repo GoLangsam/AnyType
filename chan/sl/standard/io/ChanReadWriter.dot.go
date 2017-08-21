@@ -84,7 +84,7 @@ func (c *DChReadWriter) TryReadWriter() (dat io.ReadWriter, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChReadWriter is a supply channel
+// SChReadWriter is a supply channel
 type SChReadWriter struct {
 	dat chan io.ReadWriter
 	// req chan struct{}

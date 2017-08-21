@@ -34,7 +34,7 @@ type ReaderSOnlyChan interface {
 	ProvideReader(dat *tar.Reader) // the send function - aka "MyKind <- some Reader"
 }
 
-// DChReader is a supply channel
+// SChReader is a supply channel
 type SChReader struct {
 	dat chan *tar.Reader
 	// req chan struct{}

@@ -84,7 +84,7 @@ func (c *DChFile) TryFile() (dat zip.File, open bool) {
 
 // TODO(apa): close, cap & len
 
-// DChFile is a supply channel
+// SChFile is a supply channel
 type SChFile struct {
 	dat chan zip.File
 	// req chan struct{}

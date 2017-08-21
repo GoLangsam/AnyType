@@ -34,7 +34,7 @@ type WriteSeekerSOnlyChan interface {
 	ProvideWriteSeeker(dat io.WriteSeeker) // the send function - aka "MyKind <- some WriteSeeker"
 }
 
-// DChWriteSeeker is a supply channel
+// SChWriteSeeker is a supply channel
 type SChWriteSeeker struct {
 	dat chan io.WriteSeeker
 	// req chan struct{}
