@@ -1,8 +1,8 @@
 func join{{.}}Slice(done chan<- struct{}, out chan<- {{.Dot}}, inp ...[]{{.Dot}}) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}

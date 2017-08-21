@@ -1,7 +1,7 @@
 func send{{.}}(out chan<- {{.Dot}}, inp ...{{.Dot}}) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 

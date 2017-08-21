@@ -3,8 +3,8 @@ func Join{{.}}(out chan<- {{.Dot}}, inp ...{{.Dot}}) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- {{.Dot}}, inp ...{{.Dot}}) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)

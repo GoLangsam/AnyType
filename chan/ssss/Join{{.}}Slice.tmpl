@@ -3,9 +3,9 @@ func Join{{.}}Slice(out chan<- {{.Dot}}, inp ...[]{{.Dot}}) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}

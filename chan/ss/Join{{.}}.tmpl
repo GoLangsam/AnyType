@@ -1,7 +1,7 @@
 func join{{.}}(done chan<- struct{}, out chan<- {{.Dot}}, inp ...{{.Dot}}) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }

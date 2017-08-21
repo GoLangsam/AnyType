@@ -3,9 +3,9 @@ func Chan{{.}}Slice(inp ...[]{{.Dot}}) (out <-chan {{.Dot}}) {
 	cha := make(chan {{.Dot}})
 	go func(out chan<- {{.Dot}}, inp ...[]{{.Dot}}) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)

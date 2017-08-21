@@ -3,8 +3,8 @@ func Chan{{.}}(inp ...{{.Dot}}) (out <-chan {{.Dot}}) {
 	cha := make(chan {{.Dot}})
 	go func(out chan<- {{.Dot}}, inp ...{{.Dot}}) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
