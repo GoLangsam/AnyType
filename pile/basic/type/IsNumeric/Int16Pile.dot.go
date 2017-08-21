@@ -108,7 +108,7 @@ func (d *Int16Pile) Wait() (done <-chan int) {
 				break
 			}
 		}
-		cha <- len(d.list) // signal the lenght, and terminate
+		cha <- len(d.list) // signal the length, and terminate
 	}(cha, d)
 	return cha
 }

@@ -2,52 +2,48 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package io
+package IsBoolean
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-import (
-	"io"
-)
-
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
-// WriterAtPile is a structure for
+// Pile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `io.WriterAt`)
+// of items (of type `bool`)
 // which are cached in a growing-only list.
-// Next() traverses the WriterAtPile.
+// Next() traverses the Pile.
 // Reset() allows a new transversal from the beginning.
 //
 // You may either
-// traverse the WriterAtPile lazily -following its (buffered) growth that is-
+// traverse the Pile lazily -following its (buffered) growth that is-
 // or
 // await the signal from Wait() before starting traversal.
 //
 // Note: Pile() may be used concurrently,
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
-type WriterAtPile struct {
-	pile   chan io.WriterAt // channel to receive further items
-	list   []io.WriterAt    // list of known items
-	offset int              // index for Next()
+type Pile struct {
+	pile   chan bool // channel to receive further items
+	list   []bool    // list of known items
+	offset int       // index for Next()
 }
 
-// MakeWriterAtPile returns a (pointer to a) fresh pile
-// of items (of type `io.WriterAt`)
+// MakePile returns a (pointer to a) fresh pile
+// of items (of type `bool`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
-func MakeWriterAtPile(size, buff int) *WriterAtPile {
-	pile := new(WriterAtPile)
-	pile.list = make([]io.WriterAt, 0, size)
-	pile.pile = make(chan io.WriterAt, buff)
+func MakePile(size, buff int) *Pile {
+	pile := new(Pile)
+	pile.list = make([]bool, 0, size)
+	pile.pile = make(chan bool, buff)
 	return pile
 }
 
 // Reset puts the pile iterator `Next()` back at the beginning.
-func (d *WriterAtPile) Reset() {
+func (d *Pile) Reset() {
 	d.offset = 0
 }
 
@@ -55,7 +51,7 @@ func (d *WriterAtPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *WriterAtPile) Next() (item io.WriterAt, ok bool) {
+func (d *Pile) Next() (item bool, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +64,11 @@ func (d *WriterAtPile) Next() (item io.WriterAt, ok bool) {
 }
 
 // Pile adds
-// an item (of type `io.WriterAt`)
-// to the WriterAtPile.
+// an item (of type `bool`)
+// to the Pile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *WriterAtPile) Pile(item io.WriterAt) {
+func (d *Pile) Pile(item bool) {
 	d.pile <- item
 }
 
@@ -84,7 +80,7 @@ func (d *WriterAtPile) Pile(item io.WriterAt) {
 // any Pile(...) will panic
 // and
 // any Next() will return immediately: no eventual blocking, that is.
-func (d *WriterAtPile) Close() {
+func (d *Pile) Close() {
 	close(d.pile)
 }
 
@@ -97,9 +93,9 @@ func (d *WriterAtPile) Close() {
 // Once the pile is closed, Wait() will return in constant time.)
 //
 // Note: Upon close of the done-channel, the pile is Reset() so You may traverse it (via Next) right away.
-func (d *WriterAtPile) Wait() (done <-chan int) {
+func (d *Pile) Wait() (done <-chan int) {
 	cha := make(chan int)
-	go func(cha chan<- int, d *WriterAtPile) {
+	go func(cha chan<- int, d *Pile) {
 		defer close(cha)
 		d.Reset()
 		if len(d.list) > 0 { // skip what's already known

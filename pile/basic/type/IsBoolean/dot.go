@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package IsUnsafe
+package IsBoolean
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
