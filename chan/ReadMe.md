@@ -5,7 +5,7 @@
 - **And**: piping is a convenient way to design a process - a process with **concurrent** parts.
   Batteries included :-)
 
-- **And**: Mind You: *[Concurrency enables parallelism!](resources.md)*
+- **And**: Mind You: *[Concurrency enables parallelism!](http://go-proverbs.github.io/)*
 
 [This project `chan`]([here](https://github.com/GoLangsam/AnyType/tree/master/chan/) provides facilites and mechanisms to build, invoke and manage such process.
 
