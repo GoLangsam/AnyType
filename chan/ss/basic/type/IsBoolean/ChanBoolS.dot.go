@@ -34,8 +34,8 @@ func MakeBoolSChan() (out chan []bool) {
 
 func sendBoolS(out chan<- []bool, inp ...[]bool) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -48,9 +48,9 @@ func ChanBoolS(inp ...[]bool) (out <-chan []bool) {
 
 func sendBoolSSlice(out chan<- []bool, inp ...[][]bool) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -62,10 +62,48 @@ func ChanBoolSSlice(inp ...[][]bool) (out <-chan []bool) {
 	return cha
 }
 
+func chanBoolSFuncNok(out chan<- []bool, act func() ([]bool, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanBoolSFuncNok returns a channel to receive all results of act until nok before close.
+func ChanBoolSFuncNok(act func() ([]bool, bool)) (out <-chan []bool) {
+	cha := make(chan []bool)
+	go chanBoolSFuncNok(cha, act)
+	return cha
+}
+
+func chanBoolSFuncErr(out chan<- []bool, act func() ([]bool, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanBoolSFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanBoolSFuncErr(act func() ([]bool, error)) (out <-chan []bool) {
+	cha := make(chan []bool)
+	go chanBoolSFuncErr(cha, act)
+	return cha
+}
+
 func joinBoolS(done chan<- struct{}, out chan<- []bool, inp ...[]bool) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -79,9 +117,9 @@ func JoinBoolS(out chan<- []bool, inp ...[]bool) (done <-chan struct{}) {
 
 func joinBoolSSlice(done chan<- struct{}, out chan<- []bool, inp ...[][]bool) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -210,3 +248,44 @@ func PipeBoolSFork(inp <-chan []bool) (out1, out2 <-chan []bool) {
 	go pipeBoolSFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// BoolSTube is the signature for a pipe function.
+type BoolSTube func(inp <-chan []bool, out <-chan []bool)
+
+// BoolSDaisy returns a channel to receive all inp after having passed thru tube.
+func BoolSDaisy(inp <-chan []bool, tube BoolSTube) (out <-chan []bool) {
+	cha := make(chan []bool)
+	go tube(inp, cha)
+	return cha
+}
+
+// BoolSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func BoolSDaisyChain(inp <-chan []bool, tubes ...BoolSTube) (out <-chan []bool) {
+	cha := inp
+	for i := range tubes {
+		cha = BoolSDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

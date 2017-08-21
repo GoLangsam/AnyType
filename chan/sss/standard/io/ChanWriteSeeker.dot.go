@@ -41,8 +41,8 @@ func ChanWriteSeeker(inp ...io.WriteSeeker) (out <-chan io.WriteSeeker) {
 	cha := make(chan io.WriteSeeker)
 	go func(out chan<- io.WriteSeeker, inp ...io.WriteSeeker) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanWriteSeekerSlice(inp ...[]io.WriteSeeker) (out <-chan io.WriteSeeker) {
 	cha := make(chan io.WriteSeeker)
 	go func(out chan<- io.WriteSeeker, inp ...[]io.WriteSeeker) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanWriteSeekerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanWriteSeekerFuncNok(act func() (io.WriteSeeker, bool)) (out <-chan io.WriteSeeker) {
+	cha := make(chan io.WriteSeeker)
+	go func(out chan<- io.WriteSeeker, act func() (io.WriteSeeker, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanWriteSeekerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanWriteSeekerFuncErr(act func() (io.WriteSeeker, error)) (out <-chan io.WriteSeeker) {
+	cha := make(chan io.WriteSeeker)
+	go func(out chan<- io.WriteSeeker, act func() (io.WriteSeeker, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinWriteSeeker(out chan<- io.WriteSeeker, inp ...io.WriteSeeker) (done <-c
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriteSeeker, inp ...io.WriteSeeker) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinWriteSeekerSlice(out chan<- io.WriteSeeker, inp ...[]io.WriteSeeker) (d
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriteSeeker, inp ...[]io.WriteSeeker) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeWriteSeekerFork(inp <-chan io.WriteSeeker) (out1, out2 <-chan io.WriteS
 // WriteSeekerTube is the signature for a pipe function.
 type WriteSeekerTube func(inp <-chan io.WriteSeeker, out <-chan io.WriteSeeker)
 
-// WriteSeekerdaisy returns a channel to receive all inp after having passed thru tube.
-func WriteSeekerdaisy(inp <-chan io.WriteSeeker, tube WriteSeekerTube) (out <-chan io.WriteSeeker) {
+// WriteSeekerDaisy returns a channel to receive all inp after having passed thru tube.
+func WriteSeekerDaisy(inp <-chan io.WriteSeeker, tube WriteSeekerTube) (out <-chan io.WriteSeeker) {
 	cha := make(chan io.WriteSeeker)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func WriteSeekerdaisy(inp <-chan io.WriteSeeker, tube WriteSeekerTube) (out <-ch
 // WriteSeekerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func WriteSeekerDaisyChain(inp <-chan io.WriteSeeker, tubes ...WriteSeekerTube) (out <-chan io.WriteSeeker) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = WriteSeekerdaisy(cha, tube)
+	for i := range tubes {
+		cha = WriteSeekerDaisy(cha, tubes[i])
 	}
 	return cha
 }

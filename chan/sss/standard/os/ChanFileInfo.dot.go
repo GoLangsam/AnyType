@@ -41,8 +41,8 @@ func ChanFileInfo(inp ...os.FileInfo) (out <-chan os.FileInfo) {
 	cha := make(chan os.FileInfo)
 	go func(out chan<- os.FileInfo, inp ...os.FileInfo) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanFileInfoSlice(inp ...[]os.FileInfo) (out <-chan os.FileInfo) {
 	cha := make(chan os.FileInfo)
 	go func(out chan<- os.FileInfo, inp ...[]os.FileInfo) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanFileInfoFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFileInfoFuncNok(act func() (os.FileInfo, bool)) (out <-chan os.FileInfo) {
+	cha := make(chan os.FileInfo)
+	go func(out chan<- os.FileInfo, act func() (os.FileInfo, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanFileInfoFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFileInfoFuncErr(act func() (os.FileInfo, error)) (out <-chan os.FileInfo) {
+	cha := make(chan os.FileInfo)
+	go func(out chan<- os.FileInfo, act func() (os.FileInfo, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinFileInfo(out chan<- os.FileInfo, inp ...os.FileInfo) (done <-chan struc
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.FileInfo, inp ...os.FileInfo) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinFileInfoSlice(out chan<- os.FileInfo, inp ...[]os.FileInfo) (done <-cha
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- os.FileInfo, inp ...[]os.FileInfo) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeFileInfoFork(inp <-chan os.FileInfo) (out1, out2 <-chan os.FileInfo) {
 // FileInfoTube is the signature for a pipe function.
 type FileInfoTube func(inp <-chan os.FileInfo, out <-chan os.FileInfo)
 
-// FileInfodaisy returns a channel to receive all inp after having passed thru tube.
-func FileInfodaisy(inp <-chan os.FileInfo, tube FileInfoTube) (out <-chan os.FileInfo) {
+// FileInfoDaisy returns a channel to receive all inp after having passed thru tube.
+func FileInfoDaisy(inp <-chan os.FileInfo, tube FileInfoTube) (out <-chan os.FileInfo) {
 	cha := make(chan os.FileInfo)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func FileInfodaisy(inp <-chan os.FileInfo, tube FileInfoTube) (out <-chan os.Fil
 // FileInfoDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func FileInfoDaisyChain(inp <-chan os.FileInfo, tubes ...FileInfoTube) (out <-chan os.FileInfo) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = FileInfodaisy(cha, tube)
+	for i := range tubes {
+		cha = FileInfoDaisy(cha, tubes[i])
 	}
 	return cha
 }

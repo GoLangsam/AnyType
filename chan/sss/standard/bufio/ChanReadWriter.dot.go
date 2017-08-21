@@ -41,8 +41,8 @@ func ChanReadWriter(inp ...*bufio.ReadWriter) (out <-chan *bufio.ReadWriter) {
 	cha := make(chan *bufio.ReadWriter)
 	go func(out chan<- *bufio.ReadWriter, inp ...*bufio.ReadWriter) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanReadWriterSlice(inp ...[]*bufio.ReadWriter) (out <-chan *bufio.ReadWrit
 	cha := make(chan *bufio.ReadWriter)
 	go func(out chan<- *bufio.ReadWriter, inp ...[]*bufio.ReadWriter) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanReadWriterFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReadWriterFuncNok(act func() (*bufio.ReadWriter, bool)) (out <-chan *bufio.ReadWriter) {
+	cha := make(chan *bufio.ReadWriter)
+	go func(out chan<- *bufio.ReadWriter, act func() (*bufio.ReadWriter, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanReadWriterFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReadWriterFuncErr(act func() (*bufio.ReadWriter, error)) (out <-chan *bufio.ReadWriter) {
+	cha := make(chan *bufio.ReadWriter)
+	go func(out chan<- *bufio.ReadWriter, act func() (*bufio.ReadWriter, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinReadWriter(out chan<- *bufio.ReadWriter, inp ...*bufio.ReadWriter) (don
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.ReadWriter, inp ...*bufio.ReadWriter) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinReadWriterSlice(out chan<- *bufio.ReadWriter, inp ...[]*bufio.ReadWrite
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.ReadWriter, inp ...[]*bufio.ReadWriter) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeReadWriterFork(inp <-chan *bufio.ReadWriter) (out1, out2 <-chan *bufio.
 // ReadWriterTube is the signature for a pipe function.
 type ReadWriterTube func(inp <-chan *bufio.ReadWriter, out <-chan *bufio.ReadWriter)
 
-// ReadWriterdaisy returns a channel to receive all inp after having passed thru tube.
-func ReadWriterdaisy(inp <-chan *bufio.ReadWriter, tube ReadWriterTube) (out <-chan *bufio.ReadWriter) {
+// ReadWriterDaisy returns a channel to receive all inp after having passed thru tube.
+func ReadWriterDaisy(inp <-chan *bufio.ReadWriter, tube ReadWriterTube) (out <-chan *bufio.ReadWriter) {
 	cha := make(chan *bufio.ReadWriter)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func ReadWriterdaisy(inp <-chan *bufio.ReadWriter, tube ReadWriterTube) (out <-c
 // ReadWriterDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func ReadWriterDaisyChain(inp <-chan *bufio.ReadWriter, tubes ...ReadWriterTube) (out <-chan *bufio.ReadWriter) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = ReadWriterdaisy(cha, tube)
+	for i := range tubes {
+		cha = ReadWriterDaisy(cha, tubes[i])
 	}
 	return cha
 }

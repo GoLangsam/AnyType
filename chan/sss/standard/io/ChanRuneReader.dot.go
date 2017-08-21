@@ -41,8 +41,8 @@ func ChanRuneReader(inp ...io.RuneReader) (out <-chan io.RuneReader) {
 	cha := make(chan io.RuneReader)
 	go func(out chan<- io.RuneReader, inp ...io.RuneReader) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanRuneReaderSlice(inp ...[]io.RuneReader) (out <-chan io.RuneReader) {
 	cha := make(chan io.RuneReader)
 	go func(out chan<- io.RuneReader, inp ...[]io.RuneReader) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanRuneReaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanRuneReaderFuncNok(act func() (io.RuneReader, bool)) (out <-chan io.RuneReader) {
+	cha := make(chan io.RuneReader)
+	go func(out chan<- io.RuneReader, act func() (io.RuneReader, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanRuneReaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanRuneReaderFuncErr(act func() (io.RuneReader, error)) (out <-chan io.RuneReader) {
+	cha := make(chan io.RuneReader)
+	go func(out chan<- io.RuneReader, act func() (io.RuneReader, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinRuneReader(out chan<- io.RuneReader, inp ...io.RuneReader) (done <-chan
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.RuneReader, inp ...io.RuneReader) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinRuneReaderSlice(out chan<- io.RuneReader, inp ...[]io.RuneReader) (done
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.RuneReader, inp ...[]io.RuneReader) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeRuneReaderFork(inp <-chan io.RuneReader) (out1, out2 <-chan io.RuneRead
 // RuneReaderTube is the signature for a pipe function.
 type RuneReaderTube func(inp <-chan io.RuneReader, out <-chan io.RuneReader)
 
-// RuneReaderdaisy returns a channel to receive all inp after having passed thru tube.
-func RuneReaderdaisy(inp <-chan io.RuneReader, tube RuneReaderTube) (out <-chan io.RuneReader) {
+// RuneReaderDaisy returns a channel to receive all inp after having passed thru tube.
+func RuneReaderDaisy(inp <-chan io.RuneReader, tube RuneReaderTube) (out <-chan io.RuneReader) {
 	cha := make(chan io.RuneReader)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func RuneReaderdaisy(inp <-chan io.RuneReader, tube RuneReaderTube) (out <-chan 
 // RuneReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func RuneReaderDaisyChain(inp <-chan io.RuneReader, tubes ...RuneReaderTube) (out <-chan io.RuneReader) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = RuneReaderdaisy(cha, tube)
+	for i := range tubes {
+		cha = RuneReaderDaisy(cha, tubes[i])
 	}
 	return cha
 }

@@ -41,8 +41,8 @@ func ChanReadWriteSeeker(inp ...io.ReadWriteSeeker) chan io.ReadWriteSeeker {
 	out := make(chan io.ReadWriteSeeker)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -53,9 +53,43 @@ func ChanReadWriteSeekerSlice(inp ...[]io.ReadWriteSeeker) chan io.ReadWriteSeek
 	out := make(chan io.ReadWriteSeeker)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanReadWriteSeekerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReadWriteSeekerFuncNok(act func() (io.ReadWriteSeeker, bool)) <-chan io.ReadWriteSeeker {
+	out := make(chan io.ReadWriteSeeker)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanReadWriteSeekerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReadWriteSeekerFuncErr(act func() (io.ReadWriteSeeker, error)) <-chan io.ReadWriteSeeker {
+	out := make(chan io.ReadWriteSeeker)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -67,8 +101,8 @@ func JoinReadWriteSeeker(out chan<- io.ReadWriteSeeker, inp ...io.ReadWriteSeeke
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -80,9 +114,9 @@ func JoinReadWriteSeekerSlice(out chan<- io.ReadWriteSeeker, inp ...[]io.ReadWri
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,3 +226,44 @@ func PipeReadWriteSeekerFork(inp <-chan io.ReadWriteSeeker) (chan io.ReadWriteSe
 	}()
 	return out1, out2
 }
+
+// ReadWriteSeekerTube is the signature for a pipe function.
+type ReadWriteSeekerTube func(inp <-chan io.ReadWriteSeeker, out <-chan io.ReadWriteSeeker)
+
+// ReadWriteSeekerDaisy returns a channel to receive all inp after having passed thru tube.
+func ReadWriteSeekerDaisy(inp <-chan io.ReadWriteSeeker, tube ReadWriteSeekerTube) (out <-chan io.ReadWriteSeeker) {
+	cha := make(chan io.ReadWriteSeeker)
+	go tube(inp, cha)
+	return cha
+}
+
+// ReadWriteSeekerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ReadWriteSeekerDaisyChain(inp <-chan io.ReadWriteSeeker, tubes ...ReadWriteSeekerTube) (out <-chan io.ReadWriteSeeker) {
+	cha := inp
+	for i := range tubes {
+		cha = ReadWriteSeekerDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

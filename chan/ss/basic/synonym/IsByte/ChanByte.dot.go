@@ -34,8 +34,8 @@ func MakeByteChan() (out chan byte) {
 
 func sendByte(out chan<- byte, inp ...byte) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -48,9 +48,9 @@ func ChanByte(inp ...byte) (out <-chan byte) {
 
 func sendByteSlice(out chan<- byte, inp ...[]byte) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -62,10 +62,48 @@ func ChanByteSlice(inp ...[]byte) (out <-chan byte) {
 	return cha
 }
 
+func chanByteFuncNok(out chan<- byte, act func() (byte, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanByteFuncNok returns a channel to receive all results of act until nok before close.
+func ChanByteFuncNok(act func() (byte, bool)) (out <-chan byte) {
+	cha := make(chan byte)
+	go chanByteFuncNok(cha, act)
+	return cha
+}
+
+func chanByteFuncErr(out chan<- byte, act func() (byte, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanByteFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanByteFuncErr(act func() (byte, error)) (out <-chan byte) {
+	cha := make(chan byte)
+	go chanByteFuncErr(cha, act)
+	return cha
+}
+
 func joinByte(done chan<- struct{}, out chan<- byte, inp ...byte) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -79,9 +117,9 @@ func JoinByte(out chan<- byte, inp ...byte) (done <-chan struct{}) {
 
 func joinByteSlice(done chan<- struct{}, out chan<- byte, inp ...[]byte) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -210,3 +248,44 @@ func PipeByteFork(inp <-chan byte) (out1, out2 <-chan byte) {
 	go pipeByteFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// ByteTube is the signature for a pipe function.
+type ByteTube func(inp <-chan byte, out <-chan byte)
+
+// ByteDaisy returns a channel to receive all inp after having passed thru tube.
+func ByteDaisy(inp <-chan byte, tube ByteTube) (out <-chan byte) {
+	cha := make(chan byte)
+	go tube(inp, cha)
+	return cha
+}
+
+// ByteDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ByteDaisyChain(inp <-chan byte, tubes ...ByteTube) (out <-chan byte) {
+	cha := inp
+	for i := range tubes {
+		cha = ByteDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

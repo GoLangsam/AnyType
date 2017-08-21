@@ -37,8 +37,8 @@ func ChanInt64(inp ...int64) chan int64 {
 	out := make(chan int64)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -49,9 +49,43 @@ func ChanInt64Slice(inp ...[]int64) chan int64 {
 	out := make(chan int64)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanInt64FuncNok returns a channel to receive all results of act until nok before close.
+func ChanInt64FuncNok(act func() (int64, bool)) <-chan int64 {
+	out := make(chan int64)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanInt64FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanInt64FuncErr(act func() (int64, error)) <-chan int64 {
+	out := make(chan int64)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -63,8 +97,8 @@ func JoinInt64(out chan<- int64, inp ...int64) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -76,9 +110,9 @@ func JoinInt64Slice(out chan<- int64, inp ...[]int64) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -188,6 +222,47 @@ func PipeInt64Fork(inp <-chan int64) (chan int64, chan int64) {
 	}()
 	return out1, out2
 }
+
+// Int64Tube is the signature for a pipe function.
+type Int64Tube func(inp <-chan int64, out <-chan int64)
+
+// Int64Daisy returns a channel to receive all inp after having passed thru tube.
+func Int64Daisy(inp <-chan int64, tube Int64Tube) (out <-chan int64) {
+	cha := make(chan int64)
+	go tube(inp, cha)
+	return cha
+}
+
+// Int64DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func Int64DaisyChain(inp <-chan int64, tubes ...Int64Tube) (out <-chan int64) {
+	cha := inp
+	for i := range tubes {
+		cha = Int64Daisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
 
 // MergeInt64 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.

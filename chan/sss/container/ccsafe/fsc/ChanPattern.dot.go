@@ -41,8 +41,8 @@ func ChanPattern(inp ...*fs.Pattern) (out <-chan *fs.Pattern) {
 	cha := make(chan *fs.Pattern)
 	go func(out chan<- *fs.Pattern, inp ...*fs.Pattern) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanPatternSlice(inp ...[]*fs.Pattern) (out <-chan *fs.Pattern) {
 	cha := make(chan *fs.Pattern)
 	go func(out chan<- *fs.Pattern, inp ...[]*fs.Pattern) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanPatternFuncNok returns a channel to receive all results of act until nok before close.
+func ChanPatternFuncNok(act func() (*fs.Pattern, bool)) (out <-chan *fs.Pattern) {
+	cha := make(chan *fs.Pattern)
+	go func(out chan<- *fs.Pattern, act func() (*fs.Pattern, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanPatternFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanPatternFuncErr(act func() (*fs.Pattern, error)) (out <-chan *fs.Pattern) {
+	cha := make(chan *fs.Pattern)
+	go func(out chan<- *fs.Pattern, act func() (*fs.Pattern, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinPattern(out chan<- *fs.Pattern, inp ...*fs.Pattern) (done <-chan struct
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.Pattern, inp ...*fs.Pattern) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinPatternSlice(out chan<- *fs.Pattern, inp ...[]*fs.Pattern) (done <-chan
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.Pattern, inp ...[]*fs.Pattern) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipePatternFork(inp <-chan *fs.Pattern) (out1, out2 <-chan *fs.Pattern) {
 // PatternTube is the signature for a pipe function.
 type PatternTube func(inp <-chan *fs.Pattern, out <-chan *fs.Pattern)
 
-// Patterndaisy returns a channel to receive all inp after having passed thru tube.
-func Patterndaisy(inp <-chan *fs.Pattern, tube PatternTube) (out <-chan *fs.Pattern) {
+// PatternDaisy returns a channel to receive all inp after having passed thru tube.
+func PatternDaisy(inp <-chan *fs.Pattern, tube PatternTube) (out <-chan *fs.Pattern) {
 	cha := make(chan *fs.Pattern)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func Patterndaisy(inp <-chan *fs.Pattern, tube PatternTube) (out <-chan *fs.Patt
 // PatternDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func PatternDaisyChain(inp <-chan *fs.Pattern, tubes ...PatternTube) (out <-chan *fs.Pattern) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Patterndaisy(cha, tube)
+	for i := range tubes {
+		cha = PatternDaisy(cha, tubes[i])
 	}
 	return cha
 }

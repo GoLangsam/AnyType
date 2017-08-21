@@ -41,8 +41,8 @@ func ChanSectionReader(inp ...*io.SectionReader) (out <-chan *io.SectionReader) 
 	cha := make(chan *io.SectionReader)
 	go func(out chan<- *io.SectionReader, inp ...*io.SectionReader) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanSectionReaderSlice(inp ...[]*io.SectionReader) (out <-chan *io.SectionR
 	cha := make(chan *io.SectionReader)
 	go func(out chan<- *io.SectionReader, inp ...[]*io.SectionReader) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanSectionReaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanSectionReaderFuncNok(act func() (*io.SectionReader, bool)) (out <-chan *io.SectionReader) {
+	cha := make(chan *io.SectionReader)
+	go func(out chan<- *io.SectionReader, act func() (*io.SectionReader, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanSectionReaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanSectionReaderFuncErr(act func() (*io.SectionReader, error)) (out <-chan *io.SectionReader) {
+	cha := make(chan *io.SectionReader)
+	go func(out chan<- *io.SectionReader, act func() (*io.SectionReader, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinSectionReader(out chan<- *io.SectionReader, inp ...*io.SectionReader) (
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *io.SectionReader, inp ...*io.SectionReader) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinSectionReaderSlice(out chan<- *io.SectionReader, inp ...[]*io.SectionRe
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *io.SectionReader, inp ...[]*io.SectionReader) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeSectionReaderFork(inp <-chan *io.SectionReader) (out1, out2 <-chan *io.
 // SectionReaderTube is the signature for a pipe function.
 type SectionReaderTube func(inp <-chan *io.SectionReader, out <-chan *io.SectionReader)
 
-// SectionReaderdaisy returns a channel to receive all inp after having passed thru tube.
-func SectionReaderdaisy(inp <-chan *io.SectionReader, tube SectionReaderTube) (out <-chan *io.SectionReader) {
+// SectionReaderDaisy returns a channel to receive all inp after having passed thru tube.
+func SectionReaderDaisy(inp <-chan *io.SectionReader, tube SectionReaderTube) (out <-chan *io.SectionReader) {
 	cha := make(chan *io.SectionReader)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func SectionReaderdaisy(inp <-chan *io.SectionReader, tube SectionReaderTube) (o
 // SectionReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func SectionReaderDaisyChain(inp <-chan *io.SectionReader, tubes ...SectionReaderTube) (out <-chan *io.SectionReader) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = SectionReaderdaisy(cha, tube)
+	for i := range tubes {
+		cha = SectionReaderDaisy(cha, tubes[i])
 	}
 	return cha
 }

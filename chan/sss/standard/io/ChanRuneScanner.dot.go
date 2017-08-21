@@ -41,8 +41,8 @@ func ChanRuneScanner(inp ...io.RuneScanner) (out <-chan io.RuneScanner) {
 	cha := make(chan io.RuneScanner)
 	go func(out chan<- io.RuneScanner, inp ...io.RuneScanner) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanRuneScannerSlice(inp ...[]io.RuneScanner) (out <-chan io.RuneScanner) {
 	cha := make(chan io.RuneScanner)
 	go func(out chan<- io.RuneScanner, inp ...[]io.RuneScanner) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanRuneScannerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanRuneScannerFuncNok(act func() (io.RuneScanner, bool)) (out <-chan io.RuneScanner) {
+	cha := make(chan io.RuneScanner)
+	go func(out chan<- io.RuneScanner, act func() (io.RuneScanner, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanRuneScannerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanRuneScannerFuncErr(act func() (io.RuneScanner, error)) (out <-chan io.RuneScanner) {
+	cha := make(chan io.RuneScanner)
+	go func(out chan<- io.RuneScanner, act func() (io.RuneScanner, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinRuneScanner(out chan<- io.RuneScanner, inp ...io.RuneScanner) (done <-c
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.RuneScanner, inp ...io.RuneScanner) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinRuneScannerSlice(out chan<- io.RuneScanner, inp ...[]io.RuneScanner) (d
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.RuneScanner, inp ...[]io.RuneScanner) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeRuneScannerFork(inp <-chan io.RuneScanner) (out1, out2 <-chan io.RuneSc
 // RuneScannerTube is the signature for a pipe function.
 type RuneScannerTube func(inp <-chan io.RuneScanner, out <-chan io.RuneScanner)
 
-// RuneScannerdaisy returns a channel to receive all inp after having passed thru tube.
-func RuneScannerdaisy(inp <-chan io.RuneScanner, tube RuneScannerTube) (out <-chan io.RuneScanner) {
+// RuneScannerDaisy returns a channel to receive all inp after having passed thru tube.
+func RuneScannerDaisy(inp <-chan io.RuneScanner, tube RuneScannerTube) (out <-chan io.RuneScanner) {
 	cha := make(chan io.RuneScanner)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func RuneScannerdaisy(inp <-chan io.RuneScanner, tube RuneScannerTube) (out <-ch
 // RuneScannerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func RuneScannerDaisyChain(inp <-chan io.RuneScanner, tubes ...RuneScannerTube) (out <-chan io.RuneScanner) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = RuneScannerdaisy(cha, tube)
+	for i := range tubes {
+		cha = RuneScannerDaisy(cha, tubes[i])
 	}
 	return cha
 }

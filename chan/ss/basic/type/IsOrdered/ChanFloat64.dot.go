@@ -34,8 +34,8 @@ func MakeFloat64Chan() (out chan float64) {
 
 func sendFloat64(out chan<- float64, inp ...float64) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -48,9 +48,9 @@ func ChanFloat64(inp ...float64) (out <-chan float64) {
 
 func sendFloat64Slice(out chan<- float64, inp ...[]float64) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -62,10 +62,48 @@ func ChanFloat64Slice(inp ...[]float64) (out <-chan float64) {
 	return cha
 }
 
+func chanFloat64FuncNok(out chan<- float64, act func() (float64, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanFloat64FuncNok returns a channel to receive all results of act until nok before close.
+func ChanFloat64FuncNok(act func() (float64, bool)) (out <-chan float64) {
+	cha := make(chan float64)
+	go chanFloat64FuncNok(cha, act)
+	return cha
+}
+
+func chanFloat64FuncErr(out chan<- float64, act func() (float64, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanFloat64FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFloat64FuncErr(act func() (float64, error)) (out <-chan float64) {
+	cha := make(chan float64)
+	go chanFloat64FuncErr(cha, act)
+	return cha
+}
+
 func joinFloat64(done chan<- struct{}, out chan<- float64, inp ...float64) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -79,9 +117,9 @@ func JoinFloat64(out chan<- float64, inp ...float64) (done <-chan struct{}) {
 
 func joinFloat64Slice(done chan<- struct{}, out chan<- float64, inp ...[]float64) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -210,6 +248,47 @@ func PipeFloat64Fork(inp <-chan float64) (out1, out2 <-chan float64) {
 	go pipeFloat64Fork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// Float64Tube is the signature for a pipe function.
+type Float64Tube func(inp <-chan float64, out <-chan float64)
+
+// Float64Daisy returns a channel to receive all inp after having passed thru tube.
+func Float64Daisy(inp <-chan float64, tube Float64Tube) (out <-chan float64) {
+	cha := make(chan float64)
+	go tube(inp, cha)
+	return cha
+}
+
+// Float64DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func Float64DaisyChain(inp <-chan float64, tubes ...Float64Tube) (out <-chan float64) {
+	cha := inp
+	for i := range tubes {
+		cha = Float64Daisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
 
 // MergeFloat64 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.

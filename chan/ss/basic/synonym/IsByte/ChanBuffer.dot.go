@@ -38,8 +38,8 @@ func MakeBufferChan() (out chan bytes.Buffer) {
 
 func sendBuffer(out chan<- bytes.Buffer, inp ...bytes.Buffer) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanBuffer(inp ...bytes.Buffer) (out <-chan bytes.Buffer) {
 
 func sendBufferSlice(out chan<- bytes.Buffer, inp ...[]bytes.Buffer) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanBufferSlice(inp ...[]bytes.Buffer) (out <-chan bytes.Buffer) {
 	return cha
 }
 
+func chanBufferFuncNok(out chan<- bytes.Buffer, act func() (bytes.Buffer, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanBufferFuncNok returns a channel to receive all results of act until nok before close.
+func ChanBufferFuncNok(act func() (bytes.Buffer, bool)) (out <-chan bytes.Buffer) {
+	cha := make(chan bytes.Buffer)
+	go chanBufferFuncNok(cha, act)
+	return cha
+}
+
+func chanBufferFuncErr(out chan<- bytes.Buffer, act func() (bytes.Buffer, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanBufferFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanBufferFuncErr(act func() (bytes.Buffer, error)) (out <-chan bytes.Buffer) {
+	cha := make(chan bytes.Buffer)
+	go chanBufferFuncErr(cha, act)
+	return cha
+}
+
 func joinBuffer(done chan<- struct{}, out chan<- bytes.Buffer, inp ...bytes.Buffer) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinBuffer(out chan<- bytes.Buffer, inp ...bytes.Buffer) (done <-chan struc
 
 func joinBufferSlice(done chan<- struct{}, out chan<- bytes.Buffer, inp ...[]bytes.Buffer) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeBufferFork(inp <-chan bytes.Buffer) (out1, out2 <-chan bytes.Buffer) {
 	go pipeBufferFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// BufferTube is the signature for a pipe function.
+type BufferTube func(inp <-chan bytes.Buffer, out <-chan bytes.Buffer)
+
+// BufferDaisy returns a channel to receive all inp after having passed thru tube.
+func BufferDaisy(inp <-chan bytes.Buffer, tube BufferTube) (out <-chan bytes.Buffer) {
+	cha := make(chan bytes.Buffer)
+	go tube(inp, cha)
+	return cha
+}
+
+// BufferDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func BufferDaisyChain(inp <-chan bytes.Buffer, tubes ...BufferTube) (out <-chan bytes.Buffer) {
+	cha := inp
+	for i := range tubes {
+		cha = BufferDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

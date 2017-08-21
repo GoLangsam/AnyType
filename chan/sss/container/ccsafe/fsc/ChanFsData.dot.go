@@ -41,8 +41,8 @@ func ChanFsData(inp ...*fs.FsData) (out <-chan *fs.FsData) {
 	cha := make(chan *fs.FsData)
 	go func(out chan<- *fs.FsData, inp ...*fs.FsData) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanFsDataSlice(inp ...[]*fs.FsData) (out <-chan *fs.FsData) {
 	cha := make(chan *fs.FsData)
 	go func(out chan<- *fs.FsData, inp ...[]*fs.FsData) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanFsDataFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFsDataFuncNok(act func() (*fs.FsData, bool)) (out <-chan *fs.FsData) {
+	cha := make(chan *fs.FsData)
+	go func(out chan<- *fs.FsData, act func() (*fs.FsData, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanFsDataFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFsDataFuncErr(act func() (*fs.FsData, error)) (out <-chan *fs.FsData) {
+	cha := make(chan *fs.FsData)
+	go func(out chan<- *fs.FsData, act func() (*fs.FsData, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinFsData(out chan<- *fs.FsData, inp ...*fs.FsData) (done <-chan struct{})
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.FsData, inp ...*fs.FsData) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinFsDataSlice(out chan<- *fs.FsData, inp ...[]*fs.FsData) (done <-chan st
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.FsData, inp ...[]*fs.FsData) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeFsDataFork(inp <-chan *fs.FsData) (out1, out2 <-chan *fs.FsData) {
 // FsDataTube is the signature for a pipe function.
 type FsDataTube func(inp <-chan *fs.FsData, out <-chan *fs.FsData)
 
-// FsDatadaisy returns a channel to receive all inp after having passed thru tube.
-func FsDatadaisy(inp <-chan *fs.FsData, tube FsDataTube) (out <-chan *fs.FsData) {
+// FsDataDaisy returns a channel to receive all inp after having passed thru tube.
+func FsDataDaisy(inp <-chan *fs.FsData, tube FsDataTube) (out <-chan *fs.FsData) {
 	cha := make(chan *fs.FsData)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func FsDatadaisy(inp <-chan *fs.FsData, tube FsDataTube) (out <-chan *fs.FsData)
 // FsDataDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func FsDataDaisyChain(inp <-chan *fs.FsData, tubes ...FsDataTube) (out <-chan *fs.FsData) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = FsDatadaisy(cha, tube)
+	for i := range tubes {
+		cha = FsDataDaisy(cha, tubes[i])
 	}
 	return cha
 }

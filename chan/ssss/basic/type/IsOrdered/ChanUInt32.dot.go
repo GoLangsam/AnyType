@@ -37,8 +37,8 @@ func ChanUInt32(inp ...uint32) chan uint32 {
 	out := make(chan uint32)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -49,9 +49,43 @@ func ChanUInt32Slice(inp ...[]uint32) chan uint32 {
 	out := make(chan uint32)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanUInt32FuncNok returns a channel to receive all results of act until nok before close.
+func ChanUInt32FuncNok(act func() (uint32, bool)) <-chan uint32 {
+	out := make(chan uint32)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanUInt32FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanUInt32FuncErr(act func() (uint32, error)) <-chan uint32 {
+	out := make(chan uint32)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -63,8 +97,8 @@ func JoinUInt32(out chan<- uint32, inp ...uint32) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -76,9 +110,9 @@ func JoinUInt32Slice(out chan<- uint32, inp ...[]uint32) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -188,6 +222,47 @@ func PipeUInt32Fork(inp <-chan uint32) (chan uint32, chan uint32) {
 	}()
 	return out1, out2
 }
+
+// UInt32Tube is the signature for a pipe function.
+type UInt32Tube func(inp <-chan uint32, out <-chan uint32)
+
+// UInt32Daisy returns a channel to receive all inp after having passed thru tube.
+func UInt32Daisy(inp <-chan uint32, tube UInt32Tube) (out <-chan uint32) {
+	cha := make(chan uint32)
+	go tube(inp, cha)
+	return cha
+}
+
+// UInt32DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func UInt32DaisyChain(inp <-chan uint32, tubes ...UInt32Tube) (out <-chan uint32) {
+	cha := inp
+	for i := range tubes {
+		cha = UInt32Daisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
 
 // MergeUInt32 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.

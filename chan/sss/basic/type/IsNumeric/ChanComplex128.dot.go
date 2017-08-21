@@ -37,8 +37,8 @@ func ChanComplex128(inp ...complex128) (out <-chan complex128) {
 	cha := make(chan complex128)
 	go func(out chan<- complex128, inp ...complex128) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanComplex128Slice(inp ...[]complex128) (out <-chan complex128) {
 	cha := make(chan complex128)
 	go func(out chan<- complex128, inp ...[]complex128) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanComplex128FuncNok returns a channel to receive all results of act until nok before close.
+func ChanComplex128FuncNok(act func() (complex128, bool)) (out <-chan complex128) {
+	cha := make(chan complex128)
+	go func(out chan<- complex128, act func() (complex128, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanComplex128FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanComplex128FuncErr(act func() (complex128, error)) (out <-chan complex128) {
+	cha := make(chan complex128)
+	go func(out chan<- complex128, act func() (complex128, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinComplex128(out chan<- complex128, inp ...complex128) (done <-chan struc
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- complex128, inp ...complex128) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinComplex128Slice(out chan<- complex128, inp ...[]complex128) (done <-cha
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- complex128, inp ...[]complex128) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeComplex128Fork(inp <-chan complex128) (out1, out2 <-chan complex128) {
 // Complex128Tube is the signature for a pipe function.
 type Complex128Tube func(inp <-chan complex128, out <-chan complex128)
 
-// Complex128daisy returns a channel to receive all inp after having passed thru tube.
-func Complex128daisy(inp <-chan complex128, tube Complex128Tube) (out <-chan complex128) {
+// Complex128Daisy returns a channel to receive all inp after having passed thru tube.
+func Complex128Daisy(inp <-chan complex128, tube Complex128Tube) (out <-chan complex128) {
 	cha := make(chan complex128)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func Complex128daisy(inp <-chan complex128, tube Complex128Tube) (out <-chan com
 // Complex128DaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func Complex128DaisyChain(inp <-chan complex128, tubes ...Complex128Tube) (out <-chan complex128) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Complex128daisy(cha, tube)
+	for i := range tubes {
+		cha = Complex128Daisy(cha, tubes[i])
 	}
 	return cha
 }

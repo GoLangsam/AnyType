@@ -37,8 +37,8 @@ func ChanInt32(inp ...int32) (out <-chan int32) {
 	cha := make(chan int32)
 	go func(out chan<- int32, inp ...int32) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanInt32Slice(inp ...[]int32) (out <-chan int32) {
 	cha := make(chan int32)
 	go func(out chan<- int32, inp ...[]int32) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanInt32FuncNok returns a channel to receive all results of act until nok before close.
+func ChanInt32FuncNok(act func() (int32, bool)) (out <-chan int32) {
+	cha := make(chan int32)
+	go func(out chan<- int32, act func() (int32, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanInt32FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanInt32FuncErr(act func() (int32, error)) (out <-chan int32) {
+	cha := make(chan int32)
+	go func(out chan<- int32, act func() (int32, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinInt32(out chan<- int32, inp ...int32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- int32, inp ...int32) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinInt32Slice(out chan<- int32, inp ...[]int32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- int32, inp ...[]int32) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeInt32Fork(inp <-chan int32) (out1, out2 <-chan int32) {
 // Int32Tube is the signature for a pipe function.
 type Int32Tube func(inp <-chan int32, out <-chan int32)
 
-// Int32daisy returns a channel to receive all inp after having passed thru tube.
-func Int32daisy(inp <-chan int32, tube Int32Tube) (out <-chan int32) {
+// Int32Daisy returns a channel to receive all inp after having passed thru tube.
+func Int32Daisy(inp <-chan int32, tube Int32Tube) (out <-chan int32) {
 	cha := make(chan int32)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func Int32daisy(inp <-chan int32, tube Int32Tube) (out <-chan int32) {
 // Int32DaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func Int32DaisyChain(inp <-chan int32, tubes ...Int32Tube) (out <-chan int32) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Int32daisy(cha, tube)
+	for i := range tubes {
+		cha = Int32Daisy(cha, tubes[i])
 	}
 	return cha
 }

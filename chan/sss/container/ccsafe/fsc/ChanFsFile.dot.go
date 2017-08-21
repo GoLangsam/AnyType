@@ -41,8 +41,8 @@ func ChanFsFile(inp ...*fs.FsFile) (out <-chan *fs.FsFile) {
 	cha := make(chan *fs.FsFile)
 	go func(out chan<- *fs.FsFile, inp ...*fs.FsFile) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanFsFileSlice(inp ...[]*fs.FsFile) (out <-chan *fs.FsFile) {
 	cha := make(chan *fs.FsFile)
 	go func(out chan<- *fs.FsFile, inp ...[]*fs.FsFile) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanFsFileFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFsFileFuncNok(act func() (*fs.FsFile, bool)) (out <-chan *fs.FsFile) {
+	cha := make(chan *fs.FsFile)
+	go func(out chan<- *fs.FsFile, act func() (*fs.FsFile, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanFsFileFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFsFileFuncErr(act func() (*fs.FsFile, error)) (out <-chan *fs.FsFile) {
+	cha := make(chan *fs.FsFile)
+	go func(out chan<- *fs.FsFile, act func() (*fs.FsFile, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinFsFile(out chan<- *fs.FsFile, inp ...*fs.FsFile) (done <-chan struct{})
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.FsFile, inp ...*fs.FsFile) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinFsFileSlice(out chan<- *fs.FsFile, inp ...[]*fs.FsFile) (done <-chan st
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *fs.FsFile, inp ...[]*fs.FsFile) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeFsFileFork(inp <-chan *fs.FsFile) (out1, out2 <-chan *fs.FsFile) {
 // FsFileTube is the signature for a pipe function.
 type FsFileTube func(inp <-chan *fs.FsFile, out <-chan *fs.FsFile)
 
-// FsFiledaisy returns a channel to receive all inp after having passed thru tube.
-func FsFiledaisy(inp <-chan *fs.FsFile, tube FsFileTube) (out <-chan *fs.FsFile) {
+// FsFileDaisy returns a channel to receive all inp after having passed thru tube.
+func FsFileDaisy(inp <-chan *fs.FsFile, tube FsFileTube) (out <-chan *fs.FsFile) {
 	cha := make(chan *fs.FsFile)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func FsFiledaisy(inp <-chan *fs.FsFile, tube FsFileTube) (out <-chan *fs.FsFile)
 // FsFileDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func FsFileDaisyChain(inp <-chan *fs.FsFile, tubes ...FsFileTube) (out <-chan *fs.FsFile) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = FsFiledaisy(cha, tube)
+	for i := range tubes {
+		cha = FsFileDaisy(cha, tubes[i])
 	}
 	return cha
 }

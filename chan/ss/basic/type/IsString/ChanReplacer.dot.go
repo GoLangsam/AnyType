@@ -38,8 +38,8 @@ func MakeReplacerChan() (out chan *strings.Replacer) {
 
 func sendReplacer(out chan<- *strings.Replacer, inp ...*strings.Replacer) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanReplacer(inp ...*strings.Replacer) (out <-chan *strings.Replacer) {
 
 func sendReplacerSlice(out chan<- *strings.Replacer, inp ...[]*strings.Replacer) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanReplacerSlice(inp ...[]*strings.Replacer) (out <-chan *strings.Replacer
 	return cha
 }
 
+func chanReplacerFuncNok(out chan<- *strings.Replacer, act func() (*strings.Replacer, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanReplacerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReplacerFuncNok(act func() (*strings.Replacer, bool)) (out <-chan *strings.Replacer) {
+	cha := make(chan *strings.Replacer)
+	go chanReplacerFuncNok(cha, act)
+	return cha
+}
+
+func chanReplacerFuncErr(out chan<- *strings.Replacer, act func() (*strings.Replacer, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanReplacerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReplacerFuncErr(act func() (*strings.Replacer, error)) (out <-chan *strings.Replacer) {
+	cha := make(chan *strings.Replacer)
+	go chanReplacerFuncErr(cha, act)
+	return cha
+}
+
 func joinReplacer(done chan<- struct{}, out chan<- *strings.Replacer, inp ...*strings.Replacer) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinReplacer(out chan<- *strings.Replacer, inp ...*strings.Replacer) (done 
 
 func joinReplacerSlice(done chan<- struct{}, out chan<- *strings.Replacer, inp ...[]*strings.Replacer) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeReplacerFork(inp <-chan *strings.Replacer) (out1, out2 <-chan *strings.
 	go pipeReplacerFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// ReplacerTube is the signature for a pipe function.
+type ReplacerTube func(inp <-chan *strings.Replacer, out <-chan *strings.Replacer)
+
+// ReplacerDaisy returns a channel to receive all inp after having passed thru tube.
+func ReplacerDaisy(inp <-chan *strings.Replacer, tube ReplacerTube) (out <-chan *strings.Replacer) {
+	cha := make(chan *strings.Replacer)
+	go tube(inp, cha)
+	return cha
+}
+
+// ReplacerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ReplacerDaisyChain(inp <-chan *strings.Replacer, tubes ...ReplacerTube) (out <-chan *strings.Replacer) {
+	cha := inp
+	for i := range tubes {
+		cha = ReplacerDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

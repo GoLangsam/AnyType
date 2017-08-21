@@ -41,8 +41,8 @@ func ChanReader(inp ...*bufio.Reader) (out <-chan *bufio.Reader) {
 	cha := make(chan *bufio.Reader)
 	go func(out chan<- *bufio.Reader, inp ...*bufio.Reader) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanReaderSlice(inp ...[]*bufio.Reader) (out <-chan *bufio.Reader) {
 	cha := make(chan *bufio.Reader)
 	go func(out chan<- *bufio.Reader, inp ...[]*bufio.Reader) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanReaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReaderFuncNok(act func() (*bufio.Reader, bool)) (out <-chan *bufio.Reader) {
+	cha := make(chan *bufio.Reader)
+	go func(out chan<- *bufio.Reader, act func() (*bufio.Reader, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanReaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReaderFuncErr(act func() (*bufio.Reader, error)) (out <-chan *bufio.Reader) {
+	cha := make(chan *bufio.Reader)
+	go func(out chan<- *bufio.Reader, act func() (*bufio.Reader, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinReader(out chan<- *bufio.Reader, inp ...*bufio.Reader) (done <-chan str
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Reader, inp ...*bufio.Reader) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinReaderSlice(out chan<- *bufio.Reader, inp ...[]*bufio.Reader) (done <-c
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *bufio.Reader, inp ...[]*bufio.Reader) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeReaderFork(inp <-chan *bufio.Reader) (out1, out2 <-chan *bufio.Reader) 
 // ReaderTube is the signature for a pipe function.
 type ReaderTube func(inp <-chan *bufio.Reader, out <-chan *bufio.Reader)
 
-// Readerdaisy returns a channel to receive all inp after having passed thru tube.
-func Readerdaisy(inp <-chan *bufio.Reader, tube ReaderTube) (out <-chan *bufio.Reader) {
+// ReaderDaisy returns a channel to receive all inp after having passed thru tube.
+func ReaderDaisy(inp <-chan *bufio.Reader, tube ReaderTube) (out <-chan *bufio.Reader) {
 	cha := make(chan *bufio.Reader)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func Readerdaisy(inp <-chan *bufio.Reader, tube ReaderTube) (out <-chan *bufio.R
 // ReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func ReaderDaisyChain(inp <-chan *bufio.Reader, tubes ...ReaderTube) (out <-chan *bufio.Reader) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Readerdaisy(cha, tube)
+	for i := range tubes {
+		cha = ReaderDaisy(cha, tubes[i])
 	}
 	return cha
 }

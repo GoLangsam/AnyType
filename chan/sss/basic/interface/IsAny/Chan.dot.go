@@ -37,8 +37,8 @@ func Chan(inp ...interface{}) (out <-chan interface{}) {
 	cha := make(chan interface{})
 	go func(out chan<- interface{}, inp ...interface{}) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanSlice(inp ...[]interface{}) (out <-chan interface{}) {
 	cha := make(chan interface{})
 	go func(out chan<- interface{}, inp ...[]interface{}) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFuncNok(act func() (interface{}, bool)) (out <-chan interface{}) {
+	cha := make(chan interface{})
+	go func(out chan<- interface{}, act func() (interface{}, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFuncErr(act func() (interface{}, error)) (out <-chan interface{}) {
+	cha := make(chan interface{})
+	go func(out chan<- interface{}, act func() (interface{}, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func Join(out chan<- interface{}, inp ...interface{}) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- interface{}, inp ...interface{}) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinSlice(out chan<- interface{}, inp ...[]interface{}) (done <-chan struct
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- interface{}, inp ...[]interface{}) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeFork(inp <-chan interface{}) (out1, out2 <-chan interface{}) {
 // Tube is the signature for a pipe function.
 type Tube func(inp <-chan interface{}, out <-chan interface{})
 
-// daisy returns a channel to receive all inp after having passed thru tube.
-func daisy(inp <-chan interface{}, tube Tube) (out <-chan interface{}) {
+// Daisy returns a channel to receive all inp after having passed thru tube.
+func Daisy(inp <-chan interface{}, tube Tube) (out <-chan interface{}) {
 	cha := make(chan interface{})
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func daisy(inp <-chan interface{}, tube Tube) (out <-chan interface{}) {
 // DaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func DaisyChain(inp <-chan interface{}, tubes ...Tube) (out <-chan interface{}) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = daisy(cha, tube)
+	for i := range tubes {
+		cha = Daisy(cha, tubes[i])
 	}
 	return cha
 }

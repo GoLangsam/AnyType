@@ -37,8 +37,8 @@ func ChanByte(inp ...byte) (out <-chan byte) {
 	cha := make(chan byte)
 	go func(out chan<- byte, inp ...byte) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanByteSlice(inp ...[]byte) (out <-chan byte) {
 	cha := make(chan byte)
 	go func(out chan<- byte, inp ...[]byte) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanByteFuncNok returns a channel to receive all results of act until nok before close.
+func ChanByteFuncNok(act func() (byte, bool)) (out <-chan byte) {
+	cha := make(chan byte)
+	go func(out chan<- byte, act func() (byte, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanByteFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanByteFuncErr(act func() (byte, error)) (out <-chan byte) {
+	cha := make(chan byte)
+	go func(out chan<- byte, act func() (byte, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinByte(out chan<- byte, inp ...byte) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- byte, inp ...byte) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinByteSlice(out chan<- byte, inp ...[]byte) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- byte, inp ...[]byte) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeByteFork(inp <-chan byte) (out1, out2 <-chan byte) {
 // ByteTube is the signature for a pipe function.
 type ByteTube func(inp <-chan byte, out <-chan byte)
 
-// Bytedaisy returns a channel to receive all inp after having passed thru tube.
-func Bytedaisy(inp <-chan byte, tube ByteTube) (out <-chan byte) {
+// ByteDaisy returns a channel to receive all inp after having passed thru tube.
+func ByteDaisy(inp <-chan byte, tube ByteTube) (out <-chan byte) {
 	cha := make(chan byte)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func Bytedaisy(inp <-chan byte, tube ByteTube) (out <-chan byte) {
 // ByteDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func ByteDaisyChain(inp <-chan byte, tubes ...ByteTube) (out <-chan byte) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Bytedaisy(cha, tube)
+	for i := range tubes {
+		cha = ByteDaisy(cha, tubes[i])
 	}
 	return cha
 }

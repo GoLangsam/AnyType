@@ -41,8 +41,8 @@ func ChanFsFold(inp ...*fs.FsFold) chan *fs.FsFold {
 	out := make(chan *fs.FsFold)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -53,9 +53,43 @@ func ChanFsFoldSlice(inp ...[]*fs.FsFold) chan *fs.FsFold {
 	out := make(chan *fs.FsFold)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanFsFoldFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFsFoldFuncNok(act func() (*fs.FsFold, bool)) <-chan *fs.FsFold {
+	out := make(chan *fs.FsFold)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanFsFoldFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFsFoldFuncErr(act func() (*fs.FsFold, error)) <-chan *fs.FsFold {
+	out := make(chan *fs.FsFold)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -67,8 +101,8 @@ func JoinFsFold(out chan<- *fs.FsFold, inp ...*fs.FsFold) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -80,9 +114,9 @@ func JoinFsFoldSlice(out chan<- *fs.FsFold, inp ...[]*fs.FsFold) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,3 +226,44 @@ func PipeFsFoldFork(inp <-chan *fs.FsFold) (chan *fs.FsFold, chan *fs.FsFold) {
 	}()
 	return out1, out2
 }
+
+// FsFoldTube is the signature for a pipe function.
+type FsFoldTube func(inp <-chan *fs.FsFold, out <-chan *fs.FsFold)
+
+// FsFoldDaisy returns a channel to receive all inp after having passed thru tube.
+func FsFoldDaisy(inp <-chan *fs.FsFold, tube FsFoldTube) (out <-chan *fs.FsFold) {
+	cha := make(chan *fs.FsFold)
+	go tube(inp, cha)
+	return cha
+}
+
+// FsFoldDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func FsFoldDaisyChain(inp <-chan *fs.FsFold, tubes ...FsFoldTube) (out <-chan *fs.FsFold) {
+	cha := inp
+	for i := range tubes {
+		cha = FsFoldDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

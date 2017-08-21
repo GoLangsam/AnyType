@@ -34,8 +34,8 @@ func MakeInt8Chan() (out chan int8) {
 
 func sendInt8(out chan<- int8, inp ...int8) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -48,9 +48,9 @@ func ChanInt8(inp ...int8) (out <-chan int8) {
 
 func sendInt8Slice(out chan<- int8, inp ...[]int8) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -62,10 +62,48 @@ func ChanInt8Slice(inp ...[]int8) (out <-chan int8) {
 	return cha
 }
 
+func chanInt8FuncNok(out chan<- int8, act func() (int8, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanInt8FuncNok returns a channel to receive all results of act until nok before close.
+func ChanInt8FuncNok(act func() (int8, bool)) (out <-chan int8) {
+	cha := make(chan int8)
+	go chanInt8FuncNok(cha, act)
+	return cha
+}
+
+func chanInt8FuncErr(out chan<- int8, act func() (int8, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanInt8FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanInt8FuncErr(act func() (int8, error)) (out <-chan int8) {
+	cha := make(chan int8)
+	go chanInt8FuncErr(cha, act)
+	return cha
+}
+
 func joinInt8(done chan<- struct{}, out chan<- int8, inp ...int8) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -79,9 +117,9 @@ func JoinInt8(out chan<- int8, inp ...int8) (done <-chan struct{}) {
 
 func joinInt8Slice(done chan<- struct{}, out chan<- int8, inp ...[]int8) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -210,6 +248,47 @@ func PipeInt8Fork(inp <-chan int8) (out1, out2 <-chan int8) {
 	go pipeInt8Fork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// Int8Tube is the signature for a pipe function.
+type Int8Tube func(inp <-chan int8, out <-chan int8)
+
+// Int8Daisy returns a channel to receive all inp after having passed thru tube.
+func Int8Daisy(inp <-chan int8, tube Int8Tube) (out <-chan int8) {
+	cha := make(chan int8)
+	go tube(inp, cha)
+	return cha
+}
+
+// Int8DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func Int8DaisyChain(inp <-chan int8, tubes ...Int8Tube) (out <-chan int8) {
+	cha := inp
+	for i := range tubes {
+		cha = Int8Daisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
 
 // MergeInt8 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.

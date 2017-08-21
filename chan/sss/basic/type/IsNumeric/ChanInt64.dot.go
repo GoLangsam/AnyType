@@ -37,8 +37,8 @@ func ChanInt64(inp ...int64) (out <-chan int64) {
 	cha := make(chan int64)
 	go func(out chan<- int64, inp ...int64) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanInt64Slice(inp ...[]int64) (out <-chan int64) {
 	cha := make(chan int64)
 	go func(out chan<- int64, inp ...[]int64) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanInt64FuncNok returns a channel to receive all results of act until nok before close.
+func ChanInt64FuncNok(act func() (int64, bool)) (out <-chan int64) {
+	cha := make(chan int64)
+	go func(out chan<- int64, act func() (int64, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanInt64FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanInt64FuncErr(act func() (int64, error)) (out <-chan int64) {
+	cha := make(chan int64)
+	go func(out chan<- int64, act func() (int64, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinInt64(out chan<- int64, inp ...int64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- int64, inp ...int64) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinInt64Slice(out chan<- int64, inp ...[]int64) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- int64, inp ...[]int64) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeInt64Fork(inp <-chan int64) (out1, out2 <-chan int64) {
 // Int64Tube is the signature for a pipe function.
 type Int64Tube func(inp <-chan int64, out <-chan int64)
 
-// Int64daisy returns a channel to receive all inp after having passed thru tube.
-func Int64daisy(inp <-chan int64, tube Int64Tube) (out <-chan int64) {
+// Int64Daisy returns a channel to receive all inp after having passed thru tube.
+func Int64Daisy(inp <-chan int64, tube Int64Tube) (out <-chan int64) {
 	cha := make(chan int64)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func Int64daisy(inp <-chan int64, tube Int64Tube) (out <-chan int64) {
 // Int64DaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func Int64DaisyChain(inp <-chan int64, tubes ...Int64Tube) (out <-chan int64) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Int64daisy(cha, tube)
+	for i := range tubes {
+		cha = Int64Daisy(cha, tubes[i])
 	}
 	return cha
 }

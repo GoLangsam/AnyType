@@ -38,8 +38,8 @@ func MakeSeekerChan() (out chan io.Seeker) {
 
 func sendSeeker(out chan<- io.Seeker, inp ...io.Seeker) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanSeeker(inp ...io.Seeker) (out <-chan io.Seeker) {
 
 func sendSeekerSlice(out chan<- io.Seeker, inp ...[]io.Seeker) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanSeekerSlice(inp ...[]io.Seeker) (out <-chan io.Seeker) {
 	return cha
 }
 
+func chanSeekerFuncNok(out chan<- io.Seeker, act func() (io.Seeker, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanSeekerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanSeekerFuncNok(act func() (io.Seeker, bool)) (out <-chan io.Seeker) {
+	cha := make(chan io.Seeker)
+	go chanSeekerFuncNok(cha, act)
+	return cha
+}
+
+func chanSeekerFuncErr(out chan<- io.Seeker, act func() (io.Seeker, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanSeekerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanSeekerFuncErr(act func() (io.Seeker, error)) (out <-chan io.Seeker) {
+	cha := make(chan io.Seeker)
+	go chanSeekerFuncErr(cha, act)
+	return cha
+}
+
 func joinSeeker(done chan<- struct{}, out chan<- io.Seeker, inp ...io.Seeker) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinSeeker(out chan<- io.Seeker, inp ...io.Seeker) (done <-chan struct{}) {
 
 func joinSeekerSlice(done chan<- struct{}, out chan<- io.Seeker, inp ...[]io.Seeker) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeSeekerFork(inp <-chan io.Seeker) (out1, out2 <-chan io.Seeker) {
 	go pipeSeekerFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// SeekerTube is the signature for a pipe function.
+type SeekerTube func(inp <-chan io.Seeker, out <-chan io.Seeker)
+
+// SeekerDaisy returns a channel to receive all inp after having passed thru tube.
+func SeekerDaisy(inp <-chan io.Seeker, tube SeekerTube) (out <-chan io.Seeker) {
+	cha := make(chan io.Seeker)
+	go tube(inp, cha)
+	return cha
+}
+
+// SeekerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func SeekerDaisyChain(inp <-chan io.Seeker, tubes ...SeekerTube) (out <-chan io.Seeker) {
+	cha := inp
+	for i := range tubes {
+		cha = SeekerDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

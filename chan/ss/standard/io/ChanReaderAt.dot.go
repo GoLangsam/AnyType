@@ -38,8 +38,8 @@ func MakeReaderAtChan() (out chan io.ReaderAt) {
 
 func sendReaderAt(out chan<- io.ReaderAt, inp ...io.ReaderAt) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanReaderAt(inp ...io.ReaderAt) (out <-chan io.ReaderAt) {
 
 func sendReaderAtSlice(out chan<- io.ReaderAt, inp ...[]io.ReaderAt) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanReaderAtSlice(inp ...[]io.ReaderAt) (out <-chan io.ReaderAt) {
 	return cha
 }
 
+func chanReaderAtFuncNok(out chan<- io.ReaderAt, act func() (io.ReaderAt, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanReaderAtFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReaderAtFuncNok(act func() (io.ReaderAt, bool)) (out <-chan io.ReaderAt) {
+	cha := make(chan io.ReaderAt)
+	go chanReaderAtFuncNok(cha, act)
+	return cha
+}
+
+func chanReaderAtFuncErr(out chan<- io.ReaderAt, act func() (io.ReaderAt, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanReaderAtFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReaderAtFuncErr(act func() (io.ReaderAt, error)) (out <-chan io.ReaderAt) {
+	cha := make(chan io.ReaderAt)
+	go chanReaderAtFuncErr(cha, act)
+	return cha
+}
+
 func joinReaderAt(done chan<- struct{}, out chan<- io.ReaderAt, inp ...io.ReaderAt) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinReaderAt(out chan<- io.ReaderAt, inp ...io.ReaderAt) (done <-chan struc
 
 func joinReaderAtSlice(done chan<- struct{}, out chan<- io.ReaderAt, inp ...[]io.ReaderAt) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeReaderAtFork(inp <-chan io.ReaderAt) (out1, out2 <-chan io.ReaderAt) {
 	go pipeReaderAtFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// ReaderAtTube is the signature for a pipe function.
+type ReaderAtTube func(inp <-chan io.ReaderAt, out <-chan io.ReaderAt)
+
+// ReaderAtDaisy returns a channel to receive all inp after having passed thru tube.
+func ReaderAtDaisy(inp <-chan io.ReaderAt, tube ReaderAtTube) (out <-chan io.ReaderAt) {
+	cha := make(chan io.ReaderAt)
+	go tube(inp, cha)
+	return cha
+}
+
+// ReaderAtDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ReaderAtDaisyChain(inp <-chan io.ReaderAt, tubes ...ReaderAtTube) (out <-chan io.ReaderAt) {
+	cha := inp
+	for i := range tubes {
+		cha = ReaderAtDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

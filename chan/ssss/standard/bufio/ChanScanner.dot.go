@@ -41,8 +41,8 @@ func ChanScanner(inp ...*bufio.Scanner) chan *bufio.Scanner {
 	out := make(chan *bufio.Scanner)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -53,9 +53,43 @@ func ChanScannerSlice(inp ...[]*bufio.Scanner) chan *bufio.Scanner {
 	out := make(chan *bufio.Scanner)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanScannerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanScannerFuncNok(act func() (*bufio.Scanner, bool)) <-chan *bufio.Scanner {
+	out := make(chan *bufio.Scanner)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanScannerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanScannerFuncErr(act func() (*bufio.Scanner, error)) <-chan *bufio.Scanner {
+	out := make(chan *bufio.Scanner)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -67,8 +101,8 @@ func JoinScanner(out chan<- *bufio.Scanner, inp ...*bufio.Scanner) chan struct{}
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -80,9 +114,9 @@ func JoinScannerSlice(out chan<- *bufio.Scanner, inp ...[]*bufio.Scanner) chan s
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,3 +226,44 @@ func PipeScannerFork(inp <-chan *bufio.Scanner) (chan *bufio.Scanner, chan *bufi
 	}()
 	return out1, out2
 }
+
+// ScannerTube is the signature for a pipe function.
+type ScannerTube func(inp <-chan *bufio.Scanner, out <-chan *bufio.Scanner)
+
+// ScannerDaisy returns a channel to receive all inp after having passed thru tube.
+func ScannerDaisy(inp <-chan *bufio.Scanner, tube ScannerTube) (out <-chan *bufio.Scanner) {
+	cha := make(chan *bufio.Scanner)
+	go tube(inp, cha)
+	return cha
+}
+
+// ScannerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ScannerDaisyChain(inp <-chan *bufio.Scanner, tubes ...ScannerTube) (out <-chan *bufio.Scanner) {
+	cha := inp
+	for i := range tubes {
+		cha = ScannerDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

@@ -37,8 +37,8 @@ func ChanFloat32(inp ...float32) (out <-chan float32) {
 	cha := make(chan float32)
 	go func(out chan<- float32, inp ...float32) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanFloat32Slice(inp ...[]float32) (out <-chan float32) {
 	cha := make(chan float32)
 	go func(out chan<- float32, inp ...[]float32) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanFloat32FuncNok returns a channel to receive all results of act until nok before close.
+func ChanFloat32FuncNok(act func() (float32, bool)) (out <-chan float32) {
+	cha := make(chan float32)
+	go func(out chan<- float32, act func() (float32, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanFloat32FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFloat32FuncErr(act func() (float32, error)) (out <-chan float32) {
+	cha := make(chan float32)
+	go func(out chan<- float32, act func() (float32, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinFloat32(out chan<- float32, inp ...float32) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float32, inp ...float32) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinFloat32Slice(out chan<- float32, inp ...[]float32) (done <-chan struct{
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- float32, inp ...[]float32) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeFloat32Fork(inp <-chan float32) (out1, out2 <-chan float32) {
 // Float32Tube is the signature for a pipe function.
 type Float32Tube func(inp <-chan float32, out <-chan float32)
 
-// Float32daisy returns a channel to receive all inp after having passed thru tube.
-func Float32daisy(inp <-chan float32, tube Float32Tube) (out <-chan float32) {
+// Float32Daisy returns a channel to receive all inp after having passed thru tube.
+func Float32Daisy(inp <-chan float32, tube Float32Tube) (out <-chan float32) {
 	cha := make(chan float32)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func Float32daisy(inp <-chan float32, tube Float32Tube) (out <-chan float32) {
 // Float32DaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func Float32DaisyChain(inp <-chan float32, tubes ...Float32Tube) (out <-chan float32) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Float32daisy(cha, tube)
+	for i := range tubes {
+		cha = Float32Daisy(cha, tubes[i])
 	}
 	return cha
 }

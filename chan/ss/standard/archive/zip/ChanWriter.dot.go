@@ -38,8 +38,8 @@ func MakeWriterChan() (out chan zip.Writer) {
 
 func sendWriter(out chan<- zip.Writer, inp ...zip.Writer) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanWriter(inp ...zip.Writer) (out <-chan zip.Writer) {
 
 func sendWriterSlice(out chan<- zip.Writer, inp ...[]zip.Writer) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanWriterSlice(inp ...[]zip.Writer) (out <-chan zip.Writer) {
 	return cha
 }
 
+func chanWriterFuncNok(out chan<- zip.Writer, act func() (zip.Writer, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanWriterFuncNok returns a channel to receive all results of act until nok before close.
+func ChanWriterFuncNok(act func() (zip.Writer, bool)) (out <-chan zip.Writer) {
+	cha := make(chan zip.Writer)
+	go chanWriterFuncNok(cha, act)
+	return cha
+}
+
+func chanWriterFuncErr(out chan<- zip.Writer, act func() (zip.Writer, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanWriterFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanWriterFuncErr(act func() (zip.Writer, error)) (out <-chan zip.Writer) {
+	cha := make(chan zip.Writer)
+	go chanWriterFuncErr(cha, act)
+	return cha
+}
+
 func joinWriter(done chan<- struct{}, out chan<- zip.Writer, inp ...zip.Writer) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinWriter(out chan<- zip.Writer, inp ...zip.Writer) (done <-chan struct{})
 
 func joinWriterSlice(done chan<- struct{}, out chan<- zip.Writer, inp ...[]zip.Writer) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeWriterFork(inp <-chan zip.Writer) (out1, out2 <-chan zip.Writer) {
 	go pipeWriterFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// WriterTube is the signature for a pipe function.
+type WriterTube func(inp <-chan zip.Writer, out <-chan zip.Writer)
+
+// WriterDaisy returns a channel to receive all inp after having passed thru tube.
+func WriterDaisy(inp <-chan zip.Writer, tube WriterTube) (out <-chan zip.Writer) {
+	cha := make(chan zip.Writer)
+	go tube(inp, cha)
+	return cha
+}
+
+// WriterDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func WriterDaisyChain(inp <-chan zip.Writer, tubes ...WriterTube) (out <-chan zip.Writer) {
+	cha := inp
+	for i := range tubes {
+		cha = WriterDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

@@ -41,8 +41,8 @@ func ChanReader(inp ...bytes.Reader) (out <-chan bytes.Reader) {
 	cha := make(chan bytes.Reader)
 	go func(out chan<- bytes.Reader, inp ...bytes.Reader) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanReaderSlice(inp ...[]bytes.Reader) (out <-chan bytes.Reader) {
 	cha := make(chan bytes.Reader)
 	go func(out chan<- bytes.Reader, inp ...[]bytes.Reader) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanReaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReaderFuncNok(act func() (bytes.Reader, bool)) (out <-chan bytes.Reader) {
+	cha := make(chan bytes.Reader)
+	go func(out chan<- bytes.Reader, act func() (bytes.Reader, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanReaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReaderFuncErr(act func() (bytes.Reader, error)) (out <-chan bytes.Reader) {
+	cha := make(chan bytes.Reader)
+	go func(out chan<- bytes.Reader, act func() (bytes.Reader, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinReader(out chan<- bytes.Reader, inp ...bytes.Reader) (done <-chan struc
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- bytes.Reader, inp ...bytes.Reader) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinReaderSlice(out chan<- bytes.Reader, inp ...[]bytes.Reader) (done <-cha
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- bytes.Reader, inp ...[]bytes.Reader) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeReaderFork(inp <-chan bytes.Reader) (out1, out2 <-chan bytes.Reader) {
 // ReaderTube is the signature for a pipe function.
 type ReaderTube func(inp <-chan bytes.Reader, out <-chan bytes.Reader)
 
-// Readerdaisy returns a channel to receive all inp after having passed thru tube.
-func Readerdaisy(inp <-chan bytes.Reader, tube ReaderTube) (out <-chan bytes.Reader) {
+// ReaderDaisy returns a channel to receive all inp after having passed thru tube.
+func ReaderDaisy(inp <-chan bytes.Reader, tube ReaderTube) (out <-chan bytes.Reader) {
 	cha := make(chan bytes.Reader)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func Readerdaisy(inp <-chan bytes.Reader, tube ReaderTube) (out <-chan bytes.Rea
 // ReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func ReaderDaisyChain(inp <-chan bytes.Reader, tubes ...ReaderTube) (out <-chan bytes.Reader) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Readerdaisy(cha, tube)
+	for i := range tubes {
+		cha = ReaderDaisy(cha, tubes[i])
 	}
 	return cha
 }

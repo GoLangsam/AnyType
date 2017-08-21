@@ -38,8 +38,8 @@ func MakeByteScannerChan() (out chan io.ByteScanner) {
 
 func sendByteScanner(out chan<- io.ByteScanner, inp ...io.ByteScanner) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanByteScanner(inp ...io.ByteScanner) (out <-chan io.ByteScanner) {
 
 func sendByteScannerSlice(out chan<- io.ByteScanner, inp ...[]io.ByteScanner) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanByteScannerSlice(inp ...[]io.ByteScanner) (out <-chan io.ByteScanner) {
 	return cha
 }
 
+func chanByteScannerFuncNok(out chan<- io.ByteScanner, act func() (io.ByteScanner, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanByteScannerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanByteScannerFuncNok(act func() (io.ByteScanner, bool)) (out <-chan io.ByteScanner) {
+	cha := make(chan io.ByteScanner)
+	go chanByteScannerFuncNok(cha, act)
+	return cha
+}
+
+func chanByteScannerFuncErr(out chan<- io.ByteScanner, act func() (io.ByteScanner, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanByteScannerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanByteScannerFuncErr(act func() (io.ByteScanner, error)) (out <-chan io.ByteScanner) {
+	cha := make(chan io.ByteScanner)
+	go chanByteScannerFuncErr(cha, act)
+	return cha
+}
+
 func joinByteScanner(done chan<- struct{}, out chan<- io.ByteScanner, inp ...io.ByteScanner) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinByteScanner(out chan<- io.ByteScanner, inp ...io.ByteScanner) (done <-c
 
 func joinByteScannerSlice(done chan<- struct{}, out chan<- io.ByteScanner, inp ...[]io.ByteScanner) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeByteScannerFork(inp <-chan io.ByteScanner) (out1, out2 <-chan io.ByteSc
 	go pipeByteScannerFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// ByteScannerTube is the signature for a pipe function.
+type ByteScannerTube func(inp <-chan io.ByteScanner, out <-chan io.ByteScanner)
+
+// ByteScannerDaisy returns a channel to receive all inp after having passed thru tube.
+func ByteScannerDaisy(inp <-chan io.ByteScanner, tube ByteScannerTube) (out <-chan io.ByteScanner) {
+	cha := make(chan io.ByteScanner)
+	go tube(inp, cha)
+	return cha
+}
+
+// ByteScannerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ByteScannerDaisyChain(inp <-chan io.ByteScanner, tubes ...ByteScannerTube) (out <-chan io.ByteScanner) {
+	cha := inp
+	for i := range tubes {
+		cha = ByteScannerDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

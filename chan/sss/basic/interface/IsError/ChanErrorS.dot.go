@@ -37,8 +37,8 @@ func ChanErrorS(inp ...[]error) (out <-chan []error) {
 	cha := make(chan []error)
 	go func(out chan<- []error, inp ...[]error) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanErrorSSlice(inp ...[][]error) (out <-chan []error) {
 	cha := make(chan []error)
 	go func(out chan<- []error, inp ...[][]error) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanErrorSFuncNok returns a channel to receive all results of act until nok before close.
+func ChanErrorSFuncNok(act func() ([]error, bool)) (out <-chan []error) {
+	cha := make(chan []error)
+	go func(out chan<- []error, act func() ([]error, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanErrorSFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanErrorSFuncErr(act func() ([]error, error)) (out <-chan []error) {
+	cha := make(chan []error)
+	go func(out chan<- []error, act func() ([]error, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinErrorS(out chan<- []error, inp ...[]error) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- []error, inp ...[]error) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinErrorSSlice(out chan<- []error, inp ...[][]error) (done <-chan struct{}
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- []error, inp ...[][]error) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeErrorSFork(inp <-chan []error) (out1, out2 <-chan []error) {
 // ErrorSTube is the signature for a pipe function.
 type ErrorSTube func(inp <-chan []error, out <-chan []error)
 
-// ErrorSdaisy returns a channel to receive all inp after having passed thru tube.
-func ErrorSdaisy(inp <-chan []error, tube ErrorSTube) (out <-chan []error) {
+// ErrorSDaisy returns a channel to receive all inp after having passed thru tube.
+func ErrorSDaisy(inp <-chan []error, tube ErrorSTube) (out <-chan []error) {
 	cha := make(chan []error)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func ErrorSdaisy(inp <-chan []error, tube ErrorSTube) (out <-chan []error) {
 // ErrorSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func ErrorSDaisyChain(inp <-chan []error, tubes ...ErrorSTube) (out <-chan []error) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = ErrorSdaisy(cha, tube)
+	for i := range tubes {
+		cha = ErrorSDaisy(cha, tubes[i])
 	}
 	return cha
 }

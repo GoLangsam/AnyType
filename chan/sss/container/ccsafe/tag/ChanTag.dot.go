@@ -41,8 +41,8 @@ func ChanTag(inp ...tag.TagAny) (out <-chan tag.TagAny) {
 	cha := make(chan tag.TagAny)
 	go func(out chan<- tag.TagAny, inp ...tag.TagAny) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanTagSlice(inp ...[]tag.TagAny) (out <-chan tag.TagAny) {
 	cha := make(chan tag.TagAny)
 	go func(out chan<- tag.TagAny, inp ...[]tag.TagAny) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanTagFuncNok returns a channel to receive all results of act until nok before close.
+func ChanTagFuncNok(act func() (tag.TagAny, bool)) (out <-chan tag.TagAny) {
+	cha := make(chan tag.TagAny)
+	go func(out chan<- tag.TagAny, act func() (tag.TagAny, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanTagFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanTagFuncErr(act func() (tag.TagAny, error)) (out <-chan tag.TagAny) {
+	cha := make(chan tag.TagAny)
+	go func(out chan<- tag.TagAny, act func() (tag.TagAny, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinTag(out chan<- tag.TagAny, inp ...tag.TagAny) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- tag.TagAny, inp ...tag.TagAny) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinTagSlice(out chan<- tag.TagAny, inp ...[]tag.TagAny) (done <-chan struc
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- tag.TagAny, inp ...[]tag.TagAny) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeTagFork(inp <-chan tag.TagAny) (out1, out2 <-chan tag.TagAny) {
 // TagTube is the signature for a pipe function.
 type TagTube func(inp <-chan tag.TagAny, out <-chan tag.TagAny)
 
-// Tagdaisy returns a channel to receive all inp after having passed thru tube.
-func Tagdaisy(inp <-chan tag.TagAny, tube TagTube) (out <-chan tag.TagAny) {
+// TagDaisy returns a channel to receive all inp after having passed thru tube.
+func TagDaisy(inp <-chan tag.TagAny, tube TagTube) (out <-chan tag.TagAny) {
 	cha := make(chan tag.TagAny)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func Tagdaisy(inp <-chan tag.TagAny, tube TagTube) (out <-chan tag.TagAny) {
 // TagDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func TagDaisyChain(inp <-chan tag.TagAny, tubes ...TagTube) (out <-chan tag.TagAny) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Tagdaisy(cha, tube)
+	for i := range tubes {
+		cha = TagDaisy(cha, tubes[i])
 	}
 	return cha
 }

@@ -34,8 +34,8 @@ func MakeInt32Chan() (out chan int32) {
 
 func sendInt32(out chan<- int32, inp ...int32) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -48,9 +48,9 @@ func ChanInt32(inp ...int32) (out <-chan int32) {
 
 func sendInt32Slice(out chan<- int32, inp ...[]int32) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -62,10 +62,48 @@ func ChanInt32Slice(inp ...[]int32) (out <-chan int32) {
 	return cha
 }
 
+func chanInt32FuncNok(out chan<- int32, act func() (int32, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanInt32FuncNok returns a channel to receive all results of act until nok before close.
+func ChanInt32FuncNok(act func() (int32, bool)) (out <-chan int32) {
+	cha := make(chan int32)
+	go chanInt32FuncNok(cha, act)
+	return cha
+}
+
+func chanInt32FuncErr(out chan<- int32, act func() (int32, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanInt32FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanInt32FuncErr(act func() (int32, error)) (out <-chan int32) {
+	cha := make(chan int32)
+	go chanInt32FuncErr(cha, act)
+	return cha
+}
+
 func joinInt32(done chan<- struct{}, out chan<- int32, inp ...int32) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -79,9 +117,9 @@ func JoinInt32(out chan<- int32, inp ...int32) (done <-chan struct{}) {
 
 func joinInt32Slice(done chan<- struct{}, out chan<- int32, inp ...[]int32) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -210,6 +248,47 @@ func PipeInt32Fork(inp <-chan int32) (out1, out2 <-chan int32) {
 	go pipeInt32Fork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// Int32Tube is the signature for a pipe function.
+type Int32Tube func(inp <-chan int32, out <-chan int32)
+
+// Int32Daisy returns a channel to receive all inp after having passed thru tube.
+func Int32Daisy(inp <-chan int32, tube Int32Tube) (out <-chan int32) {
+	cha := make(chan int32)
+	go tube(inp, cha)
+	return cha
+}
+
+// Int32DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func Int32DaisyChain(inp <-chan int32, tubes ...Int32Tube) (out <-chan int32) {
+	cha := inp
+	for i := range tubes {
+		cha = Int32Daisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
 
 // MergeInt32 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.

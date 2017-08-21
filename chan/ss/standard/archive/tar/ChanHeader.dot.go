@@ -38,8 +38,8 @@ func MakeHeaderChan() (out chan *tar.Header) {
 
 func sendHeader(out chan<- *tar.Header, inp ...*tar.Header) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanHeader(inp ...*tar.Header) (out <-chan *tar.Header) {
 
 func sendHeaderSlice(out chan<- *tar.Header, inp ...[]*tar.Header) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanHeaderSlice(inp ...[]*tar.Header) (out <-chan *tar.Header) {
 	return cha
 }
 
+func chanHeaderFuncNok(out chan<- *tar.Header, act func() (*tar.Header, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanHeaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanHeaderFuncNok(act func() (*tar.Header, bool)) (out <-chan *tar.Header) {
+	cha := make(chan *tar.Header)
+	go chanHeaderFuncNok(cha, act)
+	return cha
+}
+
+func chanHeaderFuncErr(out chan<- *tar.Header, act func() (*tar.Header, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanHeaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanHeaderFuncErr(act func() (*tar.Header, error)) (out <-chan *tar.Header) {
+	cha := make(chan *tar.Header)
+	go chanHeaderFuncErr(cha, act)
+	return cha
+}
+
 func joinHeader(done chan<- struct{}, out chan<- *tar.Header, inp ...*tar.Header) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinHeader(out chan<- *tar.Header, inp ...*tar.Header) (done <-chan struct{
 
 func joinHeaderSlice(done chan<- struct{}, out chan<- *tar.Header, inp ...[]*tar.Header) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeHeaderFork(inp <-chan *tar.Header) (out1, out2 <-chan *tar.Header) {
 	go pipeHeaderFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// HeaderTube is the signature for a pipe function.
+type HeaderTube func(inp <-chan *tar.Header, out <-chan *tar.Header)
+
+// HeaderDaisy returns a channel to receive all inp after having passed thru tube.
+func HeaderDaisy(inp <-chan *tar.Header, tube HeaderTube) (out <-chan *tar.Header) {
+	cha := make(chan *tar.Header)
+	go tube(inp, cha)
+	return cha
+}
+
+// HeaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func HeaderDaisyChain(inp <-chan *tar.Header, tubes ...HeaderTube) (out <-chan *tar.Header) {
+	cha := inp
+	for i := range tubes {
+		cha = HeaderDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

@@ -41,8 +41,8 @@ func ChanWriterTo(inp ...io.WriterTo) (out <-chan io.WriterTo) {
 	cha := make(chan io.WriterTo)
 	go func(out chan<- io.WriterTo, inp ...io.WriterTo) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanWriterToSlice(inp ...[]io.WriterTo) (out <-chan io.WriterTo) {
 	cha := make(chan io.WriterTo)
 	go func(out chan<- io.WriterTo, inp ...[]io.WriterTo) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanWriterToFuncNok returns a channel to receive all results of act until nok before close.
+func ChanWriterToFuncNok(act func() (io.WriterTo, bool)) (out <-chan io.WriterTo) {
+	cha := make(chan io.WriterTo)
+	go func(out chan<- io.WriterTo, act func() (io.WriterTo, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanWriterToFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanWriterToFuncErr(act func() (io.WriterTo, error)) (out <-chan io.WriterTo) {
+	cha := make(chan io.WriterTo)
+	go func(out chan<- io.WriterTo, act func() (io.WriterTo, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinWriterTo(out chan<- io.WriterTo, inp ...io.WriterTo) (done <-chan struc
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriterTo, inp ...io.WriterTo) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinWriterToSlice(out chan<- io.WriterTo, inp ...[]io.WriterTo) (done <-cha
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriterTo, inp ...[]io.WriterTo) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeWriterToFork(inp <-chan io.WriterTo) (out1, out2 <-chan io.WriterTo) {
 // WriterToTube is the signature for a pipe function.
 type WriterToTube func(inp <-chan io.WriterTo, out <-chan io.WriterTo)
 
-// WriterTodaisy returns a channel to receive all inp after having passed thru tube.
-func WriterTodaisy(inp <-chan io.WriterTo, tube WriterToTube) (out <-chan io.WriterTo) {
+// WriterToDaisy returns a channel to receive all inp after having passed thru tube.
+func WriterToDaisy(inp <-chan io.WriterTo, tube WriterToTube) (out <-chan io.WriterTo) {
 	cha := make(chan io.WriterTo)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func WriterTodaisy(inp <-chan io.WriterTo, tube WriterToTube) (out <-chan io.Wri
 // WriterToDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func WriterToDaisyChain(inp <-chan io.WriterTo, tubes ...WriterToTube) (out <-chan io.WriterTo) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = WriterTodaisy(cha, tube)
+	for i := range tubes {
+		cha = WriterToDaisy(cha, tubes[i])
 	}
 	return cha
 }

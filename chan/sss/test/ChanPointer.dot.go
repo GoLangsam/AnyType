@@ -37,8 +37,8 @@ func ChanPointer(inp ...*SomeType) (out <-chan *SomeType) {
 	cha := make(chan *SomeType)
 	go func(out chan<- *SomeType, inp ...*SomeType) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanPointerSlice(inp ...[]*SomeType) (out <-chan *SomeType) {
 	cha := make(chan *SomeType)
 	go func(out chan<- *SomeType, inp ...[]*SomeType) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanPointerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanPointerFuncNok(act func() (*SomeType, bool)) (out <-chan *SomeType) {
+	cha := make(chan *SomeType)
+	go func(out chan<- *SomeType, act func() (*SomeType, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanPointerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanPointerFuncErr(act func() (*SomeType, error)) (out <-chan *SomeType) {
+	cha := make(chan *SomeType)
+	go func(out chan<- *SomeType, act func() (*SomeType, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinPointer(out chan<- *SomeType, inp ...*SomeType) (done <-chan struct{}) 
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *SomeType, inp ...*SomeType) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinPointerSlice(out chan<- *SomeType, inp ...[]*SomeType) (done <-chan str
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *SomeType, inp ...[]*SomeType) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipePointerFork(inp <-chan *SomeType) (out1, out2 <-chan *SomeType) {
 // PointerTube is the signature for a pipe function.
 type PointerTube func(inp <-chan *SomeType, out <-chan *SomeType)
 
-// Pointerdaisy returns a channel to receive all inp after having passed thru tube.
-func Pointerdaisy(inp <-chan *SomeType, tube PointerTube) (out <-chan *SomeType) {
+// PointerDaisy returns a channel to receive all inp after having passed thru tube.
+func PointerDaisy(inp <-chan *SomeType, tube PointerTube) (out <-chan *SomeType) {
 	cha := make(chan *SomeType)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func Pointerdaisy(inp <-chan *SomeType, tube PointerTube) (out <-chan *SomeType)
 // PointerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func PointerDaisyChain(inp <-chan *SomeType, tubes ...PointerTube) (out <-chan *SomeType) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Pointerdaisy(cha, tube)
+	for i := range tubes {
+		cha = PointerDaisy(cha, tubes[i])
 	}
 	return cha
 }

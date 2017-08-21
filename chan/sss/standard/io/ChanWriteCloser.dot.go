@@ -41,8 +41,8 @@ func ChanWriteCloser(inp ...io.WriteCloser) (out <-chan io.WriteCloser) {
 	cha := make(chan io.WriteCloser)
 	go func(out chan<- io.WriteCloser, inp ...io.WriteCloser) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanWriteCloserSlice(inp ...[]io.WriteCloser) (out <-chan io.WriteCloser) {
 	cha := make(chan io.WriteCloser)
 	go func(out chan<- io.WriteCloser, inp ...[]io.WriteCloser) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanWriteCloserFuncNok returns a channel to receive all results of act until nok before close.
+func ChanWriteCloserFuncNok(act func() (io.WriteCloser, bool)) (out <-chan io.WriteCloser) {
+	cha := make(chan io.WriteCloser)
+	go func(out chan<- io.WriteCloser, act func() (io.WriteCloser, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanWriteCloserFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanWriteCloserFuncErr(act func() (io.WriteCloser, error)) (out <-chan io.WriteCloser) {
+	cha := make(chan io.WriteCloser)
+	go func(out chan<- io.WriteCloser, act func() (io.WriteCloser, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinWriteCloser(out chan<- io.WriteCloser, inp ...io.WriteCloser) (done <-c
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriteCloser, inp ...io.WriteCloser) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinWriteCloserSlice(out chan<- io.WriteCloser, inp ...[]io.WriteCloser) (d
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.WriteCloser, inp ...[]io.WriteCloser) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeWriteCloserFork(inp <-chan io.WriteCloser) (out1, out2 <-chan io.WriteC
 // WriteCloserTube is the signature for a pipe function.
 type WriteCloserTube func(inp <-chan io.WriteCloser, out <-chan io.WriteCloser)
 
-// WriteCloserdaisy returns a channel to receive all inp after having passed thru tube.
-func WriteCloserdaisy(inp <-chan io.WriteCloser, tube WriteCloserTube) (out <-chan io.WriteCloser) {
+// WriteCloserDaisy returns a channel to receive all inp after having passed thru tube.
+func WriteCloserDaisy(inp <-chan io.WriteCloser, tube WriteCloserTube) (out <-chan io.WriteCloser) {
 	cha := make(chan io.WriteCloser)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func WriteCloserdaisy(inp <-chan io.WriteCloser, tube WriteCloserTube) (out <-ch
 // WriteCloserDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func WriteCloserDaisyChain(inp <-chan io.WriteCloser, tubes ...WriteCloserTube) (out <-chan io.WriteCloser) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = WriteCloserdaisy(cha, tube)
+	for i := range tubes {
+		cha = WriteCloserDaisy(cha, tubes[i])
 	}
 	return cha
 }

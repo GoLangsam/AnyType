@@ -37,8 +37,8 @@ func ChanRuneS(inp ...[]rune) chan []rune {
 	out := make(chan []rune)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -49,9 +49,43 @@ func ChanRuneSSlice(inp ...[][]rune) chan []rune {
 	out := make(chan []rune)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanRuneSFuncNok returns a channel to receive all results of act until nok before close.
+func ChanRuneSFuncNok(act func() ([]rune, bool)) <-chan []rune {
+	out := make(chan []rune)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanRuneSFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanRuneSFuncErr(act func() ([]rune, error)) <-chan []rune {
+	out := make(chan []rune)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -63,8 +97,8 @@ func JoinRuneS(out chan<- []rune, inp ...[]rune) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -76,9 +110,9 @@ func JoinRuneSSlice(out chan<- []rune, inp ...[][]rune) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -188,3 +222,44 @@ func PipeRuneSFork(inp <-chan []rune) (chan []rune, chan []rune) {
 	}()
 	return out1, out2
 }
+
+// RuneSTube is the signature for a pipe function.
+type RuneSTube func(inp <-chan []rune, out <-chan []rune)
+
+// RuneSDaisy returns a channel to receive all inp after having passed thru tube.
+func RuneSDaisy(inp <-chan []rune, tube RuneSTube) (out <-chan []rune) {
+	cha := make(chan []rune)
+	go tube(inp, cha)
+	return cha
+}
+
+// RuneSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func RuneSDaisyChain(inp <-chan []rune, tubes ...RuneSTube) (out <-chan []rune) {
+	cha := inp
+	for i := range tubes {
+		cha = RuneSDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

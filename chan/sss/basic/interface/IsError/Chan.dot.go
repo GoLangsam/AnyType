@@ -37,8 +37,8 @@ func Chan(inp ...error) (out <-chan error) {
 	cha := make(chan error)
 	go func(out chan<- error, inp ...error) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanSlice(inp ...[]error) (out <-chan error) {
 	cha := make(chan error)
 	go func(out chan<- error, inp ...[]error) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFuncNok(act func() (error, bool)) (out <-chan error) {
+	cha := make(chan error)
+	go func(out chan<- error, act func() (error, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFuncErr(act func() (error, error)) (out <-chan error) {
+	cha := make(chan error)
+	go func(out chan<- error, act func() (error, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func Join(out chan<- error, inp ...error) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- error, inp ...error) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinSlice(out chan<- error, inp ...[]error) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- error, inp ...[]error) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeFork(inp <-chan error) (out1, out2 <-chan error) {
 // Tube is the signature for a pipe function.
 type Tube func(inp <-chan error, out <-chan error)
 
-// daisy returns a channel to receive all inp after having passed thru tube.
-func daisy(inp <-chan error, tube Tube) (out <-chan error) {
+// Daisy returns a channel to receive all inp after having passed thru tube.
+func Daisy(inp <-chan error, tube Tube) (out <-chan error) {
 	cha := make(chan error)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func daisy(inp <-chan error, tube Tube) (out <-chan error) {
 // DaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func DaisyChain(inp <-chan error, tubes ...Tube) (out <-chan error) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = daisy(cha, tube)
+	for i := range tubes {
+		cha = Daisy(cha, tubes[i])
 	}
 	return cha
 }

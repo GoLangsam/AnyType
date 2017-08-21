@@ -34,8 +34,8 @@ func MakeUInt16Chan() (out chan uint16) {
 
 func sendUInt16(out chan<- uint16, inp ...uint16) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -48,9 +48,9 @@ func ChanUInt16(inp ...uint16) (out <-chan uint16) {
 
 func sendUInt16Slice(out chan<- uint16, inp ...[]uint16) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -62,10 +62,48 @@ func ChanUInt16Slice(inp ...[]uint16) (out <-chan uint16) {
 	return cha
 }
 
+func chanUInt16FuncNok(out chan<- uint16, act func() (uint16, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanUInt16FuncNok returns a channel to receive all results of act until nok before close.
+func ChanUInt16FuncNok(act func() (uint16, bool)) (out <-chan uint16) {
+	cha := make(chan uint16)
+	go chanUInt16FuncNok(cha, act)
+	return cha
+}
+
+func chanUInt16FuncErr(out chan<- uint16, act func() (uint16, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanUInt16FuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanUInt16FuncErr(act func() (uint16, error)) (out <-chan uint16) {
+	cha := make(chan uint16)
+	go chanUInt16FuncErr(cha, act)
+	return cha
+}
+
 func joinUInt16(done chan<- struct{}, out chan<- uint16, inp ...uint16) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -79,9 +117,9 @@ func JoinUInt16(out chan<- uint16, inp ...uint16) (done <-chan struct{}) {
 
 func joinUInt16Slice(done chan<- struct{}, out chan<- uint16, inp ...[]uint16) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -210,6 +248,47 @@ func PipeUInt16Fork(inp <-chan uint16) (out1, out2 <-chan uint16) {
 	go pipeUInt16Fork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// UInt16Tube is the signature for a pipe function.
+type UInt16Tube func(inp <-chan uint16, out <-chan uint16)
+
+// UInt16Daisy returns a channel to receive all inp after having passed thru tube.
+func UInt16Daisy(inp <-chan uint16, tube UInt16Tube) (out <-chan uint16) {
+	cha := make(chan uint16)
+	go tube(inp, cha)
+	return cha
+}
+
+// UInt16DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func UInt16DaisyChain(inp <-chan uint16, tubes ...UInt16Tube) (out <-chan uint16) {
+	cha := inp
+	for i := range tubes {
+		cha = UInt16Daisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
 
 // MergeUInt16 returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.

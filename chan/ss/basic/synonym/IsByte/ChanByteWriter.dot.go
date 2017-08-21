@@ -38,8 +38,8 @@ func MakeByteWriterChan() (out chan io.ByteWriter) {
 
 func sendByteWriter(out chan<- io.ByteWriter, inp ...io.ByteWriter) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanByteWriter(inp ...io.ByteWriter) (out <-chan io.ByteWriter) {
 
 func sendByteWriterSlice(out chan<- io.ByteWriter, inp ...[]io.ByteWriter) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanByteWriterSlice(inp ...[]io.ByteWriter) (out <-chan io.ByteWriter) {
 	return cha
 }
 
+func chanByteWriterFuncNok(out chan<- io.ByteWriter, act func() (io.ByteWriter, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanByteWriterFuncNok returns a channel to receive all results of act until nok before close.
+func ChanByteWriterFuncNok(act func() (io.ByteWriter, bool)) (out <-chan io.ByteWriter) {
+	cha := make(chan io.ByteWriter)
+	go chanByteWriterFuncNok(cha, act)
+	return cha
+}
+
+func chanByteWriterFuncErr(out chan<- io.ByteWriter, act func() (io.ByteWriter, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanByteWriterFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanByteWriterFuncErr(act func() (io.ByteWriter, error)) (out <-chan io.ByteWriter) {
+	cha := make(chan io.ByteWriter)
+	go chanByteWriterFuncErr(cha, act)
+	return cha
+}
+
 func joinByteWriter(done chan<- struct{}, out chan<- io.ByteWriter, inp ...io.ByteWriter) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinByteWriter(out chan<- io.ByteWriter, inp ...io.ByteWriter) (done <-chan
 
 func joinByteWriterSlice(done chan<- struct{}, out chan<- io.ByteWriter, inp ...[]io.ByteWriter) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeByteWriterFork(inp <-chan io.ByteWriter) (out1, out2 <-chan io.ByteWrit
 	go pipeByteWriterFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// ByteWriterTube is the signature for a pipe function.
+type ByteWriterTube func(inp <-chan io.ByteWriter, out <-chan io.ByteWriter)
+
+// ByteWriterDaisy returns a channel to receive all inp after having passed thru tube.
+func ByteWriterDaisy(inp <-chan io.ByteWriter, tube ByteWriterTube) (out <-chan io.ByteWriter) {
+	cha := make(chan io.ByteWriter)
+	go tube(inp, cha)
+	return cha
+}
+
+// ByteWriterDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ByteWriterDaisyChain(inp <-chan io.ByteWriter, tubes ...ByteWriterTube) (out <-chan io.ByteWriter) {
+	cha := inp
+	for i := range tubes {
+		cha = ByteWriterDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

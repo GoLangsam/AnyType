@@ -38,8 +38,8 @@ func MakePipeWriterChan() (out chan *io.PipeWriter) {
 
 func sendPipeWriter(out chan<- *io.PipeWriter, inp ...*io.PipeWriter) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanPipeWriter(inp ...*io.PipeWriter) (out <-chan *io.PipeWriter) {
 
 func sendPipeWriterSlice(out chan<- *io.PipeWriter, inp ...[]*io.PipeWriter) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanPipeWriterSlice(inp ...[]*io.PipeWriter) (out <-chan *io.PipeWriter) {
 	return cha
 }
 
+func chanPipeWriterFuncNok(out chan<- *io.PipeWriter, act func() (*io.PipeWriter, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanPipeWriterFuncNok returns a channel to receive all results of act until nok before close.
+func ChanPipeWriterFuncNok(act func() (*io.PipeWriter, bool)) (out <-chan *io.PipeWriter) {
+	cha := make(chan *io.PipeWriter)
+	go chanPipeWriterFuncNok(cha, act)
+	return cha
+}
+
+func chanPipeWriterFuncErr(out chan<- *io.PipeWriter, act func() (*io.PipeWriter, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanPipeWriterFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanPipeWriterFuncErr(act func() (*io.PipeWriter, error)) (out <-chan *io.PipeWriter) {
+	cha := make(chan *io.PipeWriter)
+	go chanPipeWriterFuncErr(cha, act)
+	return cha
+}
+
 func joinPipeWriter(done chan<- struct{}, out chan<- *io.PipeWriter, inp ...*io.PipeWriter) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinPipeWriter(out chan<- *io.PipeWriter, inp ...*io.PipeWriter) (done <-ch
 
 func joinPipeWriterSlice(done chan<- struct{}, out chan<- *io.PipeWriter, inp ...[]*io.PipeWriter) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipePipeWriterFork(inp <-chan *io.PipeWriter) (out1, out2 <-chan *io.PipeWr
 	go pipePipeWriterFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// PipeWriterTube is the signature for a pipe function.
+type PipeWriterTube func(inp <-chan *io.PipeWriter, out <-chan *io.PipeWriter)
+
+// PipeWriterDaisy returns a channel to receive all inp after having passed thru tube.
+func PipeWriterDaisy(inp <-chan *io.PipeWriter, tube PipeWriterTube) (out <-chan *io.PipeWriter) {
+	cha := make(chan *io.PipeWriter)
+	go tube(inp, cha)
+	return cha
+}
+
+// PipeWriterDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func PipeWriterDaisyChain(inp <-chan *io.PipeWriter, tubes ...PipeWriterTube) (out <-chan *io.PipeWriter) {
+	cha := inp
+	for i := range tubes {
+		cha = PipeWriterDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

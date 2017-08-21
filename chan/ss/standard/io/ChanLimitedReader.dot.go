@@ -38,8 +38,8 @@ func MakeLimitedReaderChan() (out chan *io.LimitedReader) {
 
 func sendLimitedReader(out chan<- *io.LimitedReader, inp ...*io.LimitedReader) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanLimitedReader(inp ...*io.LimitedReader) (out <-chan *io.LimitedReader) 
 
 func sendLimitedReaderSlice(out chan<- *io.LimitedReader, inp ...[]*io.LimitedReader) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanLimitedReaderSlice(inp ...[]*io.LimitedReader) (out <-chan *io.LimitedR
 	return cha
 }
 
+func chanLimitedReaderFuncNok(out chan<- *io.LimitedReader, act func() (*io.LimitedReader, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanLimitedReaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanLimitedReaderFuncNok(act func() (*io.LimitedReader, bool)) (out <-chan *io.LimitedReader) {
+	cha := make(chan *io.LimitedReader)
+	go chanLimitedReaderFuncNok(cha, act)
+	return cha
+}
+
+func chanLimitedReaderFuncErr(out chan<- *io.LimitedReader, act func() (*io.LimitedReader, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanLimitedReaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanLimitedReaderFuncErr(act func() (*io.LimitedReader, error)) (out <-chan *io.LimitedReader) {
+	cha := make(chan *io.LimitedReader)
+	go chanLimitedReaderFuncErr(cha, act)
+	return cha
+}
+
 func joinLimitedReader(done chan<- struct{}, out chan<- *io.LimitedReader, inp ...*io.LimitedReader) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinLimitedReader(out chan<- *io.LimitedReader, inp ...*io.LimitedReader) (
 
 func joinLimitedReaderSlice(done chan<- struct{}, out chan<- *io.LimitedReader, inp ...[]*io.LimitedReader) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeLimitedReaderFork(inp <-chan *io.LimitedReader) (out1, out2 <-chan *io.
 	go pipeLimitedReaderFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// LimitedReaderTube is the signature for a pipe function.
+type LimitedReaderTube func(inp <-chan *io.LimitedReader, out <-chan *io.LimitedReader)
+
+// LimitedReaderDaisy returns a channel to receive all inp after having passed thru tube.
+func LimitedReaderDaisy(inp <-chan *io.LimitedReader, tube LimitedReaderTube) (out <-chan *io.LimitedReader) {
+	cha := make(chan *io.LimitedReader)
+	go tube(inp, cha)
+	return cha
+}
+
+// LimitedReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func LimitedReaderDaisyChain(inp <-chan *io.LimitedReader, tubes ...LimitedReaderTube) (out <-chan *io.LimitedReader) {
+	cha := inp
+	for i := range tubes {
+		cha = LimitedReaderDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

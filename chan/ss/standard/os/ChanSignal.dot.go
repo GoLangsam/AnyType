@@ -38,8 +38,8 @@ func MakeSignalChan() (out chan os.Signal) {
 
 func sendSignal(out chan<- os.Signal, inp ...os.Signal) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanSignal(inp ...os.Signal) (out <-chan os.Signal) {
 
 func sendSignalSlice(out chan<- os.Signal, inp ...[]os.Signal) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanSignalSlice(inp ...[]os.Signal) (out <-chan os.Signal) {
 	return cha
 }
 
+func chanSignalFuncNok(out chan<- os.Signal, act func() (os.Signal, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanSignalFuncNok returns a channel to receive all results of act until nok before close.
+func ChanSignalFuncNok(act func() (os.Signal, bool)) (out <-chan os.Signal) {
+	cha := make(chan os.Signal)
+	go chanSignalFuncNok(cha, act)
+	return cha
+}
+
+func chanSignalFuncErr(out chan<- os.Signal, act func() (os.Signal, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanSignalFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanSignalFuncErr(act func() (os.Signal, error)) (out <-chan os.Signal) {
+	cha := make(chan os.Signal)
+	go chanSignalFuncErr(cha, act)
+	return cha
+}
+
 func joinSignal(done chan<- struct{}, out chan<- os.Signal, inp ...os.Signal) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinSignal(out chan<- os.Signal, inp ...os.Signal) (done <-chan struct{}) {
 
 func joinSignalSlice(done chan<- struct{}, out chan<- os.Signal, inp ...[]os.Signal) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeSignalFork(inp <-chan os.Signal) (out1, out2 <-chan os.Signal) {
 	go pipeSignalFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// SignalTube is the signature for a pipe function.
+type SignalTube func(inp <-chan os.Signal, out <-chan os.Signal)
+
+// SignalDaisy returns a channel to receive all inp after having passed thru tube.
+func SignalDaisy(inp <-chan os.Signal, tube SignalTube) (out <-chan os.Signal) {
+	cha := make(chan os.Signal)
+	go tube(inp, cha)
+	return cha
+}
+
+// SignalDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func SignalDaisyChain(inp <-chan os.Signal, tubes ...SignalTube) (out <-chan os.Signal) {
+	cha := inp
+	for i := range tubes {
+		cha = SignalDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

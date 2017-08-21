@@ -41,8 +41,8 @@ func ChanReadSeeker(inp ...io.ReadSeeker) (out <-chan io.ReadSeeker) {
 	cha := make(chan io.ReadSeeker)
 	go func(out chan<- io.ReadSeeker, inp ...io.ReadSeeker) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanReadSeekerSlice(inp ...[]io.ReadSeeker) (out <-chan io.ReadSeeker) {
 	cha := make(chan io.ReadSeeker)
 	go func(out chan<- io.ReadSeeker, inp ...[]io.ReadSeeker) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanReadSeekerFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReadSeekerFuncNok(act func() (io.ReadSeeker, bool)) (out <-chan io.ReadSeeker) {
+	cha := make(chan io.ReadSeeker)
+	go func(out chan<- io.ReadSeeker, act func() (io.ReadSeeker, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanReadSeekerFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReadSeekerFuncErr(act func() (io.ReadSeeker, error)) (out <-chan io.ReadSeeker) {
+	cha := make(chan io.ReadSeeker)
+	go func(out chan<- io.ReadSeeker, act func() (io.ReadSeeker, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinReadSeeker(out chan<- io.ReadSeeker, inp ...io.ReadSeeker) (done <-chan
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.ReadSeeker, inp ...io.ReadSeeker) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinReadSeekerSlice(out chan<- io.ReadSeeker, inp ...[]io.ReadSeeker) (done
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- io.ReadSeeker, inp ...[]io.ReadSeeker) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeReadSeekerFork(inp <-chan io.ReadSeeker) (out1, out2 <-chan io.ReadSeek
 // ReadSeekerTube is the signature for a pipe function.
 type ReadSeekerTube func(inp <-chan io.ReadSeeker, out <-chan io.ReadSeeker)
 
-// ReadSeekerdaisy returns a channel to receive all inp after having passed thru tube.
-func ReadSeekerdaisy(inp <-chan io.ReadSeeker, tube ReadSeekerTube) (out <-chan io.ReadSeeker) {
+// ReadSeekerDaisy returns a channel to receive all inp after having passed thru tube.
+func ReadSeekerDaisy(inp <-chan io.ReadSeeker, tube ReadSeekerTube) (out <-chan io.ReadSeeker) {
 	cha := make(chan io.ReadSeeker)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func ReadSeekerdaisy(inp <-chan io.ReadSeeker, tube ReadSeekerTube) (out <-chan 
 // ReadSeekerDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func ReadSeekerDaisyChain(inp <-chan io.ReadSeeker, tubes ...ReadSeekerTube) (out <-chan io.ReadSeeker) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = ReadSeekerdaisy(cha, tube)
+	for i := range tubes {
+		cha = ReadSeekerDaisy(cha, tubes[i])
 	}
 	return cha
 }

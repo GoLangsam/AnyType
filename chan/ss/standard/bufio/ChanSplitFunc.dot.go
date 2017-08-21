@@ -38,8 +38,8 @@ func MakeSplitFuncChan() (out chan bufio.SplitFunc) {
 
 func sendSplitFunc(out chan<- bufio.SplitFunc, inp ...bufio.SplitFunc) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanSplitFunc(inp ...bufio.SplitFunc) (out <-chan bufio.SplitFunc) {
 
 func sendSplitFuncSlice(out chan<- bufio.SplitFunc, inp ...[]bufio.SplitFunc) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanSplitFuncSlice(inp ...[]bufio.SplitFunc) (out <-chan bufio.SplitFunc) {
 	return cha
 }
 
+func chanSplitFuncFuncNok(out chan<- bufio.SplitFunc, act func() (bufio.SplitFunc, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanSplitFuncFuncNok returns a channel to receive all results of act until nok before close.
+func ChanSplitFuncFuncNok(act func() (bufio.SplitFunc, bool)) (out <-chan bufio.SplitFunc) {
+	cha := make(chan bufio.SplitFunc)
+	go chanSplitFuncFuncNok(cha, act)
+	return cha
+}
+
+func chanSplitFuncFuncErr(out chan<- bufio.SplitFunc, act func() (bufio.SplitFunc, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanSplitFuncFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanSplitFuncFuncErr(act func() (bufio.SplitFunc, error)) (out <-chan bufio.SplitFunc) {
+	cha := make(chan bufio.SplitFunc)
+	go chanSplitFuncFuncErr(cha, act)
+	return cha
+}
+
 func joinSplitFunc(done chan<- struct{}, out chan<- bufio.SplitFunc, inp ...bufio.SplitFunc) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinSplitFunc(out chan<- bufio.SplitFunc, inp ...bufio.SplitFunc) (done <-c
 
 func joinSplitFuncSlice(done chan<- struct{}, out chan<- bufio.SplitFunc, inp ...[]bufio.SplitFunc) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeSplitFuncFork(inp <-chan bufio.SplitFunc) (out1, out2 <-chan bufio.Spli
 	go pipeSplitFuncFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// SplitFuncTube is the signature for a pipe function.
+type SplitFuncTube func(inp <-chan bufio.SplitFunc, out <-chan bufio.SplitFunc)
+
+// SplitFuncDaisy returns a channel to receive all inp after having passed thru tube.
+func SplitFuncDaisy(inp <-chan bufio.SplitFunc, tube SplitFuncTube) (out <-chan bufio.SplitFunc) {
+	cha := make(chan bufio.SplitFunc)
+	go tube(inp, cha)
+	return cha
+}
+
+// SplitFuncDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func SplitFuncDaisyChain(inp <-chan bufio.SplitFunc, tubes ...SplitFuncTube) (out <-chan bufio.SplitFunc) {
+	cha := inp
+	for i := range tubes {
+		cha = SplitFuncDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

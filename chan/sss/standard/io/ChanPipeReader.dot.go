@@ -41,8 +41,8 @@ func ChanPipeReader(inp ...*io.PipeReader) (out <-chan *io.PipeReader) {
 	cha := make(chan *io.PipeReader)
 	go func(out chan<- *io.PipeReader, inp ...*io.PipeReader) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanPipeReaderSlice(inp ...[]*io.PipeReader) (out <-chan *io.PipeReader) {
 	cha := make(chan *io.PipeReader)
 	go func(out chan<- *io.PipeReader, inp ...[]*io.PipeReader) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanPipeReaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanPipeReaderFuncNok(act func() (*io.PipeReader, bool)) (out <-chan *io.PipeReader) {
+	cha := make(chan *io.PipeReader)
+	go func(out chan<- *io.PipeReader, act func() (*io.PipeReader, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanPipeReaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanPipeReaderFuncErr(act func() (*io.PipeReader, error)) (out <-chan *io.PipeReader) {
+	cha := make(chan *io.PipeReader)
+	go func(out chan<- *io.PipeReader, act func() (*io.PipeReader, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinPipeReader(out chan<- *io.PipeReader, inp ...*io.PipeReader) (done <-ch
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *io.PipeReader, inp ...*io.PipeReader) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinPipeReaderSlice(out chan<- *io.PipeReader, inp ...[]*io.PipeReader) (do
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- *io.PipeReader, inp ...[]*io.PipeReader) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipePipeReaderFork(inp <-chan *io.PipeReader) (out1, out2 <-chan *io.PipeRe
 // PipeReaderTube is the signature for a pipe function.
 type PipeReaderTube func(inp <-chan *io.PipeReader, out <-chan *io.PipeReader)
 
-// PipeReaderdaisy returns a channel to receive all inp after having passed thru tube.
-func PipeReaderdaisy(inp <-chan *io.PipeReader, tube PipeReaderTube) (out <-chan *io.PipeReader) {
+// PipeReaderDaisy returns a channel to receive all inp after having passed thru tube.
+func PipeReaderDaisy(inp <-chan *io.PipeReader, tube PipeReaderTube) (out <-chan *io.PipeReader) {
 	cha := make(chan *io.PipeReader)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func PipeReaderdaisy(inp <-chan *io.PipeReader, tube PipeReaderTube) (out <-chan
 // PipeReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func PipeReaderDaisyChain(inp <-chan *io.PipeReader, tubes ...PipeReaderTube) (out <-chan *io.PipeReader) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = PipeReaderdaisy(cha, tube)
+	for i := range tubes {
+		cha = PipeReaderDaisy(cha, tubes[i])
 	}
 	return cha
 }

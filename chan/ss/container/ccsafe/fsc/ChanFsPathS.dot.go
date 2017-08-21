@@ -38,8 +38,8 @@ func MakeFsPathSChan() (out chan fs.FsPathS) {
 
 func sendFsPathS(out chan<- fs.FsPathS, inp ...fs.FsPathS) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -52,9 +52,9 @@ func ChanFsPathS(inp ...fs.FsPathS) (out <-chan fs.FsPathS) {
 
 func sendFsPathSSlice(out chan<- fs.FsPathS, inp ...[]fs.FsPathS) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -66,10 +66,48 @@ func ChanFsPathSSlice(inp ...[]fs.FsPathS) (out <-chan fs.FsPathS) {
 	return cha
 }
 
+func chanFsPathSFuncNok(out chan<- fs.FsPathS, act func() (fs.FsPathS, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanFsPathSFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFsPathSFuncNok(act func() (fs.FsPathS, bool)) (out <-chan fs.FsPathS) {
+	cha := make(chan fs.FsPathS)
+	go chanFsPathSFuncNok(cha, act)
+	return cha
+}
+
+func chanFsPathSFuncErr(out chan<- fs.FsPathS, act func() (fs.FsPathS, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanFsPathSFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFsPathSFuncErr(act func() (fs.FsPathS, error)) (out <-chan fs.FsPathS) {
+	cha := make(chan fs.FsPathS)
+	go chanFsPathSFuncErr(cha, act)
+	return cha
+}
+
 func joinFsPathS(done chan<- struct{}, out chan<- fs.FsPathS, inp ...fs.FsPathS) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -83,9 +121,9 @@ func JoinFsPathS(out chan<- fs.FsPathS, inp ...fs.FsPathS) (done <-chan struct{}
 
 func joinFsPathSSlice(done chan<- struct{}, out chan<- fs.FsPathS, inp ...[]fs.FsPathS) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -214,3 +252,44 @@ func PipeFsPathSFork(inp <-chan fs.FsPathS) (out1, out2 <-chan fs.FsPathS) {
 	go pipeFsPathSFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// FsPathSTube is the signature for a pipe function.
+type FsPathSTube func(inp <-chan fs.FsPathS, out <-chan fs.FsPathS)
+
+// FsPathSDaisy returns a channel to receive all inp after having passed thru tube.
+func FsPathSDaisy(inp <-chan fs.FsPathS, tube FsPathSTube) (out <-chan fs.FsPathS) {
+	cha := make(chan fs.FsPathS)
+	go tube(inp, cha)
+	return cha
+}
+
+// FsPathSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func FsPathSDaisyChain(inp <-chan fs.FsPathS, tubes ...FsPathSTube) (out <-chan fs.FsPathS) {
+	cha := inp
+	for i := range tubes {
+		cha = FsPathSDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

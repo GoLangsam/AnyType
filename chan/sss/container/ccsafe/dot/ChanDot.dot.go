@@ -41,8 +41,8 @@ func ChanDot(inp ...dot.Dot) (out <-chan dot.Dot) {
 	cha := make(chan dot.Dot)
 	go func(out chan<- dot.Dot, inp ...dot.Dot) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanDotSlice(inp ...[]dot.Dot) (out <-chan dot.Dot) {
 	cha := make(chan dot.Dot)
 	go func(out chan<- dot.Dot, inp ...[]dot.Dot) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanDotFuncNok returns a channel to receive all results of act until nok before close.
+func ChanDotFuncNok(act func() (dot.Dot, bool)) (out <-chan dot.Dot) {
+	cha := make(chan dot.Dot)
+	go func(out chan<- dot.Dot, act func() (dot.Dot, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanDotFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanDotFuncErr(act func() (dot.Dot, error)) (out <-chan dot.Dot) {
+	cha := make(chan dot.Dot)
+	go func(out chan<- dot.Dot, act func() (dot.Dot, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinDot(out chan<- dot.Dot, inp ...dot.Dot) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- dot.Dot, inp ...dot.Dot) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinDotSlice(out chan<- dot.Dot, inp ...[]dot.Dot) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- dot.Dot, inp ...[]dot.Dot) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeDotFork(inp <-chan dot.Dot) (out1, out2 <-chan dot.Dot) {
 // DotTube is the signature for a pipe function.
 type DotTube func(inp <-chan dot.Dot, out <-chan dot.Dot)
 
-// Dotdaisy returns a channel to receive all inp after having passed thru tube.
-func Dotdaisy(inp <-chan dot.Dot, tube DotTube) (out <-chan dot.Dot) {
+// DotDaisy returns a channel to receive all inp after having passed thru tube.
+func DotDaisy(inp <-chan dot.Dot, tube DotTube) (out <-chan dot.Dot) {
 	cha := make(chan dot.Dot)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func Dotdaisy(inp <-chan dot.Dot, tube DotTube) (out <-chan dot.Dot) {
 // DotDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func DotDaisyChain(inp <-chan dot.Dot, tubes ...DotTube) (out <-chan dot.Dot) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = Dotdaisy(cha, tube)
+	for i := range tubes {
+		cha = DotDaisy(cha, tubes[i])
 	}
 	return cha
 }

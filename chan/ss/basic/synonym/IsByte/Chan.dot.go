@@ -34,8 +34,8 @@ func MakeChan() (out chan []byte) {
 
 func send(out chan<- []byte, inp ...[]byte) {
 	defer close(out)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 }
 
@@ -48,9 +48,9 @@ func Chan(inp ...[]byte) (out <-chan []byte) {
 
 func sendSlice(out chan<- []byte, inp ...[][]byte) {
 	defer close(out)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 }
@@ -62,10 +62,48 @@ func ChanSlice(inp ...[][]byte) (out <-chan []byte) {
 	return cha
 }
 
+func chanFuncNok(out chan<- []byte, act func() ([]byte, bool)) {
+	defer close(out)
+	for {
+		res, ok := act() // Apply action
+		if !ok {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFuncNok(act func() ([]byte, bool)) (out <-chan []byte) {
+	cha := make(chan []byte)
+	go chanFuncNok(cha, act)
+	return cha
+}
+
+func chanFuncErr(out chan<- []byte, act func() ([]byte, error)) {
+	defer close(out)
+	for {
+		res, err := act() // Apply action
+		if err != nil {
+			return
+		} else {
+			out <- res
+		}
+	}
+}
+
+// ChanFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFuncErr(act func() ([]byte, error)) (out <-chan []byte) {
+	cha := make(chan []byte)
+	go chanFuncErr(cha, act)
+	return cha
+}
+
 func join(done chan<- struct{}, out chan<- []byte, inp ...[]byte) {
 	defer close(done)
-	for _, i := range inp {
-		out <- i
+	for i := range inp {
+		out <- inp[i]
 	}
 	done <- struct{}{}
 }
@@ -79,9 +117,9 @@ func Join(out chan<- []byte, inp ...[]byte) (done <-chan struct{}) {
 
 func joinSlice(done chan<- struct{}, out chan<- []byte, inp ...[][]byte) {
 	defer close(done)
-	for _, in := range inp {
-		for _, i := range in {
-			out <- i
+	for i := range inp {
+		for j := range inp[i] {
+			out <- inp[i][j]
 		}
 	}
 	done <- struct{}{}
@@ -210,3 +248,44 @@ func PipeFork(inp <-chan []byte) (out1, out2 <-chan []byte) {
 	go pipeFork(cha1, cha2, inp)
 	return cha1, cha2
 }
+
+// Tube is the signature for a pipe function.
+type Tube func(inp <-chan []byte, out <-chan []byte)
+
+// Daisy returns a channel to receive all inp after having passed thru tube.
+func Daisy(inp <-chan []byte, tube Tube) (out <-chan []byte) {
+	cha := make(chan []byte)
+	go tube(inp, cha)
+	return cha
+}
+
+// DaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func DaisyChain(inp <-chan []byte, tubes ...Tube) (out <-chan []byte) {
+	cha := inp
+	for i := range tubes {
+		cha = Daisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

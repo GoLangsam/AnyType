@@ -41,8 +41,8 @@ func ChanFile(inp ...zip.File) chan zip.File {
 	out := make(chan zip.File)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -53,9 +53,43 @@ func ChanFileSlice(inp ...[]zip.File) chan zip.File {
 	out := make(chan zip.File)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanFileFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFileFuncNok(act func() (zip.File, bool)) <-chan zip.File {
+	out := make(chan zip.File)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanFileFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFileFuncErr(act func() (zip.File, error)) <-chan zip.File {
+	out := make(chan zip.File)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -67,8 +101,8 @@ func JoinFile(out chan<- zip.File, inp ...zip.File) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -80,9 +114,9 @@ func JoinFileSlice(out chan<- zip.File, inp ...[]zip.File) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,3 +226,44 @@ func PipeFileFork(inp <-chan zip.File) (chan zip.File, chan zip.File) {
 	}()
 	return out1, out2
 }
+
+// FileTube is the signature for a pipe function.
+type FileTube func(inp <-chan zip.File, out <-chan zip.File)
+
+// FileDaisy returns a channel to receive all inp after having passed thru tube.
+func FileDaisy(inp <-chan zip.File, tube FileTube) (out <-chan zip.File) {
+	cha := make(chan zip.File)
+	go tube(inp, cha)
+	return cha
+}
+
+// FileDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func FileDaisyChain(inp <-chan zip.File, tubes ...FileTube) (out <-chan zip.File) {
+	cha := inp
+	for i := range tubes {
+		cha = FileDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

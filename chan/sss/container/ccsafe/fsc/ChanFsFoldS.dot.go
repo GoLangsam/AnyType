@@ -41,8 +41,8 @@ func ChanFsFoldS(inp ...fs.FsFoldS) (out <-chan fs.FsFoldS) {
 	cha := make(chan fs.FsFoldS)
 	go func(out chan<- fs.FsFoldS, inp ...fs.FsFoldS) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -53,12 +53,46 @@ func ChanFsFoldSSlice(inp ...[]fs.FsFoldS) (out <-chan fs.FsFoldS) {
 	cha := make(chan fs.FsFoldS)
 	go func(out chan<- fs.FsFoldS, inp ...[]fs.FsFoldS) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanFsFoldSFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFsFoldSFuncNok(act func() (fs.FsFoldS, bool)) (out <-chan fs.FsFoldS) {
+	cha := make(chan fs.FsFoldS)
+	go func(out chan<- fs.FsFoldS, act func() (fs.FsFoldS, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanFsFoldSFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFsFoldSFuncErr(act func() (fs.FsFoldS, error)) (out <-chan fs.FsFoldS) {
+	cha := make(chan fs.FsFoldS)
+	go func(out chan<- fs.FsFoldS, act func() (fs.FsFoldS, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -67,8 +101,8 @@ func JoinFsFoldS(out chan<- fs.FsFoldS, inp ...fs.FsFoldS) (done <-chan struct{}
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- fs.FsFoldS, inp ...fs.FsFoldS) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -80,9 +114,9 @@ func JoinFsFoldSSlice(out chan<- fs.FsFoldS, inp ...[]fs.FsFoldS) (done <-chan s
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- fs.FsFoldS, inp ...[]fs.FsFoldS) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -196,8 +230,8 @@ func PipeFsFoldSFork(inp <-chan fs.FsFoldS) (out1, out2 <-chan fs.FsFoldS) {
 // FsFoldSTube is the signature for a pipe function.
 type FsFoldSTube func(inp <-chan fs.FsFoldS, out <-chan fs.FsFoldS)
 
-// FsFoldSdaisy returns a channel to receive all inp after having passed thru tube.
-func FsFoldSdaisy(inp <-chan fs.FsFoldS, tube FsFoldSTube) (out <-chan fs.FsFoldS) {
+// FsFoldSDaisy returns a channel to receive all inp after having passed thru tube.
+func FsFoldSDaisy(inp <-chan fs.FsFoldS, tube FsFoldSTube) (out <-chan fs.FsFoldS) {
 	cha := make(chan fs.FsFoldS)
 	go tube(inp, cha)
 	return cha
@@ -206,8 +240,8 @@ func FsFoldSdaisy(inp <-chan fs.FsFoldS, tube FsFoldSTube) (out <-chan fs.FsFold
 // FsFoldSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func FsFoldSDaisyChain(inp <-chan fs.FsFoldS, tubes ...FsFoldSTube) (out <-chan fs.FsFoldS) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = FsFoldSdaisy(cha, tube)
+	for i := range tubes {
+		cha = FsFoldSDaisy(cha, tubes[i])
 	}
 	return cha
 }

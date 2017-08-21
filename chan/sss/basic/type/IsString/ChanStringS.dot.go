@@ -37,8 +37,8 @@ func ChanStringS(inp ...[]string) (out <-chan []string) {
 	cha := make(chan []string)
 	go func(out chan<- []string, inp ...[]string) {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}(cha, inp...)
 	return cha
@@ -49,12 +49,46 @@ func ChanStringSSlice(inp ...[][]string) (out <-chan []string) {
 	cha := make(chan []string)
 	go func(out chan<- []string, inp ...[][]string) {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanStringSFuncNok returns a channel to receive all results of act until nok before close.
+func ChanStringSFuncNok(act func() ([]string, bool)) (out <-chan []string) {
+	cha := make(chan []string)
+	go func(out chan<- []string, act func() ([]string, bool)) {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
+	return cha
+}
+
+// ChanStringSFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanStringSFuncErr(act func() ([]string, error)) (out <-chan []string) {
+	cha := make(chan []string)
+	go func(out chan<- []string, act func() ([]string, error)) {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}(cha, act)
 	return cha
 }
 
@@ -63,8 +97,8 @@ func JoinStringS(out chan<- []string, inp ...[]string) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- []string, inp ...[]string) {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}(cha, out, inp...)
@@ -76,9 +110,9 @@ func JoinStringSSlice(out chan<- []string, inp ...[][]string) (done <-chan struc
 	cha := make(chan struct{})
 	go func(done chan<- struct{}, out chan<- []string, inp ...[][]string) {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,8 +226,8 @@ func PipeStringSFork(inp <-chan []string) (out1, out2 <-chan []string) {
 // StringSTube is the signature for a pipe function.
 type StringSTube func(inp <-chan []string, out <-chan []string)
 
-// StringSdaisy returns a channel to receive all inp after having passed thru tube.
-func StringSdaisy(inp <-chan []string, tube StringSTube) (out <-chan []string) {
+// StringSDaisy returns a channel to receive all inp after having passed thru tube.
+func StringSDaisy(inp <-chan []string, tube StringSTube) (out <-chan []string) {
 	cha := make(chan []string)
 	go tube(inp, cha)
 	return cha
@@ -202,8 +236,8 @@ func StringSdaisy(inp <-chan []string, tube StringSTube) (out <-chan []string) {
 // StringSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
 func StringSDaisyChain(inp <-chan []string, tubes ...StringSTube) (out <-chan []string) {
 	cha := inp
-	for _, tube := range tubes {
-		cha = StringSdaisy(cha, tube)
+	for i := range tubes {
+		cha = StringSDaisy(cha, tubes[i])
 	}
 	return cha
 }

@@ -41,8 +41,8 @@ func ChanFsInfoS(inp ...fs.FsInfoS) chan fs.FsInfoS {
 	out := make(chan fs.FsInfoS)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -53,9 +53,43 @@ func ChanFsInfoSSlice(inp ...[]fs.FsInfoS) chan fs.FsInfoS {
 	out := make(chan fs.FsInfoS)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanFsInfoSFuncNok returns a channel to receive all results of act until nok before close.
+func ChanFsInfoSFuncNok(act func() (fs.FsInfoS, bool)) <-chan fs.FsInfoS {
+	out := make(chan fs.FsInfoS)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanFsInfoSFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanFsInfoSFuncErr(act func() (fs.FsInfoS, error)) <-chan fs.FsInfoS {
+	out := make(chan fs.FsInfoS)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -67,8 +101,8 @@ func JoinFsInfoS(out chan<- fs.FsInfoS, inp ...fs.FsInfoS) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -80,9 +114,9 @@ func JoinFsInfoSSlice(out chan<- fs.FsInfoS, inp ...[]fs.FsInfoS) chan struct{} 
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,3 +226,44 @@ func PipeFsInfoSFork(inp <-chan fs.FsInfoS) (chan fs.FsInfoS, chan fs.FsInfoS) {
 	}()
 	return out1, out2
 }
+
+// FsInfoSTube is the signature for a pipe function.
+type FsInfoSTube func(inp <-chan fs.FsInfoS, out <-chan fs.FsInfoS)
+
+// FsInfoSDaisy returns a channel to receive all inp after having passed thru tube.
+func FsInfoSDaisy(inp <-chan fs.FsInfoS, tube FsInfoSTube) (out <-chan fs.FsInfoS) {
+	cha := make(chan fs.FsInfoS)
+	go tube(inp, cha)
+	return cha
+}
+
+// FsInfoSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func FsInfoSDaisyChain(inp <-chan fs.FsInfoS, tubes ...FsInfoSTube) (out <-chan fs.FsInfoS) {
+	cha := inp
+	for i := range tubes {
+		cha = FsInfoSDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/

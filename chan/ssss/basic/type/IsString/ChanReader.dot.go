@@ -41,8 +41,8 @@ func ChanReader(inp ...*strings.Reader) chan *strings.Reader {
 	out := make(chan *strings.Reader)
 	go func() {
 		defer close(out)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 	}()
 	return out
@@ -53,9 +53,43 @@ func ChanReaderSlice(inp ...[]*strings.Reader) chan *strings.Reader {
 	out := make(chan *strings.Reader)
 	go func() {
 		defer close(out)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
+			}
+		}
+	}()
+	return out
+}
+
+// ChanReaderFuncNok returns a channel to receive all results of act until nok before close.
+func ChanReaderFuncNok(act func() (*strings.Reader, bool)) <-chan *strings.Reader {
+	out := make(chan *strings.Reader)
+	go func() {
+		defer close(out)
+		for {
+			res, ok := act() // Apply action
+			if !ok {
+				return
+			} else {
+				out <- res
+			}
+		}
+	}()
+	return out
+}
+
+// ChanReaderFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanReaderFuncErr(act func() (*strings.Reader, error)) <-chan *strings.Reader {
+	out := make(chan *strings.Reader)
+	go func() {
+		defer close(out)
+		for {
+			res, err := act() // Apply action
+			if err != nil {
+				return
+			} else {
+				out <- res
 			}
 		}
 	}()
@@ -67,8 +101,8 @@ func JoinReader(out chan<- *strings.Reader, inp ...*strings.Reader) chan struct{
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, i := range inp {
-			out <- i
+		for i := range inp {
+			out <- inp[i]
 		}
 		done <- struct{}{}
 	}()
@@ -80,9 +114,9 @@ func JoinReaderSlice(out chan<- *strings.Reader, inp ...[]*strings.Reader) chan 
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for _, in := range inp {
-			for _, i := range in {
-				out <- i
+		for i := range inp {
+			for j := range inp[i] {
+				out <- inp[i][j]
 			}
 		}
 		done <- struct{}{}
@@ -192,3 +226,44 @@ func PipeReaderFork(inp <-chan *strings.Reader) (chan *strings.Reader, chan *str
 	}()
 	return out1, out2
 }
+
+// ReaderTube is the signature for a pipe function.
+type ReaderTube func(inp <-chan *strings.Reader, out <-chan *strings.Reader)
+
+// ReaderDaisy returns a channel to receive all inp after having passed thru tube.
+func ReaderDaisy(inp <-chan *strings.Reader, tube ReaderTube) (out <-chan *strings.Reader) {
+	cha := make(chan *strings.Reader)
+	go tube(inp, cha)
+	return cha
+}
+
+// ReaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func ReaderDaisyChain(inp <-chan *strings.Reader, tubes ...ReaderTube) (out <-chan *strings.Reader) {
+	cha := inp
+	for i := range tubes {
+		cha = ReaderDaisy(cha, tubes[i])
+	}
+	return cha
+}
+
+/*
+func sendOneInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+}
+
+func sendTwoInto(snd chan<- int) {
+	defer close(snd)
+	snd <- 1 // send a 1
+	snd <- 2 // send a 2
+}
+
+var fun = func(left chan<- int, right <-chan int) { left <- 1 + <-right }
+
+func main() {
+	leftmost := make(chan int)
+	right := daisyChain(leftmost, fun, 10000) // the chain - right to left!
+	go sendTwoInto(right)
+	fmt.Println(<-leftmost)
+}
+*/
