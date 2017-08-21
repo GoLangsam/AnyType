@@ -12,7 +12,7 @@
 {{.DotDot "FsData"	"*fs.FsData"}}
 {{.DotDot "Pattern"	"*fs.Pattern"}}
 {{range .Range}}
-	{{.DotDot ":Package:" "fsc"}}
+	{{.DotDot ":Package:" "fs"}}
 	{{with .G ":Import:"}}
 		{{.DotDot "github.com/golangsam/container/ccsafe/fs" ""}}
 	{{end}}
