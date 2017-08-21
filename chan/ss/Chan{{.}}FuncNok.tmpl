@@ -4,9 +4,8 @@ func chan{{.}}FuncNok(out chan<- {{.Dot}}, act func() ({{.Dot}}, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

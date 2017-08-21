@@ -7,9 +7,8 @@ func Chan{{.}}FuncNil(act func() ({{.Dot}})) (out <-chan {{.Dot}}) {
 			res := act() // Apply action
 			if res == nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

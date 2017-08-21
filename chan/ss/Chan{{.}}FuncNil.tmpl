@@ -4,9 +4,8 @@ func chan{{.}}FuncNil(out chan<- {{.Dot}}, act func() ({{.Dot}})) {
 		res := act() // Apply action
 		if res == nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

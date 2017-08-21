@@ -4,9 +4,8 @@ func chan{{.}}FuncErr(out chan<- {{.Dot}}, act func() ({{.Dot}}, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
