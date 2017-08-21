@@ -71,9 +71,8 @@ func ChanPipeWriterFuncNok(act func() (*io.PipeWriter, bool)) (out <-chan *io.Pi
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanPipeWriterFuncErr(act func() (*io.PipeWriter, error)) (out <-chan *io.P
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

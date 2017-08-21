@@ -71,9 +71,8 @@ func ChanElementSFuncNok(act func() ([]list.Element, bool)) <-chan []list.Elemen
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanElementSFuncErr(act func() ([]list.Element, error)) <-chan []list.Eleme
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

@@ -68,9 +68,8 @@ func chanByteFuncNok(out chan<- byte, act func() (byte, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -87,9 +86,8 @@ func chanByteFuncErr(out chan<- byte, act func() (byte, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

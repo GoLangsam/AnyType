@@ -71,9 +71,8 @@ func ChanFileHeaderFuncNok(act func() (zip.FileHeader, bool)) <-chan zip.FileHea
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanFileHeaderFuncErr(act func() (zip.FileHeader, error)) <-chan zip.FileHe
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

@@ -71,9 +71,8 @@ func ChanLSMFuncNok(act func() (lsm.LazyStringerMap, bool)) <-chan lsm.LazyStrin
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanLSMFuncErr(act func() (lsm.LazyStringerMap, error)) <-chan lsm.LazyStri
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

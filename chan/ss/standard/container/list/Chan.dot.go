@@ -72,9 +72,8 @@ func chanFuncNok(out chan<- list.List, act func() (list.List, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanFuncErr(out chan<- list.List, act func() (list.List, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

@@ -68,9 +68,8 @@ func chanIntFuncNok(out chan<- int, act func() (int, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -87,9 +86,8 @@ func chanIntFuncErr(out chan<- int, act func() (int, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

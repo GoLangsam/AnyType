@@ -72,9 +72,8 @@ func chanBufferFuncNok(out chan<- bytes.Buffer, act func() (bytes.Buffer, bool))
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanBufferFuncErr(out chan<- bytes.Buffer, act func() (bytes.Buffer, error)
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

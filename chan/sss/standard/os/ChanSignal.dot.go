@@ -71,9 +71,8 @@ func ChanSignalFuncNok(act func() (os.Signal, bool)) (out <-chan os.Signal) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanSignalFuncErr(act func() (os.Signal, error)) (out <-chan os.Signal) {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

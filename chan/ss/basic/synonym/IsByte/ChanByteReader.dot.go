@@ -72,9 +72,8 @@ func chanByteReaderFuncNok(out chan<- io.ByteReader, act func() (io.ByteReader, 
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanByteReaderFuncErr(out chan<- io.ByteReader, act func() (io.ByteReader, 
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

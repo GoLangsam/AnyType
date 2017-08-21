@@ -72,9 +72,8 @@ func chanScannerFuncNok(out chan<- *bufio.Scanner, act func() (*bufio.Scanner, b
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanScannerFuncErr(out chan<- *bufio.Scanner, act func() (*bufio.Scanner, e
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

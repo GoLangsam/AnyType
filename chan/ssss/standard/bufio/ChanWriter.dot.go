@@ -71,9 +71,8 @@ func ChanWriterFuncNok(act func() (*bufio.Writer, bool)) <-chan *bufio.Writer {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanWriterFuncErr(act func() (*bufio.Writer, error)) <-chan *bufio.Writer {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

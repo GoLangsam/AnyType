@@ -67,9 +67,8 @@ func ChanUInt32FuncNok(act func() (uint32, bool)) (out <-chan uint32) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -84,9 +83,8 @@ func ChanUInt32FuncErr(act func() (uint32, error)) (out <-chan uint32) {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

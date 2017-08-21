@@ -71,9 +71,8 @@ func ChanReadCloserFuncNok(act func() (io.ReadCloser, bool)) <-chan io.ReadClose
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanReadCloserFuncErr(act func() (io.ReadCloser, error)) <-chan io.ReadClos
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

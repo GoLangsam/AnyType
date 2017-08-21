@@ -72,9 +72,8 @@ func chanByteScannerFuncNok(out chan<- io.ByteScanner, act func() (io.ByteScanne
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanByteScannerFuncErr(out chan<- io.ByteScanner, act func() (io.ByteScanne
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

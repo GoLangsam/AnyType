@@ -71,9 +71,8 @@ func ChanSectionReaderFuncNok(act func() (*io.SectionReader, bool)) <-chan *io.S
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanSectionReaderFuncErr(act func() (*io.SectionReader, error)) <-chan *io.
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

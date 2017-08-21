@@ -71,9 +71,8 @@ func ChanFsFoldSFuncNok(act func() (fs.FsFoldS, bool)) <-chan fs.FsFoldS {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanFsFoldSFuncErr(act func() (fs.FsFoldS, error)) <-chan fs.FsFoldS {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

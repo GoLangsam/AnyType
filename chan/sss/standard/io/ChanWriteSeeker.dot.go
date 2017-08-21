@@ -71,9 +71,8 @@ func ChanWriteSeekerFuncNok(act func() (io.WriteSeeker, bool)) (out <-chan io.Wr
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanWriteSeekerFuncErr(act func() (io.WriteSeeker, error)) (out <-chan io.W
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

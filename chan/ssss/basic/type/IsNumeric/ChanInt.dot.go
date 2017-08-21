@@ -67,9 +67,8 @@ func ChanIntFuncNok(act func() (int, bool)) <-chan int {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanIntFuncErr(act func() (int, error)) <-chan int {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

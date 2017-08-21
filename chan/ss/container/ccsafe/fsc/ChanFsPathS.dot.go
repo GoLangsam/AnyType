@@ -72,9 +72,8 @@ func chanFsPathSFuncNok(out chan<- fs.FsPathS, act func() (fs.FsPathS, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanFsPathSFuncErr(out chan<- fs.FsPathS, act func() (fs.FsPathS, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

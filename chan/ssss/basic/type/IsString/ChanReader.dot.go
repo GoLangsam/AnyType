@@ -71,9 +71,8 @@ func ChanReaderFuncNok(act func() (*strings.Reader, bool)) <-chan *strings.Reade
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanReaderFuncErr(act func() (*strings.Reader, error)) <-chan *strings.Read
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

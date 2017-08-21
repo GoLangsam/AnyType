@@ -67,9 +67,8 @@ func ChanFuncNok(act func() (string, bool)) (out <-chan string) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -84,9 +83,8 @@ func ChanFuncErr(act func() (string, error)) (out <-chan string) {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

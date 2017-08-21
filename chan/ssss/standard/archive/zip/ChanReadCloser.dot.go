@@ -71,9 +71,8 @@ func ChanReadCloserFuncNok(act func() (zip.ReadCloser, bool)) <-chan zip.ReadClo
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanReadCloserFuncErr(act func() (zip.ReadCloser, error)) <-chan zip.ReadCl
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

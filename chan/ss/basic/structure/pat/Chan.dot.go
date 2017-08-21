@@ -68,9 +68,8 @@ func chanFuncNok(out chan<- struct{}, act func() (struct{}, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -87,9 +86,8 @@ func chanFuncErr(out chan<- struct{}, act func() (struct{}, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

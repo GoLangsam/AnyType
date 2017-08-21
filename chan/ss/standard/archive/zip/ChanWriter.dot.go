@@ -72,9 +72,8 @@ func chanWriterFuncNok(out chan<- zip.Writer, act func() (zip.Writer, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanWriterFuncErr(out chan<- zip.Writer, act func() (zip.Writer, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

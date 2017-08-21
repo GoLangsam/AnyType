@@ -67,9 +67,8 @@ func ChanSomeTypeSFuncNok(act func() ([]SomeType, bool)) (out <-chan []SomeType)
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -84,9 +83,8 @@ func ChanSomeTypeSFuncErr(act func() ([]SomeType, error)) (out <-chan []SomeType
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

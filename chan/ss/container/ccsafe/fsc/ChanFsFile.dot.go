@@ -72,9 +72,8 @@ func chanFsFileFuncNok(out chan<- *fs.FsFile, act func() (*fs.FsFile, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanFsFileFuncErr(out chan<- *fs.FsFile, act func() (*fs.FsFile, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

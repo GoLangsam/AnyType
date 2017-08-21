@@ -67,9 +67,8 @@ func ChanBoolSFuncNok(act func() ([]bool, bool)) (out <-chan []bool) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -84,9 +83,8 @@ func ChanBoolSFuncErr(act func() ([]bool, error)) (out <-chan []bool) {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

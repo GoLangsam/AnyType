@@ -67,9 +67,8 @@ func ChanInt32FuncNok(act func() (int32, bool)) <-chan int32 {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanInt32FuncErr(act func() (int32, error)) <-chan int32 {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

@@ -72,9 +72,8 @@ func chanReaderFuncNok(out chan<- *bufio.Reader, act func() (*bufio.Reader, bool
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanReaderFuncErr(out chan<- *bufio.Reader, act func() (*bufio.Reader, erro
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

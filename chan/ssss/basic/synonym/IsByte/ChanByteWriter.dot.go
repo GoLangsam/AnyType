@@ -71,9 +71,8 @@ func ChanByteWriterFuncNok(act func() (io.ByteWriter, bool)) <-chan io.ByteWrite
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanByteWriterFuncErr(act func() (io.ByteWriter, error)) <-chan io.ByteWrit
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

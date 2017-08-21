@@ -72,9 +72,8 @@ func chanRuneScannerFuncNok(out chan<- io.RuneScanner, act func() (io.RuneScanne
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanRuneScannerFuncErr(out chan<- io.RuneScanner, act func() (io.RuneScanne
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

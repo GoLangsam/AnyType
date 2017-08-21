@@ -72,9 +72,8 @@ func chanRuneReaderFuncNok(out chan<- io.RuneReader, act func() (io.RuneReader, 
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanRuneReaderFuncErr(out chan<- io.RuneReader, act func() (io.RuneReader, 
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

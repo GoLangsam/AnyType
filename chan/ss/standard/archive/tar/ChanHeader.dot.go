@@ -72,9 +72,8 @@ func chanHeaderFuncNok(out chan<- *tar.Header, act func() (*tar.Header, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanHeaderFuncErr(out chan<- *tar.Header, act func() (*tar.Header, error)) 
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

@@ -72,9 +72,8 @@ func chanFsFoldFuncNok(out chan<- *fs.FsFold, act func() (*fs.FsFold, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanFsFoldFuncErr(out chan<- *fs.FsFold, act func() (*fs.FsFold, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

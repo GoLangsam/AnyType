@@ -67,9 +67,8 @@ func ChanFloat32FuncNok(act func() (float32, bool)) <-chan float32 {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanFloat32FuncErr(act func() (float32, error)) <-chan float32 {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

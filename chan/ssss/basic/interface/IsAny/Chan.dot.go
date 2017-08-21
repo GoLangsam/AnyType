@@ -67,9 +67,8 @@ func ChanFuncNok(act func() (interface{}, bool)) <-chan interface{} {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanFuncErr(act func() (interface{}, error)) <-chan interface{} {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

@@ -67,9 +67,8 @@ func ChanUInt64FuncNok(act func() (uint64, bool)) <-chan uint64 {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanUInt64FuncErr(act func() (uint64, error)) <-chan uint64 {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

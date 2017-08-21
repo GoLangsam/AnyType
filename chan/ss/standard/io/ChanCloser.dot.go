@@ -72,9 +72,8 @@ func chanCloserFuncNok(out chan<- io.Closer, act func() (io.Closer, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanCloserFuncErr(out chan<- io.Closer, act func() (io.Closer, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

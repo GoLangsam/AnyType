@@ -71,9 +71,8 @@ func ChanLimitedReaderFuncNok(act func() (*io.LimitedReader, bool)) (out <-chan 
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanLimitedReaderFuncErr(act func() (*io.LimitedReader, error)) (out <-chan
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

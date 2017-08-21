@@ -72,9 +72,8 @@ func chanPipeReaderFuncNok(out chan<- *io.PipeReader, act func() (*io.PipeReader
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanPipeReaderFuncErr(out chan<- *io.PipeReader, act func() (*io.PipeReader
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

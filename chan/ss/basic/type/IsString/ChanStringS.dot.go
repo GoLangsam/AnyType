@@ -68,9 +68,8 @@ func chanStringSFuncNok(out chan<- []string, act func() ([]string, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -87,9 +86,8 @@ func chanStringSFuncErr(out chan<- []string, act func() ([]string, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

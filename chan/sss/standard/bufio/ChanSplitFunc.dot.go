@@ -71,9 +71,8 @@ func ChanSplitFuncFuncNok(act func() (bufio.SplitFunc, bool)) (out <-chan bufio.
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanSplitFuncFuncErr(act func() (bufio.SplitFunc, error)) (out <-chan bufio
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

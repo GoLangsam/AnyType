@@ -67,9 +67,8 @@ func ChanInt64FuncNok(act func() (int64, bool)) (out <-chan int64) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -84,9 +83,8 @@ func ChanInt64FuncErr(act func() (int64, error)) (out <-chan int64) {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

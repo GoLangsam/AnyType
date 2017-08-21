@@ -71,9 +71,8 @@ func ChanReaderFuncNok(act func() (bytes.Reader, bool)) (out <-chan bytes.Reader
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanReaderFuncErr(act func() (bytes.Reader, error)) (out <-chan bytes.Reade
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

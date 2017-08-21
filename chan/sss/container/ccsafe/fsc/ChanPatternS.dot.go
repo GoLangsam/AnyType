@@ -71,9 +71,8 @@ func ChanPatternSFuncNok(act func() (fs.PatternS, bool)) (out <-chan fs.PatternS
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanPatternSFuncErr(act func() (fs.PatternS, error)) (out <-chan fs.Pattern
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

@@ -71,9 +71,8 @@ func ChanReaderFuncNok(act func() (zip.Reader, bool)) <-chan zip.Reader {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanReaderFuncErr(act func() (zip.Reader, error)) <-chan zip.Reader {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

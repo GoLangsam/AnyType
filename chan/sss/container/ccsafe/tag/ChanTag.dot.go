@@ -71,9 +71,8 @@ func ChanTagFuncNok(act func() (tag.TagAny, bool)) (out <-chan tag.TagAny) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanTagFuncErr(act func() (tag.TagAny, error)) (out <-chan tag.TagAny) {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

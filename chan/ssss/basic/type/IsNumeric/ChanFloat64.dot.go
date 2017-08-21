@@ -67,9 +67,8 @@ func ChanFloat64FuncNok(act func() (float64, bool)) <-chan float64 {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanFloat64FuncErr(act func() (float64, error)) <-chan float64 {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

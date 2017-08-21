@@ -72,9 +72,8 @@ func chanFileFuncNok(out chan<- *os.File, act func() (*os.File, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanFileFuncErr(out chan<- *os.File, act func() (*os.File, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

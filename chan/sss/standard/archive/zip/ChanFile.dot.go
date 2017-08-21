@@ -71,9 +71,8 @@ func ChanFileFuncNok(act func() (zip.File, bool)) (out <-chan zip.File) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanFileFuncErr(act func() (zip.File, error)) (out <-chan zip.File) {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

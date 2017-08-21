@@ -68,9 +68,8 @@ func chanComplex64FuncNok(out chan<- complex64, act func() (complex64, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -87,9 +86,8 @@ func chanComplex64FuncErr(out chan<- complex64, act func() (complex64, error)) {
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

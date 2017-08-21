@@ -71,9 +71,8 @@ func ChanDotPathFuncNok(act func() (dotpath.DotPath, bool)) <-chan dotpath.DotPa
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanDotPathFuncErr(act func() (dotpath.DotPath, error)) <-chan dotpath.DotP
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

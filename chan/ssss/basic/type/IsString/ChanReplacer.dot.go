@@ -71,9 +71,8 @@ func ChanReplacerFuncNok(act func() (*strings.Replacer, bool)) <-chan *strings.R
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanReplacerFuncErr(act func() (*strings.Replacer, error)) <-chan *strings.
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

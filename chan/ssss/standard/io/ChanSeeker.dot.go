@@ -71,9 +71,8 @@ func ChanSeekerFuncNok(act func() (io.Seeker, bool)) <-chan io.Seeker {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanSeekerFuncErr(act func() (io.Seeker, error)) <-chan io.Seeker {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

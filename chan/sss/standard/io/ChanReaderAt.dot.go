@@ -71,9 +71,8 @@ func ChanReaderAtFuncNok(act func() (io.ReaderAt, bool)) (out <-chan io.ReaderAt
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanReaderAtFuncErr(act func() (io.ReaderAt, error)) (out <-chan io.ReaderA
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

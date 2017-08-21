@@ -72,9 +72,8 @@ func chanReadWriterFuncNok(out chan<- io.ReadWriter, act func() (io.ReadWriter, 
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanReadWriterFuncErr(out chan<- io.ReadWriter, act func() (io.ReadWriter, 
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

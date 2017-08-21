@@ -71,9 +71,8 @@ func ChanFsDataSFuncNok(act func() (fs.FsDataS, bool)) <-chan fs.FsDataS {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanFsDataSFuncErr(act func() (fs.FsDataS, error)) <-chan fs.FsDataS {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

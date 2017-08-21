@@ -67,9 +67,8 @@ func ChanPointerSFuncNok(act func() ([]*SomeType, bool)) (out <-chan []*SomeType
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -84,9 +83,8 @@ func ChanPointerSFuncErr(act func() ([]*SomeType, error)) (out <-chan []*SomeTyp
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

@@ -72,9 +72,8 @@ func chanSectionReaderFuncNok(out chan<- *io.SectionReader, act func() (*io.Sect
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanSectionReaderFuncErr(out chan<- *io.SectionReader, act func() (*io.Sect
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

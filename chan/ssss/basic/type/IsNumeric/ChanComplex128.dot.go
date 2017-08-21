@@ -67,9 +67,8 @@ func ChanComplex128FuncNok(act func() (complex128, bool)) <-chan complex128 {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanComplex128FuncErr(act func() (complex128, error)) <-chan complex128 {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

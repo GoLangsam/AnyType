@@ -72,9 +72,8 @@ func chanReaderFuncNok(out chan<- *tar.Reader, act func() (*tar.Reader, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanReaderFuncErr(out chan<- *tar.Reader, act func() (*tar.Reader, error)) 
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

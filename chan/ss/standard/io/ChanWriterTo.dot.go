@@ -72,9 +72,8 @@ func chanWriterToFuncNok(out chan<- io.WriterTo, act func() (io.WriterTo, bool))
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanWriterToFuncErr(out chan<- io.WriterTo, act func() (io.WriterTo, error)
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

@@ -71,9 +71,8 @@ func ChanWriteCloserFuncNok(act func() (io.WriteCloser, bool)) (out <-chan io.Wr
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanWriteCloserFuncErr(act func() (io.WriteCloser, error)) (out <-chan io.W
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha

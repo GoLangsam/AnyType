@@ -72,9 +72,8 @@ func chanByteWriterFuncNok(out chan<- io.ByteWriter, act func() (io.ByteWriter, 
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanByteWriterFuncErr(out chan<- io.ByteWriter, act func() (io.ByteWriter, 
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

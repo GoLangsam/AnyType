@@ -67,9 +67,8 @@ func ChanFuncNok(act func() ([]byte, bool)) <-chan []byte {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -84,9 +83,8 @@ func ChanFuncErr(act func() ([]byte, error)) <-chan []byte {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

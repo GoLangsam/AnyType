@@ -72,9 +72,8 @@ func chanReadWriteSeekerFuncNok(out chan<- io.ReadWriteSeeker, act func() (io.Re
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanReadWriteSeekerFuncErr(out chan<- io.ReadWriteSeeker, act func() (io.Re
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

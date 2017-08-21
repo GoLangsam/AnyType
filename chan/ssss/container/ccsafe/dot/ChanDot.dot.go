@@ -71,9 +71,8 @@ func ChanDotFuncNok(act func() (dot.Dot, bool)) <-chan dot.Dot {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out
@@ -88,9 +87,8 @@ func ChanDotFuncErr(act func() (dot.Dot, error)) <-chan dot.Dot {
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}()
 	return out

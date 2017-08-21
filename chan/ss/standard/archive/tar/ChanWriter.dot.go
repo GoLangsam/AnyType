@@ -72,9 +72,8 @@ func chanWriterFuncNok(out chan<- *tar.Writer, act func() (*tar.Writer, bool)) {
 		res, ok := act() // Apply action
 		if !ok {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 
@@ -91,9 +90,8 @@ func chanWriterFuncErr(out chan<- *tar.Writer, act func() (*tar.Writer, error)) 
 		res, err := act() // Apply action
 		if err != nil {
 			return
-		} else {
-			out <- res
 		}
+		out <- res
 	}
 }
 

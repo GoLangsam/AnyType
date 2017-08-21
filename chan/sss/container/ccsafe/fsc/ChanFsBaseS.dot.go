@@ -71,9 +71,8 @@ func ChanFsBaseSFuncNok(act func() (fs.FsBaseS, bool)) (out <-chan fs.FsBaseS) {
 			res, ok := act() // Apply action
 			if !ok {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
@@ -88,9 +87,8 @@ func ChanFsBaseSFuncErr(act func() (fs.FsBaseS, error)) (out <-chan fs.FsBaseS) 
 			res, err := act() // Apply action
 			if err != nil {
 				return
-			} else {
-				out <- res
 			}
+			out <- res
 		}
 	}(cha, act)
 	return cha
