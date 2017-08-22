@@ -1,39 +1,53 @@
 @If "%1"=="" goto iter
+@If "%2"=="" goto %1
 
 @Set args= /I /E /V /C /H /R /K /O /X /B /Y
+@xcopy %1	%2		%args%
+@goto done
 
-@xcopy %1	..\s\		%args%
-@xcopy %1	..\ss\		%args%
+:cleanup
+@Echo Do Cleanup
+@cd	..\s\
+@Del 		Send{{.}}Proxy.dot.go.tmpl
+@cd	..\l\
+@Del 		Send{{.}}Proxy.dot.go.tmpl
+@cd	..\sl\
+@Del 		Send{{.}}Proxy.dot.go.tmpl
+@cd	..\xs\
+@Del 		Send{{.}}Proxy.dot.go.tmpl
+@cd	..\xl\
+@Del 		Send{{.}}Proxy.dot.go.tmpl
 
-@xcopy %1	..\ssss\	%args%
-@xcopy %1	..\l\		%args%
-@xcopy %1	..\sl\		%args%
-@xcopy %1	..\xs\		%args%
-@xcopy %1	..\xl\		%args%
-
-@Del 		..\s\Send{{.}}Proxy.dot.go.tmpl
-@Del 		..\l\Send{{.}}Proxy.dot.go.tmpl
-@Del 		..\sl\Send{{.}}Proxy.dot.go.tmpl
-@Del 		..\xs\Send{{.}}Proxy.dot.go.tmpl
-@Del 		..\xl\Send{{.}}Proxy.dot.go.tmpl
+@cd ..\sss\
 
 @goto done
 
 :iter
 
-xcopy Core.nonil	basic\type\core.tmpl		/Y
+@Echo xCopy Define.Core.tmpl
+@xcopy _Core.nonil		basic\type\Define.Core.tmpl		/Y /Q
+@xcopy _Core.tmpl		basic\type\IsUnsafe\Define.Core.tmpl	/Y /Q
+@xcopy _Core.merge		basic\type\IsFloat\Define.Core.tmpl	/Y /Q
+@xcopy _Core.merge		basic\type\IsInteger\Define.Core.tmpl	/Y /Q
+@xcopy _Core.merge		basic\type\IsOrdered\Define.Core.tmpl	/Y /Q
+@xcopy _Core.merge		basic\type\IsUnsigned\Define.Core.tmpl	/Y /Q
 
-xcopy Core.tmpl		basic\type\IsUnsafe\core.tmpl	/Y
+@Echo Distribute Define.Core.tmpl
+@Call %0 *Define.Core.tmpl	..\s\
+@Call %0 *Define.Core.tmpl	..\ss\
 
-xcopy Core.merge	basic\type\IsFloat\core.tmpl	/Y
-xcopy Core.merge	basic\type\IsInteger\core.tmpl	/Y
-xcopy Core.merge	basic\type\IsOrdered\core.tmpl	/Y
-xcopy Core.merge	basic\type\IsUnsigned\core.tmpl	/Y
+@Echo Distribute *dot.go.tmpl
+@Call %0 *dot.go.tmpl	..\s\
+@Call %0 *dot.go.tmpl	..\ss\
 
-xcopy Core.basicmerge	basic\type\core.tmpl
+@Call %0 *dot.go.tmpl	..\ssss\
+@Call %0 *dot.go.tmpl	..\l\
+@Call %0 *dot.go.tmpl	..\sl\
+@Call %0 *dot.go.tmpl	..\xs\
+@Call %0 *dot.go.tmpl	..\xl\
 
-@Call %0 *core.tmpl
-@Call %0 *dot.go.tmpl
+@Echo Call Cleanup
+@Call %0 cleanup
 
 @goto done
 
