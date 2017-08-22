@@ -11,6 +11,6 @@ import (
 	"github.com/golangsam/container/ccsafe/lsm"
 )
 
-var _ lsm.LazyStringerMap // silence import
+var _ *lsm.LazyStringerMap // silence import
 
 // No functionality yet associated with this source file.

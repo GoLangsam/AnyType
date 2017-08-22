@@ -8,11 +8,11 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
 // MakeListSChan returns a new open channel
-// (simply a 'chan []list.List' that is).
+// (simply a 'chan []*list.List' that is).
 //
 // Note: No 'ListS-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,14 +32,14 @@ import (
 //
 // Note: as always (except for PipeListSBuffer) the channel is unbuffered.
 //
-func MakeListSChan() (out chan []list.List) {
-	return make(chan []list.List)
+func MakeListSChan() (out chan []*list.List) {
+	return make(chan []*list.List)
 }
 
 // ChanListS returns a channel to receive all inputs before close.
-func ChanListS(inp ...[]list.List) (out <-chan []list.List) {
-	cha := make(chan []list.List)
-	go func(out chan<- []list.List, inp ...[]list.List) {
+func ChanListS(inp ...[]*list.List) (out <-chan []*list.List) {
+	cha := make(chan []*list.List)
+	go func(out chan<- []*list.List, inp ...[]*list.List) {
 		defer close(out)
 		for i := range inp {
 			out <- inp[i]
@@ -49,9 +49,9 @@ func ChanListS(inp ...[]list.List) (out <-chan []list.List) {
 }
 
 // ChanListSSlice returns a channel to receive all inputs before close.
-func ChanListSSlice(inp ...[][]list.List) (out <-chan []list.List) {
-	cha := make(chan []list.List)
-	go func(out chan<- []list.List, inp ...[][]list.List) {
+func ChanListSSlice(inp ...[][]*list.List) (out <-chan []*list.List) {
+	cha := make(chan []*list.List)
+	go func(out chan<- []*list.List, inp ...[][]*list.List) {
 		defer close(out)
 		for i := range inp {
 			for j := range inp[i] {
@@ -62,10 +62,26 @@ func ChanListSSlice(inp ...[][]list.List) (out <-chan []list.List) {
 	return cha
 }
 
+// ChanListSFuncNil returns a channel to receive all results of act until nil before close.
+func ChanListSFuncNil(act func() []*list.List) (out <-chan []*list.List) {
+	cha := make(chan []*list.List)
+	go func(out chan<- []*list.List, act func() []*list.List) {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}(cha, act)
+	return cha
+}
+
 // ChanListSFuncNok returns a channel to receive all results of act until nok before close.
-func ChanListSFuncNok(act func() ([]list.List, bool)) (out <-chan []list.List) {
-	cha := make(chan []list.List)
-	go func(out chan<- []list.List, act func() ([]list.List, bool)) {
+func ChanListSFuncNok(act func() ([]*list.List, bool)) (out <-chan []*list.List) {
+	cha := make(chan []*list.List)
+	go func(out chan<- []*list.List, act func() ([]*list.List, bool)) {
 		defer close(out)
 		for {
 			res, ok := act() // Apply action
@@ -79,9 +95,9 @@ func ChanListSFuncNok(act func() ([]list.List, bool)) (out <-chan []list.List) {
 }
 
 // ChanListSFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanListSFuncErr(act func() ([]list.List, error)) (out <-chan []list.List) {
-	cha := make(chan []list.List)
-	go func(out chan<- []list.List, act func() ([]list.List, error)) {
+func ChanListSFuncErr(act func() ([]*list.List, error)) (out <-chan []*list.List) {
+	cha := make(chan []*list.List)
+	go func(out chan<- []*list.List, act func() ([]*list.List, error)) {
 		defer close(out)
 		for {
 			res, err := act() // Apply action
@@ -95,9 +111,9 @@ func ChanListSFuncErr(act func() ([]list.List, error)) (out <-chan []list.List) 
 }
 
 // JoinListS sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinListS(out chan<- []list.List, inp ...[]list.List) (done <-chan struct{}) {
+func JoinListS(out chan<- []*list.List, inp ...[]*list.List) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- []list.List, inp ...[]list.List) {
+	go func(done chan<- struct{}, out chan<- []*list.List, inp ...[]*list.List) {
 		defer close(done)
 		for i := range inp {
 			out <- inp[i]
@@ -108,9 +124,9 @@ func JoinListS(out chan<- []list.List, inp ...[]list.List) (done <-chan struct{}
 }
 
 // JoinListSSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinListSSlice(out chan<- []list.List, inp ...[][]list.List) (done <-chan struct{}) {
+func JoinListSSlice(out chan<- []*list.List, inp ...[][]*list.List) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- []list.List, inp ...[][]list.List) {
+	go func(done chan<- struct{}, out chan<- []*list.List, inp ...[][]*list.List) {
 		defer close(done)
 		for i := range inp {
 			for j := range inp[i] {
@@ -123,9 +139,9 @@ func JoinListSSlice(out chan<- []list.List, inp ...[][]list.List) (done <-chan s
 }
 
 // JoinListSChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinListSChan(out chan<- []list.List, inp <-chan []list.List) (done <-chan struct{}) {
+func JoinListSChan(out chan<- []*list.List, inp <-chan []*list.List) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- []list.List, inp <-chan []list.List) {
+	go func(done chan<- struct{}, out chan<- []*list.List, inp <-chan []*list.List) {
 		defer close(done)
 		for i := range inp {
 			out <- i
@@ -136,9 +152,9 @@ func JoinListSChan(out chan<- []list.List, inp <-chan []list.List) (done <-chan 
 }
 
 // DoneListS returns a channel to receive one signal before close after inp has been drained.
-func DoneListS(inp <-chan []list.List) (done <-chan struct{}) {
+func DoneListS(inp <-chan []*list.List) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, inp <-chan []list.List) {
+	go func(done chan<- struct{}, inp <-chan []*list.List) {
 		defer close(done)
 		for i := range inp {
 			_ = i // Drain inp
@@ -151,11 +167,11 @@ func DoneListS(inp <-chan []list.List) (done <-chan struct{}) {
 // DoneListSSlice returns a channel which will receive a slice
 // of all the ListSs received on inp channel before close.
 // Unlike DoneListS, a full slice is sent once, not just an event.
-func DoneListSSlice(inp <-chan []list.List) (done <-chan [][]list.List) {
-	cha := make(chan [][]list.List)
-	go func(inp <-chan []list.List, done chan<- [][]list.List) {
+func DoneListSSlice(inp <-chan []*list.List) (done <-chan [][]*list.List) {
+	cha := make(chan [][]*list.List)
+	go func(inp <-chan []*list.List, done chan<- [][]*list.List) {
 		defer close(done)
-		ListSS := [][]list.List{}
+		ListSS := [][]*list.List{}
 		for i := range inp {
 			ListSS = append(ListSS, i)
 		}
@@ -165,12 +181,12 @@ func DoneListSSlice(inp <-chan []list.List) (done <-chan [][]list.List) {
 }
 
 // DoneListSFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneListSFunc(inp <-chan []list.List, act func(a []list.List)) (out <-chan struct{}) {
+func DoneListSFunc(inp <-chan []*list.List, act func(a []*list.List)) (out <-chan struct{}) {
 	cha := make(chan struct{})
 	if act == nil {
-		act = func(a []list.List) { return }
+		act = func(a []*list.List) { return }
 	}
-	go func(done chan<- struct{}, inp <-chan []list.List, act func(a []list.List)) {
+	go func(done chan<- struct{}, inp <-chan []*list.List, act func(a []*list.List)) {
 		defer close(done)
 		for i := range inp {
 			act(i) // Apply action
@@ -181,9 +197,9 @@ func DoneListSFunc(inp <-chan []list.List, act func(a []list.List)) (out <-chan 
 }
 
 // PipeListSBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeListSBuffer(inp <-chan []list.List, cap int) (out <-chan []list.List) {
-	cha := make(chan []list.List, cap)
-	go func(out chan<- []list.List, inp <-chan []list.List) {
+func PipeListSBuffer(inp <-chan []*list.List, cap int) (out <-chan []*list.List) {
+	cha := make(chan []*list.List, cap)
+	go func(out chan<- []*list.List, inp <-chan []*list.List) {
 		defer close(out)
 		for i := range inp {
 			out <- i
@@ -195,12 +211,12 @@ func PipeListSBuffer(inp <-chan []list.List, cap int) (out <-chan []list.List) {
 // PipeListSFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeListSMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeListSFunc(inp <-chan []list.List, act func(a []list.List) []list.List) (out <-chan []list.List) {
-	cha := make(chan []list.List)
+func PipeListSFunc(inp <-chan []*list.List, act func(a []*list.List) []*list.List) (out <-chan []*list.List) {
+	cha := make(chan []*list.List)
 	if act == nil {
-		act = func(a []list.List) []list.List { return a }
+		act = func(a []*list.List) []*list.List { return a }
 	}
-	go func(out chan<- []list.List, inp <-chan []list.List, act func(a []list.List) []list.List) {
+	go func(out chan<- []*list.List, inp <-chan []*list.List, act func(a []*list.List) []*list.List) {
 		defer close(out)
 		for i := range inp {
 			out <- act(i)
@@ -211,10 +227,10 @@ func PipeListSFunc(inp <-chan []list.List, act func(a []list.List) []list.List) 
 
 // PipeListSFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeListSFork(inp <-chan []list.List) (out1, out2 <-chan []list.List) {
-	cha1 := make(chan []list.List)
-	cha2 := make(chan []list.List)
-	go func(out1, out2 chan<- []list.List, inp <-chan []list.List) {
+func PipeListSFork(inp <-chan []*list.List) (out1, out2 <-chan []*list.List) {
+	cha1 := make(chan []*list.List)
+	cha2 := make(chan []*list.List)
+	go func(out1, out2 chan<- []*list.List, inp <-chan []*list.List) {
 		defer close(out1)
 		defer close(out2)
 		for i := range inp {
@@ -226,17 +242,17 @@ func PipeListSFork(inp <-chan []list.List) (out1, out2 <-chan []list.List) {
 }
 
 // ListSTube is the signature for a pipe function.
-type ListSTube func(inp <-chan []list.List, out <-chan []list.List)
+type ListSTube func(inp <-chan []*list.List, out <-chan []*list.List)
 
 // ListSDaisy returns a channel to receive all inp after having passed thru tube.
-func ListSDaisy(inp <-chan []list.List, tube ListSTube) (out <-chan []list.List) {
-	cha := make(chan []list.List)
+func ListSDaisy(inp <-chan []*list.List, tube ListSTube) (out <-chan []*list.List) {
+	cha := make(chan []*list.List)
 	go tube(inp, cha)
 	return cha
 }
 
 // ListSDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func ListSDaisyChain(inp <-chan []list.List, tubes ...ListSTube) (out <-chan []list.List) {
+func ListSDaisyChain(inp <-chan []*list.List, tubes ...ListSTube) (out <-chan []*list.List) {
 	cha := inp
 	for i := range tubes {
 		cha = ListSDaisy(cha, tubes[i])

@@ -62,6 +62,22 @@ func ChanFsDataSlice(inp ...[]*fs.FsData) (out <-chan *fs.FsData) {
 	return cha
 }
 
+// ChanFsDataFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFsDataFuncNil(act func() *fs.FsData) (out <-chan *fs.FsData) {
+	cha := make(chan *fs.FsData)
+	go func(out chan<- *fs.FsData, act func() *fs.FsData) {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}(cha, act)
+	return cha
+}
+
 // ChanFsDataFuncNok returns a channel to receive all results of act until nok before close.
 func ChanFsDataFuncNok(act func() (*fs.FsData, bool)) (out <-chan *fs.FsData) {
 	cha := make(chan *fs.FsData)

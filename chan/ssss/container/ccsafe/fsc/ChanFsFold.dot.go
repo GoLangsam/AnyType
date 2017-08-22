@@ -62,6 +62,22 @@ func ChanFsFoldSlice(inp ...[]*fs.FsFold) chan *fs.FsFold {
 	return out
 }
 
+// ChanFsFoldFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFsFoldFuncNil(act func() *fs.FsFold) <-chan *fs.FsFold {
+	out := make(chan *fs.FsFold)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}()
+	return out
+}
+
 // ChanFsFoldFuncNok returns a channel to receive all results of act until nok before close.
 func ChanFsFoldFuncNok(act func() (*fs.FsFold, bool)) <-chan *fs.FsFold {
 	out := make(chan *fs.FsFold)

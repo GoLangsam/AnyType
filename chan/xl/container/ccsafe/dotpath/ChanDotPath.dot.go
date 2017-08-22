@@ -11,6 +11,6 @@ import (
 	"github.com/golangsam/container/ccsafe/dotpath"
 )
 
-var _ dotpath.DotPath // silence import
+var _ *dotpath.DotPath // silence import
 
 // No functionality yet associated with this source file.

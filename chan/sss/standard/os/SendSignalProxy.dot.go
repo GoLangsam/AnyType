@@ -7,30 +7,11 @@ package os
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-// Note: SendProxySignal uses "container/ring"
-
+// Note: SendProxySignal imports "container/ring" for the expanding buffer.
 import (
 	"container/ring"
 	"os"
 )
-
-/* usage as found in go/test/chan/sieve2.go
-func Sieve() {
-	// ...
-	primes := make(chan int, 10)
-	primes <- 3
-	// ...
-	go func() {
-		// In order to generate the nth prime we only need multiples of primes ≤ sqrt(nth prime).
-		// Thus, the merging goroutine will receive from 'primes' much slower than this goroutine will send to it,
-		// making the buffer accumulate and block this goroutine from sending, causing a deadlock.
-		// The solution is to use a proxy goroutine to do automatic buffering.
-		primes := sendproxy(primes)
-		// ...
-
-	}()
-}
-*/
 
 // SignalCAP is the capacity of the buffered proxy channel
 const SignalCAP = 10
@@ -75,3 +56,21 @@ func SendProxySignal(out chan<- os.Signal) chan<- os.Signal {
 	}()
 	return proxy
 }
+
+/* usage as found in $GOROOT/test/chan/sieve2.go
+func Sieve() {
+	// ...
+	primes := make(chan int, 10)
+	primes <- 3
+	// ...
+	go func() {
+		// In order to generate the nth prime we only need multiples of primes ≤ sqrt(nth prime).
+		// Thus, the merging goroutine will receive from 'primes' much slower than this goroutine will send to it,
+		// making the buffer accumulate and block this goroutine from sending, causing a deadlock.
+		// The solution is to use a proxy goroutine to do automatic buffering.
+		primes := sendproxy(primes)
+		// ...
+
+	}()
+}
+*/

@@ -8,7 +8,7 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // FileChan represents a
@@ -23,20 +23,20 @@ type FileChan interface {
 // receive-only
 // channel
 type FileROnlyChan interface {
-	RequestFile() (dat zip.File)        // the receive function - aka "MyFile := <-MyFileROnlyChan"
-	TryFile() (dat zip.File, open bool) // the multi-valued comma-ok receive function - aka "MyFile, ok := <-MyFileROnlyChan"
+	RequestFile() (dat *zip.File)        // the receive function - aka "MyFile := <-MyFileROnlyChan"
+	TryFile() (dat *zip.File, open bool) // the multi-valued comma-ok receive function - aka "MyFile, ok := <-MyFileROnlyChan"
 }
 
 // FileSOnlyChan represents a
 // send-only
 // channel
 type FileSOnlyChan interface {
-	ProvideFile(dat zip.File) // the send function - aka "MyKind <- some File"
+	ProvideFile(dat *zip.File) // the send function - aka "MyKind <- some File"
 }
 
 // SChFile is a supply channel
 type SChFile struct {
-	dat chan zip.File
+	dat chan *zip.File
 	// req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type SChFile struct {
 // supply channel
 func MakeSupplyFileChan() *SChFile {
 	d := new(SChFile)
-	d.dat = make(chan zip.File)
+	d.dat = make(chan *zip.File)
 	// d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeSupplyFileChan() *SChFile {
 // supply channel
 func MakeSupplyFileBuff(cap int) *SChFile {
 	d := new(SChFile)
-	d.dat = make(chan zip.File, cap)
+	d.dat = make(chan *zip.File, cap)
 	// eq = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideFile is the send function - aka "MyKind <- some File"
-func (c *SChFile) ProvideFile(dat zip.File) {
+func (c *SChFile) ProvideFile(dat *zip.File) {
 	// .req
 	c.dat <- dat
 }
 
 // RequestFile is the receive function - aka "some File <- MyKind"
-func (c *SChFile) RequestFile() (dat zip.File) {
+func (c *SChFile) RequestFile() (dat *zip.File) {
 	// eq <- struct{}{}
 	return <-c.dat
 }
 
 // TryFile is the comma-ok multi-valued form of RequestFile and
 // reports whether a received value was sent before the File channel was closed.
-func (c *SChFile) TryFile() (dat zip.File, open bool) {
+func (c *SChFile) TryFile() (dat *zip.File, open bool) {
 	// eq <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

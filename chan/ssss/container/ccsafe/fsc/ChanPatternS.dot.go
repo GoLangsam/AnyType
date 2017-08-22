@@ -62,6 +62,22 @@ func ChanPatternSSlice(inp ...[]fs.PatternS) chan fs.PatternS {
 	return out
 }
 
+// ChanPatternSFuncNil returns a channel to receive all results of act until nil before close.
+func ChanPatternSFuncNil(act func() fs.PatternS) <-chan fs.PatternS {
+	out := make(chan fs.PatternS)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}()
+	return out
+}
+
 // ChanPatternSFuncNok returns a channel to receive all results of act until nok before close.
 func ChanPatternSFuncNok(act func() (fs.PatternS, bool)) <-chan fs.PatternS {
 	out := make(chan fs.PatternS)

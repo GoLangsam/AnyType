@@ -23,20 +23,20 @@ type TagChan interface {
 // receive-only
 // channel
 type TagROnlyChan interface {
-	RequestTag() (dat tag.TagAny)        // the receive function - aka "MyTag := <-MyTagROnlyChan"
-	TryTag() (dat tag.TagAny, open bool) // the multi-valued comma-ok receive function - aka "MyTag, ok := <-MyTagROnlyChan"
+	RequestTag() (dat *tag.TagAny)        // the receive function - aka "MyTag := <-MyTagROnlyChan"
+	TryTag() (dat *tag.TagAny, open bool) // the multi-valued comma-ok receive function - aka "MyTag, ok := <-MyTagROnlyChan"
 }
 
 // TagSOnlyChan represents a
 // send-only
 // channel
 type TagSOnlyChan interface {
-	ProvideTag(dat tag.TagAny) // the send function - aka "MyKind <- some Tag"
+	ProvideTag(dat *tag.TagAny) // the send function - aka "MyKind <- some Tag"
 }
 
 // DChTag is a demand channel
 type DChTag struct {
-	dat chan tag.TagAny
+	dat chan *tag.TagAny
 	req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type DChTag struct {
 // demand channel
 func MakeDemandTagChan() *DChTag {
 	d := new(DChTag)
-	d.dat = make(chan tag.TagAny)
+	d.dat = make(chan *tag.TagAny)
 	d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeDemandTagChan() *DChTag {
 // demand channel
 func MakeDemandTagBuff(cap int) *DChTag {
 	d := new(DChTag)
-	d.dat = make(chan tag.TagAny, cap)
+	d.dat = make(chan *tag.TagAny, cap)
 	d.req = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideTag is the send function - aka "MyKind <- some Tag"
-func (c *DChTag) ProvideTag(dat tag.TagAny) {
+func (c *DChTag) ProvideTag(dat *tag.TagAny) {
 	<-c.req
 	c.dat <- dat
 }
 
 // RequestTag is the receive function - aka "some Tag <- MyKind"
-func (c *DChTag) RequestTag() (dat tag.TagAny) {
+func (c *DChTag) RequestTag() (dat *tag.TagAny) {
 	c.req <- struct{}{}
 	return <-c.dat
 }
 
 // TryTag is the comma-ok multi-valued form of RequestTag and
 // reports whether a received value was sent before the Tag channel was closed.
-func (c *DChTag) TryTag() (dat tag.TagAny, open bool) {
+func (c *DChTag) TryTag() (dat *tag.TagAny, open bool) {
 	c.req <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

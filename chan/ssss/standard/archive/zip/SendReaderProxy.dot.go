@@ -7,30 +7,11 @@ package zip
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-// Note: SendProxyReader uses "container/ring"
-
+// Note: SendProxyReader imports "container/ring" for the expanding buffer.
 import (
-	"archive/zip"
+	zip "archive/zip"
 	"container/ring"
 )
-
-/* usage as found in go/test/chan/sieve2.go
-func Sieve() {
-	// ...
-	primes := make(chan int, 10)
-	primes <- 3
-	// ...
-	go func() {
-		// In order to generate the nth prime we only need multiples of primes ≤ sqrt(nth prime).
-		// Thus, the merging goroutine will receive from 'primes' much slower than this goroutine will send to it,
-		// making the buffer accumulate and block this goroutine from sending, causing a deadlock.
-		// The solution is to use a proxy goroutine to do automatic buffering.
-		primes := sendproxy(primes)
-		// ...
-
-	}()
-}
-*/
 
 // ReaderCAP is the capacity of the buffered proxy channel
 const ReaderCAP = 10
@@ -43,21 +24,21 @@ const ReaderQUE = 16
 // in an expanding buffer, so that sending to 'out' never blocks.
 //
 // Note: the expanding buffer is implemented via "container/ring"
-func SendProxyReader(out chan<- zip.Reader) chan<- zip.Reader {
-	proxy := make(chan zip.Reader, ReaderCAP)
+func SendProxyReader(out chan<- *zip.Reader) chan<- *zip.Reader {
+	proxy := make(chan *zip.Reader, ReaderCAP)
 	go func() {
 		n := ReaderQUE // the allocated size of the circular queue
 		first := ring.New(n)
 		last := first
-		var c chan<- zip.Reader
-		var e zip.Reader
+		var c chan<- *zip.Reader
+		var e *zip.Reader
 		for {
 			c = out
 			if first == last {
 				// buffer empty: disable output
 				c = nil
 			} else {
-				e = first.Value.(zip.Reader)
+				e = first.Value.(*zip.Reader)
 			}
 			select {
 			case e = <-proxy:
@@ -75,3 +56,21 @@ func SendProxyReader(out chan<- zip.Reader) chan<- zip.Reader {
 	}()
 	return proxy
 }
+
+/* usage as found in $GOROOT/test/chan/sieve2.go
+func Sieve() {
+	// ...
+	primes := make(chan int, 10)
+	primes <- 3
+	// ...
+	go func() {
+		// In order to generate the nth prime we only need multiples of primes ≤ sqrt(nth prime).
+		// Thus, the merging goroutine will receive from 'primes' much slower than this goroutine will send to it,
+		// making the buffer accumulate and block this goroutine from sending, causing a deadlock.
+		// The solution is to use a proxy goroutine to do automatic buffering.
+		primes := sendproxy(primes)
+		// ...
+
+	}()
+}
+*/

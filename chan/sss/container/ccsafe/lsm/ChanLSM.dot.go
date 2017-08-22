@@ -12,7 +12,7 @@ import (
 )
 
 // MakeLSMChan returns a new open channel
-// (simply a 'chan lsm.LazyStringerMap' that is).
+// (simply a 'chan *lsm.LazyStringerMap' that is).
 //
 // Note: No 'LSM-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,14 +32,14 @@ import (
 //
 // Note: as always (except for PipeLSMBuffer) the channel is unbuffered.
 //
-func MakeLSMChan() (out chan lsm.LazyStringerMap) {
-	return make(chan lsm.LazyStringerMap)
+func MakeLSMChan() (out chan *lsm.LazyStringerMap) {
+	return make(chan *lsm.LazyStringerMap)
 }
 
 // ChanLSM returns a channel to receive all inputs before close.
-func ChanLSM(inp ...lsm.LazyStringerMap) (out <-chan lsm.LazyStringerMap) {
-	cha := make(chan lsm.LazyStringerMap)
-	go func(out chan<- lsm.LazyStringerMap, inp ...lsm.LazyStringerMap) {
+func ChanLSM(inp ...*lsm.LazyStringerMap) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap)
+	go func(out chan<- *lsm.LazyStringerMap, inp ...*lsm.LazyStringerMap) {
 		defer close(out)
 		for i := range inp {
 			out <- inp[i]
@@ -49,9 +49,9 @@ func ChanLSM(inp ...lsm.LazyStringerMap) (out <-chan lsm.LazyStringerMap) {
 }
 
 // ChanLSMSlice returns a channel to receive all inputs before close.
-func ChanLSMSlice(inp ...[]lsm.LazyStringerMap) (out <-chan lsm.LazyStringerMap) {
-	cha := make(chan lsm.LazyStringerMap)
-	go func(out chan<- lsm.LazyStringerMap, inp ...[]lsm.LazyStringerMap) {
+func ChanLSMSlice(inp ...[]*lsm.LazyStringerMap) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap)
+	go func(out chan<- *lsm.LazyStringerMap, inp ...[]*lsm.LazyStringerMap) {
 		defer close(out)
 		for i := range inp {
 			for j := range inp[i] {
@@ -62,10 +62,26 @@ func ChanLSMSlice(inp ...[]lsm.LazyStringerMap) (out <-chan lsm.LazyStringerMap)
 	return cha
 }
 
+// ChanLSMFuncNil returns a channel to receive all results of act until nil before close.
+func ChanLSMFuncNil(act func() *lsm.LazyStringerMap) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap)
+	go func(out chan<- *lsm.LazyStringerMap, act func() *lsm.LazyStringerMap) {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}(cha, act)
+	return cha
+}
+
 // ChanLSMFuncNok returns a channel to receive all results of act until nok before close.
-func ChanLSMFuncNok(act func() (lsm.LazyStringerMap, bool)) (out <-chan lsm.LazyStringerMap) {
-	cha := make(chan lsm.LazyStringerMap)
-	go func(out chan<- lsm.LazyStringerMap, act func() (lsm.LazyStringerMap, bool)) {
+func ChanLSMFuncNok(act func() (*lsm.LazyStringerMap, bool)) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap)
+	go func(out chan<- *lsm.LazyStringerMap, act func() (*lsm.LazyStringerMap, bool)) {
 		defer close(out)
 		for {
 			res, ok := act() // Apply action
@@ -79,9 +95,9 @@ func ChanLSMFuncNok(act func() (lsm.LazyStringerMap, bool)) (out <-chan lsm.Lazy
 }
 
 // ChanLSMFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanLSMFuncErr(act func() (lsm.LazyStringerMap, error)) (out <-chan lsm.LazyStringerMap) {
-	cha := make(chan lsm.LazyStringerMap)
-	go func(out chan<- lsm.LazyStringerMap, act func() (lsm.LazyStringerMap, error)) {
+func ChanLSMFuncErr(act func() (*lsm.LazyStringerMap, error)) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap)
+	go func(out chan<- *lsm.LazyStringerMap, act func() (*lsm.LazyStringerMap, error)) {
 		defer close(out)
 		for {
 			res, err := act() // Apply action
@@ -95,9 +111,9 @@ func ChanLSMFuncErr(act func() (lsm.LazyStringerMap, error)) (out <-chan lsm.Laz
 }
 
 // JoinLSM sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinLSM(out chan<- lsm.LazyStringerMap, inp ...lsm.LazyStringerMap) (done <-chan struct{}) {
+func JoinLSM(out chan<- *lsm.LazyStringerMap, inp ...*lsm.LazyStringerMap) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- lsm.LazyStringerMap, inp ...lsm.LazyStringerMap) {
+	go func(done chan<- struct{}, out chan<- *lsm.LazyStringerMap, inp ...*lsm.LazyStringerMap) {
 		defer close(done)
 		for i := range inp {
 			out <- inp[i]
@@ -108,9 +124,9 @@ func JoinLSM(out chan<- lsm.LazyStringerMap, inp ...lsm.LazyStringerMap) (done <
 }
 
 // JoinLSMSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinLSMSlice(out chan<- lsm.LazyStringerMap, inp ...[]lsm.LazyStringerMap) (done <-chan struct{}) {
+func JoinLSMSlice(out chan<- *lsm.LazyStringerMap, inp ...[]*lsm.LazyStringerMap) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- lsm.LazyStringerMap, inp ...[]lsm.LazyStringerMap) {
+	go func(done chan<- struct{}, out chan<- *lsm.LazyStringerMap, inp ...[]*lsm.LazyStringerMap) {
 		defer close(done)
 		for i := range inp {
 			for j := range inp[i] {
@@ -123,9 +139,9 @@ func JoinLSMSlice(out chan<- lsm.LazyStringerMap, inp ...[]lsm.LazyStringerMap) 
 }
 
 // JoinLSMChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinLSMChan(out chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap) (done <-chan struct{}) {
+func JoinLSMChan(out chan<- *lsm.LazyStringerMap, inp <-chan *lsm.LazyStringerMap) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap) {
+	go func(done chan<- struct{}, out chan<- *lsm.LazyStringerMap, inp <-chan *lsm.LazyStringerMap) {
 		defer close(done)
 		for i := range inp {
 			out <- i
@@ -136,9 +152,9 @@ func JoinLSMChan(out chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap)
 }
 
 // DoneLSM returns a channel to receive one signal before close after inp has been drained.
-func DoneLSM(inp <-chan lsm.LazyStringerMap) (done <-chan struct{}) {
+func DoneLSM(inp <-chan *lsm.LazyStringerMap) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, inp <-chan lsm.LazyStringerMap) {
+	go func(done chan<- struct{}, inp <-chan *lsm.LazyStringerMap) {
 		defer close(done)
 		for i := range inp {
 			_ = i // Drain inp
@@ -151,11 +167,11 @@ func DoneLSM(inp <-chan lsm.LazyStringerMap) (done <-chan struct{}) {
 // DoneLSMSlice returns a channel which will receive a slice
 // of all the LSMs received on inp channel before close.
 // Unlike DoneLSM, a full slice is sent once, not just an event.
-func DoneLSMSlice(inp <-chan lsm.LazyStringerMap) (done <-chan []lsm.LazyStringerMap) {
-	cha := make(chan []lsm.LazyStringerMap)
-	go func(inp <-chan lsm.LazyStringerMap, done chan<- []lsm.LazyStringerMap) {
+func DoneLSMSlice(inp <-chan *lsm.LazyStringerMap) (done <-chan []*lsm.LazyStringerMap) {
+	cha := make(chan []*lsm.LazyStringerMap)
+	go func(inp <-chan *lsm.LazyStringerMap, done chan<- []*lsm.LazyStringerMap) {
 		defer close(done)
-		LSMS := []lsm.LazyStringerMap{}
+		LSMS := []*lsm.LazyStringerMap{}
 		for i := range inp {
 			LSMS = append(LSMS, i)
 		}
@@ -165,12 +181,12 @@ func DoneLSMSlice(inp <-chan lsm.LazyStringerMap) (done <-chan []lsm.LazyStringe
 }
 
 // DoneLSMFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneLSMFunc(inp <-chan lsm.LazyStringerMap, act func(a lsm.LazyStringerMap)) (out <-chan struct{}) {
+func DoneLSMFunc(inp <-chan *lsm.LazyStringerMap, act func(a *lsm.LazyStringerMap)) (out <-chan struct{}) {
 	cha := make(chan struct{})
 	if act == nil {
-		act = func(a lsm.LazyStringerMap) { return }
+		act = func(a *lsm.LazyStringerMap) { return }
 	}
-	go func(done chan<- struct{}, inp <-chan lsm.LazyStringerMap, act func(a lsm.LazyStringerMap)) {
+	go func(done chan<- struct{}, inp <-chan *lsm.LazyStringerMap, act func(a *lsm.LazyStringerMap)) {
 		defer close(done)
 		for i := range inp {
 			act(i) // Apply action
@@ -181,9 +197,9 @@ func DoneLSMFunc(inp <-chan lsm.LazyStringerMap, act func(a lsm.LazyStringerMap)
 }
 
 // PipeLSMBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeLSMBuffer(inp <-chan lsm.LazyStringerMap, cap int) (out <-chan lsm.LazyStringerMap) {
-	cha := make(chan lsm.LazyStringerMap, cap)
-	go func(out chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap) {
+func PipeLSMBuffer(inp <-chan *lsm.LazyStringerMap, cap int) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap, cap)
+	go func(out chan<- *lsm.LazyStringerMap, inp <-chan *lsm.LazyStringerMap) {
 		defer close(out)
 		for i := range inp {
 			out <- i
@@ -195,12 +211,12 @@ func PipeLSMBuffer(inp <-chan lsm.LazyStringerMap, cap int) (out <-chan lsm.Lazy
 // PipeLSMFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeLSMMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeLSMFunc(inp <-chan lsm.LazyStringerMap, act func(a lsm.LazyStringerMap) lsm.LazyStringerMap) (out <-chan lsm.LazyStringerMap) {
-	cha := make(chan lsm.LazyStringerMap)
+func PipeLSMFunc(inp <-chan *lsm.LazyStringerMap, act func(a *lsm.LazyStringerMap) *lsm.LazyStringerMap) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap)
 	if act == nil {
-		act = func(a lsm.LazyStringerMap) lsm.LazyStringerMap { return a }
+		act = func(a *lsm.LazyStringerMap) *lsm.LazyStringerMap { return a }
 	}
-	go func(out chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap, act func(a lsm.LazyStringerMap) lsm.LazyStringerMap) {
+	go func(out chan<- *lsm.LazyStringerMap, inp <-chan *lsm.LazyStringerMap, act func(a *lsm.LazyStringerMap) *lsm.LazyStringerMap) {
 		defer close(out)
 		for i := range inp {
 			out <- act(i)
@@ -211,10 +227,10 @@ func PipeLSMFunc(inp <-chan lsm.LazyStringerMap, act func(a lsm.LazyStringerMap)
 
 // PipeLSMFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeLSMFork(inp <-chan lsm.LazyStringerMap) (out1, out2 <-chan lsm.LazyStringerMap) {
-	cha1 := make(chan lsm.LazyStringerMap)
-	cha2 := make(chan lsm.LazyStringerMap)
-	go func(out1, out2 chan<- lsm.LazyStringerMap, inp <-chan lsm.LazyStringerMap) {
+func PipeLSMFork(inp <-chan *lsm.LazyStringerMap) (out1, out2 <-chan *lsm.LazyStringerMap) {
+	cha1 := make(chan *lsm.LazyStringerMap)
+	cha2 := make(chan *lsm.LazyStringerMap)
+	go func(out1, out2 chan<- *lsm.LazyStringerMap, inp <-chan *lsm.LazyStringerMap) {
 		defer close(out1)
 		defer close(out2)
 		for i := range inp {
@@ -226,17 +242,17 @@ func PipeLSMFork(inp <-chan lsm.LazyStringerMap) (out1, out2 <-chan lsm.LazyStri
 }
 
 // LSMTube is the signature for a pipe function.
-type LSMTube func(inp <-chan lsm.LazyStringerMap, out <-chan lsm.LazyStringerMap)
+type LSMTube func(inp <-chan *lsm.LazyStringerMap, out <-chan *lsm.LazyStringerMap)
 
 // LSMDaisy returns a channel to receive all inp after having passed thru tube.
-func LSMDaisy(inp <-chan lsm.LazyStringerMap, tube LSMTube) (out <-chan lsm.LazyStringerMap) {
-	cha := make(chan lsm.LazyStringerMap)
+func LSMDaisy(inp <-chan *lsm.LazyStringerMap, tube LSMTube) (out <-chan *lsm.LazyStringerMap) {
+	cha := make(chan *lsm.LazyStringerMap)
 	go tube(inp, cha)
 	return cha
 }
 
 // LSMDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func LSMDaisyChain(inp <-chan lsm.LazyStringerMap, tubes ...LSMTube) (out <-chan lsm.LazyStringerMap) {
+func LSMDaisyChain(inp <-chan *lsm.LazyStringerMap, tubes ...LSMTube) (out <-chan *lsm.LazyStringerMap) {
 	cha := inp
 	for i := range tubes {
 		cha = LSMDaisy(cha, tubes[i])

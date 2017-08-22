@@ -62,6 +62,22 @@ func ChanFsPathSSlice(inp ...[]fs.FsPathS) chan fs.FsPathS {
 	return out
 }
 
+// ChanFsPathSFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFsPathSFuncNil(act func() fs.FsPathS) <-chan fs.FsPathS {
+	out := make(chan fs.FsPathS)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}()
+	return out
+}
+
 // ChanFsPathSFuncNok returns a channel to receive all results of act until nok before close.
 func ChanFsPathSFuncNok(act func() (fs.FsPathS, bool)) <-chan fs.FsPathS {
 	out := make(chan fs.FsPathS)

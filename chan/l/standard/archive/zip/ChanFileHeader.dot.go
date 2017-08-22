@@ -8,7 +8,7 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // FileHeaderChan represents a
@@ -23,20 +23,20 @@ type FileHeaderChan interface {
 // receive-only
 // channel
 type FileHeaderROnlyChan interface {
-	RequestFileHeader() (dat zip.FileHeader)        // the receive function - aka "MyFileHeader := <-MyFileHeaderROnlyChan"
-	TryFileHeader() (dat zip.FileHeader, open bool) // the multi-valued comma-ok receive function - aka "MyFileHeader, ok := <-MyFileHeaderROnlyChan"
+	RequestFileHeader() (dat *zip.FileHeader)        // the receive function - aka "MyFileHeader := <-MyFileHeaderROnlyChan"
+	TryFileHeader() (dat *zip.FileHeader, open bool) // the multi-valued comma-ok receive function - aka "MyFileHeader, ok := <-MyFileHeaderROnlyChan"
 }
 
 // FileHeaderSOnlyChan represents a
 // send-only
 // channel
 type FileHeaderSOnlyChan interface {
-	ProvideFileHeader(dat zip.FileHeader) // the send function - aka "MyKind <- some FileHeader"
+	ProvideFileHeader(dat *zip.FileHeader) // the send function - aka "MyKind <- some FileHeader"
 }
 
 // DChFileHeader is a demand channel
 type DChFileHeader struct {
-	dat chan zip.FileHeader
+	dat chan *zip.FileHeader
 	req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type DChFileHeader struct {
 // demand channel
 func MakeDemandFileHeaderChan() *DChFileHeader {
 	d := new(DChFileHeader)
-	d.dat = make(chan zip.FileHeader)
+	d.dat = make(chan *zip.FileHeader)
 	d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeDemandFileHeaderChan() *DChFileHeader {
 // demand channel
 func MakeDemandFileHeaderBuff(cap int) *DChFileHeader {
 	d := new(DChFileHeader)
-	d.dat = make(chan zip.FileHeader, cap)
+	d.dat = make(chan *zip.FileHeader, cap)
 	d.req = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideFileHeader is the send function - aka "MyKind <- some FileHeader"
-func (c *DChFileHeader) ProvideFileHeader(dat zip.FileHeader) {
+func (c *DChFileHeader) ProvideFileHeader(dat *zip.FileHeader) {
 	<-c.req
 	c.dat <- dat
 }
 
 // RequestFileHeader is the receive function - aka "some FileHeader <- MyKind"
-func (c *DChFileHeader) RequestFileHeader() (dat zip.FileHeader) {
+func (c *DChFileHeader) RequestFileHeader() (dat *zip.FileHeader) {
 	c.req <- struct{}{}
 	return <-c.dat
 }
 
 // TryFileHeader is the comma-ok multi-valued form of RequestFileHeader and
 // reports whether a received value was sent before the FileHeader channel was closed.
-func (c *DChFileHeader) TryFileHeader() (dat zip.FileHeader, open bool) {
+func (c *DChFileHeader) TryFileHeader() (dat *zip.FileHeader, open bool) {
 	c.req <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

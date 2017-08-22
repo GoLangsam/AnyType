@@ -8,7 +8,7 @@ package tar
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/tar"
+	tar "archive/tar"
 )
 
 // MakeHeaderChan returns a new open channel
@@ -59,6 +59,22 @@ func ChanHeaderSlice(inp ...[]*tar.Header) (out <-chan *tar.Header) {
 			}
 		}
 	}(cha, inp...)
+	return cha
+}
+
+// ChanHeaderFuncNil returns a channel to receive all results of act until nil before close.
+func ChanHeaderFuncNil(act func() *tar.Header) (out <-chan *tar.Header) {
+	cha := make(chan *tar.Header)
+	go func(out chan<- *tar.Header, act func() *tar.Header) {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}(cha, act)
 	return cha
 }
 

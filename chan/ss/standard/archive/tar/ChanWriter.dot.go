@@ -8,7 +8,7 @@ package tar
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/tar"
+	tar "archive/tar"
 )
 
 // MakeWriterChan returns a new open channel
@@ -63,6 +63,24 @@ func sendWriterSlice(out chan<- *tar.Writer, inp ...[]*tar.Writer) {
 func ChanWriterSlice(inp ...[]*tar.Writer) (out <-chan *tar.Writer) {
 	cha := make(chan *tar.Writer)
 	go sendWriterSlice(cha, inp...)
+	return cha
+}
+
+func chanWriterFuncNil(out chan<- *tar.Writer, act func() *tar.Writer) {
+	defer close(out)
+	for {
+		res := act() // Apply action
+		if res == nil {
+			return
+		}
+		out <- res
+	}
+}
+
+// ChanWriterFuncNil returns a channel to receive all results of act until nil before close.
+func ChanWriterFuncNil(act func() *tar.Writer) (out <-chan *tar.Writer) {
+	cha := make(chan *tar.Writer)
+	go chanWriterFuncNil(cha, act)
 	return cha
 }
 

@@ -8,7 +8,7 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
 // Chan represents a
@@ -23,20 +23,20 @@ type Chan interface {
 // receive-only
 // channel
 type ROnlyChan interface {
-	Request() (dat list.List)        // the receive function - aka "My := <-MyROnlyChan"
-	Try() (dat list.List, open bool) // the multi-valued comma-ok receive function - aka "My, ok := <-MyROnlyChan"
+	Request() (dat *list.List)        // the receive function - aka "My := <-MyROnlyChan"
+	Try() (dat *list.List, open bool) // the multi-valued comma-ok receive function - aka "My, ok := <-MyROnlyChan"
 }
 
 // SOnlyChan represents a
 // send-only
 // channel
 type SOnlyChan interface {
-	Provide(dat list.List) // the send function - aka "MyKind <- some "
+	Provide(dat *list.List) // the send function - aka "MyKind <- some "
 }
 
 // DCh is a demand channel
 type DCh struct {
-	dat chan list.List
+	dat chan *list.List
 	req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type DCh struct {
 // demand channel
 func MakeDemandChan() *DCh {
 	d := new(DCh)
-	d.dat = make(chan list.List)
+	d.dat = make(chan *list.List)
 	d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeDemandChan() *DCh {
 // demand channel
 func MakeDemandBuff(cap int) *DCh {
 	d := new(DCh)
-	d.dat = make(chan list.List, cap)
+	d.dat = make(chan *list.List, cap)
 	d.req = make(chan struct{}, cap)
 	return d
 }
 
 // Provide is the send function - aka "MyKind <- some "
-func (c *DCh) Provide(dat list.List) {
+func (c *DCh) Provide(dat *list.List) {
 	<-c.req
 	c.dat <- dat
 }
 
 // Request is the receive function - aka "some  <- MyKind"
-func (c *DCh) Request() (dat list.List) {
+func (c *DCh) Request() (dat *list.List) {
 	c.req <- struct{}{}
 	return <-c.dat
 }
 
 // Try is the comma-ok multi-valued form of Request and
 // reports whether a received value was sent before the  channel was closed.
-func (c *DCh) Try() (dat list.List, open bool) {
+func (c *DCh) Try() (dat *list.List, open bool) {
 	c.req <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open
@@ -86,7 +86,7 @@ func (c *DCh) Try() (dat list.List, open bool) {
 
 // SCh is a supply channel
 type SCh struct {
-	dat chan list.List
+	dat chan *list.List
 	// req chan struct{}
 }
 
@@ -96,7 +96,7 @@ type SCh struct {
 // supply channel
 func MakeSupplyChan() *SCh {
 	d := new(SCh)
-	d.dat = make(chan list.List)
+	d.dat = make(chan *list.List)
 	// d.req = make(chan struct{})
 	return d
 }
@@ -107,26 +107,26 @@ func MakeSupplyChan() *SCh {
 // supply channel
 func MakeSupplyBuff(cap int) *SCh {
 	d := new(SCh)
-	d.dat = make(chan list.List, cap)
+	d.dat = make(chan *list.List, cap)
 	// eq = make(chan struct{}, cap)
 	return d
 }
 
 // Provide is the send function - aka "MyKind <- some "
-func (c *SCh) Provide(dat list.List) {
+func (c *SCh) Provide(dat *list.List) {
 	// .req
 	c.dat <- dat
 }
 
 // Request is the receive function - aka "some  <- MyKind"
-func (c *SCh) Request() (dat list.List) {
+func (c *SCh) Request() (dat *list.List) {
 	// eq <- struct{}{}
 	return <-c.dat
 }
 
 // Try is the comma-ok multi-valued form of Request and
 // reports whether a received value was sent before the  channel was closed.
-func (c *SCh) Try() (dat list.List, open bool) {
+func (c *SCh) Try() (dat *list.List, open bool) {
 	// eq <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

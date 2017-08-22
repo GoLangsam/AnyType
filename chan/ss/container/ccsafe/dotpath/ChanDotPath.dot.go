@@ -12,7 +12,7 @@ import (
 )
 
 // MakeDotPathChan returns a new open channel
-// (simply a 'chan dotpath.DotPath' that is).
+// (simply a 'chan *dotpath.DotPath' that is).
 //
 // Note: No 'DotPath-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,11 +32,11 @@ import (
 //
 // Note: as always (except for PipeDotPathBuffer) the channel is unbuffered.
 //
-func MakeDotPathChan() (out chan dotpath.DotPath) {
-	return make(chan dotpath.DotPath)
+func MakeDotPathChan() (out chan *dotpath.DotPath) {
+	return make(chan *dotpath.DotPath)
 }
 
-func sendDotPath(out chan<- dotpath.DotPath, inp ...dotpath.DotPath) {
+func sendDotPath(out chan<- *dotpath.DotPath, inp ...*dotpath.DotPath) {
 	defer close(out)
 	for i := range inp {
 		out <- inp[i]
@@ -44,13 +44,13 @@ func sendDotPath(out chan<- dotpath.DotPath, inp ...dotpath.DotPath) {
 }
 
 // ChanDotPath returns a channel to receive all inputs before close.
-func ChanDotPath(inp ...dotpath.DotPath) (out <-chan dotpath.DotPath) {
-	cha := make(chan dotpath.DotPath)
+func ChanDotPath(inp ...*dotpath.DotPath) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath)
 	go sendDotPath(cha, inp...)
 	return cha
 }
 
-func sendDotPathSlice(out chan<- dotpath.DotPath, inp ...[]dotpath.DotPath) {
+func sendDotPathSlice(out chan<- *dotpath.DotPath, inp ...[]*dotpath.DotPath) {
 	defer close(out)
 	for i := range inp {
 		for j := range inp[i] {
@@ -60,13 +60,31 @@ func sendDotPathSlice(out chan<- dotpath.DotPath, inp ...[]dotpath.DotPath) {
 }
 
 // ChanDotPathSlice returns a channel to receive all inputs before close.
-func ChanDotPathSlice(inp ...[]dotpath.DotPath) (out <-chan dotpath.DotPath) {
-	cha := make(chan dotpath.DotPath)
+func ChanDotPathSlice(inp ...[]*dotpath.DotPath) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath)
 	go sendDotPathSlice(cha, inp...)
 	return cha
 }
 
-func chanDotPathFuncNok(out chan<- dotpath.DotPath, act func() (dotpath.DotPath, bool)) {
+func chanDotPathFuncNil(out chan<- *dotpath.DotPath, act func() *dotpath.DotPath) {
+	defer close(out)
+	for {
+		res := act() // Apply action
+		if res == nil {
+			return
+		}
+		out <- res
+	}
+}
+
+// ChanDotPathFuncNil returns a channel to receive all results of act until nil before close.
+func ChanDotPathFuncNil(act func() *dotpath.DotPath) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath)
+	go chanDotPathFuncNil(cha, act)
+	return cha
+}
+
+func chanDotPathFuncNok(out chan<- *dotpath.DotPath, act func() (*dotpath.DotPath, bool)) {
 	defer close(out)
 	for {
 		res, ok := act() // Apply action
@@ -78,13 +96,13 @@ func chanDotPathFuncNok(out chan<- dotpath.DotPath, act func() (dotpath.DotPath,
 }
 
 // ChanDotPathFuncNok returns a channel to receive all results of act until nok before close.
-func ChanDotPathFuncNok(act func() (dotpath.DotPath, bool)) (out <-chan dotpath.DotPath) {
-	cha := make(chan dotpath.DotPath)
+func ChanDotPathFuncNok(act func() (*dotpath.DotPath, bool)) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath)
 	go chanDotPathFuncNok(cha, act)
 	return cha
 }
 
-func chanDotPathFuncErr(out chan<- dotpath.DotPath, act func() (dotpath.DotPath, error)) {
+func chanDotPathFuncErr(out chan<- *dotpath.DotPath, act func() (*dotpath.DotPath, error)) {
 	defer close(out)
 	for {
 		res, err := act() // Apply action
@@ -96,13 +114,13 @@ func chanDotPathFuncErr(out chan<- dotpath.DotPath, act func() (dotpath.DotPath,
 }
 
 // ChanDotPathFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanDotPathFuncErr(act func() (dotpath.DotPath, error)) (out <-chan dotpath.DotPath) {
-	cha := make(chan dotpath.DotPath)
+func ChanDotPathFuncErr(act func() (*dotpath.DotPath, error)) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath)
 	go chanDotPathFuncErr(cha, act)
 	return cha
 }
 
-func joinDotPath(done chan<- struct{}, out chan<- dotpath.DotPath, inp ...dotpath.DotPath) {
+func joinDotPath(done chan<- struct{}, out chan<- *dotpath.DotPath, inp ...*dotpath.DotPath) {
 	defer close(done)
 	for i := range inp {
 		out <- inp[i]
@@ -111,13 +129,13 @@ func joinDotPath(done chan<- struct{}, out chan<- dotpath.DotPath, inp ...dotpat
 }
 
 // JoinDotPath sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinDotPath(out chan<- dotpath.DotPath, inp ...dotpath.DotPath) (done <-chan struct{}) {
+func JoinDotPath(out chan<- *dotpath.DotPath, inp ...*dotpath.DotPath) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinDotPath(cha, out, inp...)
 	return cha
 }
 
-func joinDotPathSlice(done chan<- struct{}, out chan<- dotpath.DotPath, inp ...[]dotpath.DotPath) {
+func joinDotPathSlice(done chan<- struct{}, out chan<- *dotpath.DotPath, inp ...[]*dotpath.DotPath) {
 	defer close(done)
 	for i := range inp {
 		for j := range inp[i] {
@@ -128,13 +146,13 @@ func joinDotPathSlice(done chan<- struct{}, out chan<- dotpath.DotPath, inp ...[
 }
 
 // JoinDotPathSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinDotPathSlice(out chan<- dotpath.DotPath, inp ...[]dotpath.DotPath) (done <-chan struct{}) {
+func JoinDotPathSlice(out chan<- *dotpath.DotPath, inp ...[]*dotpath.DotPath) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinDotPathSlice(cha, out, inp...)
 	return cha
 }
 
-func joinDotPathChan(done chan<- struct{}, out chan<- dotpath.DotPath, inp <-chan dotpath.DotPath) {
+func joinDotPathChan(done chan<- struct{}, out chan<- *dotpath.DotPath, inp <-chan *dotpath.DotPath) {
 	defer close(done)
 	for i := range inp {
 		out <- i
@@ -143,13 +161,13 @@ func joinDotPathChan(done chan<- struct{}, out chan<- dotpath.DotPath, inp <-cha
 }
 
 // JoinDotPathChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinDotPathChan(out chan<- dotpath.DotPath, inp <-chan dotpath.DotPath) (done <-chan struct{}) {
+func JoinDotPathChan(out chan<- *dotpath.DotPath, inp <-chan *dotpath.DotPath) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinDotPathChan(cha, out, inp)
 	return cha
 }
 
-func doitDotPath(done chan<- struct{}, inp <-chan dotpath.DotPath) {
+func doitDotPath(done chan<- struct{}, inp <-chan *dotpath.DotPath) {
 	defer close(done)
 	for i := range inp {
 		_ = i // Drain inp
@@ -158,15 +176,15 @@ func doitDotPath(done chan<- struct{}, inp <-chan dotpath.DotPath) {
 }
 
 // DoneDotPath returns a channel to receive one signal before close after inp has been drained.
-func DoneDotPath(inp <-chan dotpath.DotPath) (done <-chan struct{}) {
+func DoneDotPath(inp <-chan *dotpath.DotPath) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go doitDotPath(cha, inp)
 	return cha
 }
 
-func doitDotPathSlice(done chan<- ([]dotpath.DotPath), inp <-chan dotpath.DotPath) {
+func doitDotPathSlice(done chan<- ([]*dotpath.DotPath), inp <-chan *dotpath.DotPath) {
 	defer close(done)
-	DotPathS := []dotpath.DotPath{}
+	DotPathS := []*dotpath.DotPath{}
 	for i := range inp {
 		DotPathS = append(DotPathS, i)
 	}
@@ -176,13 +194,13 @@ func doitDotPathSlice(done chan<- ([]dotpath.DotPath), inp <-chan dotpath.DotPat
 // DoneDotPathSlice returns a channel which will receive a slice
 // of all the DotPaths received on inp channel before close.
 // Unlike DoneDotPath, a full slice is sent once, not just an event.
-func DoneDotPathSlice(inp <-chan dotpath.DotPath) (done <-chan ([]dotpath.DotPath)) {
-	cha := make(chan ([]dotpath.DotPath))
+func DoneDotPathSlice(inp <-chan *dotpath.DotPath) (done <-chan ([]*dotpath.DotPath)) {
+	cha := make(chan ([]*dotpath.DotPath))
 	go doitDotPathSlice(cha, inp)
 	return cha
 }
 
-func doitDotPathFunc(done chan<- struct{}, inp <-chan dotpath.DotPath, act func(a dotpath.DotPath)) {
+func doitDotPathFunc(done chan<- struct{}, inp <-chan *dotpath.DotPath, act func(a *dotpath.DotPath)) {
 	defer close(done)
 	for i := range inp {
 		act(i) // Apply action
@@ -191,16 +209,16 @@ func doitDotPathFunc(done chan<- struct{}, inp <-chan dotpath.DotPath, act func(
 }
 
 // DoneDotPathFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneDotPathFunc(inp <-chan dotpath.DotPath, act func(a dotpath.DotPath)) (out <-chan struct{}) {
+func DoneDotPathFunc(inp <-chan *dotpath.DotPath, act func(a *dotpath.DotPath)) (out <-chan struct{}) {
 	cha := make(chan struct{})
 	if act == nil {
-		act = func(a dotpath.DotPath) { return }
+		act = func(a *dotpath.DotPath) { return }
 	}
 	go doitDotPathFunc(cha, inp, act)
 	return cha
 }
 
-func pipeDotPathBuffer(out chan<- dotpath.DotPath, inp <-chan dotpath.DotPath) {
+func pipeDotPathBuffer(out chan<- *dotpath.DotPath, inp <-chan *dotpath.DotPath) {
 	defer close(out)
 	for i := range inp {
 		out <- i
@@ -208,13 +226,13 @@ func pipeDotPathBuffer(out chan<- dotpath.DotPath, inp <-chan dotpath.DotPath) {
 }
 
 // PipeDotPathBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeDotPathBuffer(inp <-chan dotpath.DotPath, cap int) (out <-chan dotpath.DotPath) {
-	cha := make(chan dotpath.DotPath, cap)
+func PipeDotPathBuffer(inp <-chan *dotpath.DotPath, cap int) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath, cap)
 	go pipeDotPathBuffer(cha, inp)
 	return cha
 }
 
-func pipeDotPathFunc(out chan<- dotpath.DotPath, inp <-chan dotpath.DotPath, act func(a dotpath.DotPath) dotpath.DotPath) {
+func pipeDotPathFunc(out chan<- *dotpath.DotPath, inp <-chan *dotpath.DotPath, act func(a *dotpath.DotPath) *dotpath.DotPath) {
 	defer close(out)
 	for i := range inp {
 		out <- act(i)
@@ -224,16 +242,16 @@ func pipeDotPathFunc(out chan<- dotpath.DotPath, inp <-chan dotpath.DotPath, act
 // PipeDotPathFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeDotPathMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeDotPathFunc(inp <-chan dotpath.DotPath, act func(a dotpath.DotPath) dotpath.DotPath) (out <-chan dotpath.DotPath) {
-	cha := make(chan dotpath.DotPath)
+func PipeDotPathFunc(inp <-chan *dotpath.DotPath, act func(a *dotpath.DotPath) *dotpath.DotPath) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath)
 	if act == nil {
-		act = func(a dotpath.DotPath) dotpath.DotPath { return a }
+		act = func(a *dotpath.DotPath) *dotpath.DotPath { return a }
 	}
 	go pipeDotPathFunc(cha, inp, act)
 	return cha
 }
 
-func pipeDotPathFork(out1, out2 chan<- dotpath.DotPath, inp <-chan dotpath.DotPath) {
+func pipeDotPathFork(out1, out2 chan<- *dotpath.DotPath, inp <-chan *dotpath.DotPath) {
 	defer close(out1)
 	defer close(out2)
 	for i := range inp {
@@ -244,25 +262,25 @@ func pipeDotPathFork(out1, out2 chan<- dotpath.DotPath, inp <-chan dotpath.DotPa
 
 // PipeDotPathFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeDotPathFork(inp <-chan dotpath.DotPath) (out1, out2 <-chan dotpath.DotPath) {
-	cha1 := make(chan dotpath.DotPath)
-	cha2 := make(chan dotpath.DotPath)
+func PipeDotPathFork(inp <-chan *dotpath.DotPath) (out1, out2 <-chan *dotpath.DotPath) {
+	cha1 := make(chan *dotpath.DotPath)
+	cha2 := make(chan *dotpath.DotPath)
 	go pipeDotPathFork(cha1, cha2, inp)
 	return cha1, cha2
 }
 
 // DotPathTube is the signature for a pipe function.
-type DotPathTube func(inp <-chan dotpath.DotPath, out <-chan dotpath.DotPath)
+type DotPathTube func(inp <-chan *dotpath.DotPath, out <-chan *dotpath.DotPath)
 
 // DotPathDaisy returns a channel to receive all inp after having passed thru tube.
-func DotPathDaisy(inp <-chan dotpath.DotPath, tube DotPathTube) (out <-chan dotpath.DotPath) {
-	cha := make(chan dotpath.DotPath)
+func DotPathDaisy(inp <-chan *dotpath.DotPath, tube DotPathTube) (out <-chan *dotpath.DotPath) {
+	cha := make(chan *dotpath.DotPath)
 	go tube(inp, cha)
 	return cha
 }
 
 // DotPathDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func DotPathDaisyChain(inp <-chan dotpath.DotPath, tubes ...DotPathTube) (out <-chan dotpath.DotPath) {
+func DotPathDaisyChain(inp <-chan *dotpath.DotPath, tubes ...DotPathTube) (out <-chan *dotpath.DotPath) {
 	cha := inp
 	for i := range tubes {
 		cha = DotPathDaisy(cha, tubes[i])

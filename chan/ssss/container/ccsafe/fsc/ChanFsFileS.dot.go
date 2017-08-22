@@ -62,6 +62,22 @@ func ChanFsFileSSlice(inp ...[]fs.FsFileS) chan fs.FsFileS {
 	return out
 }
 
+// ChanFsFileSFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFsFileSFuncNil(act func() fs.FsFileS) <-chan fs.FsFileS {
+	out := make(chan fs.FsFileS)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}()
+	return out
+}
+
 // ChanFsFileSFuncNok returns a channel to receive all results of act until nok before close.
 func ChanFsFileSFuncNok(act func() (fs.FsFileS, bool)) <-chan fs.FsFileS {
 	out := make(chan fs.FsFileS)

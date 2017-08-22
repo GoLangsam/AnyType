@@ -8,7 +8,7 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
 // ElementChan represents a
@@ -23,20 +23,20 @@ type ElementChan interface {
 // receive-only
 // channel
 type ElementROnlyChan interface {
-	RequestElement() (dat list.Element)        // the receive function - aka "MyElement := <-MyElementROnlyChan"
-	TryElement() (dat list.Element, open bool) // the multi-valued comma-ok receive function - aka "MyElement, ok := <-MyElementROnlyChan"
+	RequestElement() (dat *list.Element)        // the receive function - aka "MyElement := <-MyElementROnlyChan"
+	TryElement() (dat *list.Element, open bool) // the multi-valued comma-ok receive function - aka "MyElement, ok := <-MyElementROnlyChan"
 }
 
 // ElementSOnlyChan represents a
 // send-only
 // channel
 type ElementSOnlyChan interface {
-	ProvideElement(dat list.Element) // the send function - aka "MyKind <- some Element"
+	ProvideElement(dat *list.Element) // the send function - aka "MyKind <- some Element"
 }
 
 // SChElement is a supply channel
 type SChElement struct {
-	dat chan list.Element
+	dat chan *list.Element
 	// req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type SChElement struct {
 // supply channel
 func MakeSupplyElementChan() *SChElement {
 	d := new(SChElement)
-	d.dat = make(chan list.Element)
+	d.dat = make(chan *list.Element)
 	// d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeSupplyElementChan() *SChElement {
 // supply channel
 func MakeSupplyElementBuff(cap int) *SChElement {
 	d := new(SChElement)
-	d.dat = make(chan list.Element, cap)
+	d.dat = make(chan *list.Element, cap)
 	// eq = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideElement is the send function - aka "MyKind <- some Element"
-func (c *SChElement) ProvideElement(dat list.Element) {
+func (c *SChElement) ProvideElement(dat *list.Element) {
 	// .req
 	c.dat <- dat
 }
 
 // RequestElement is the receive function - aka "some Element <- MyKind"
-func (c *SChElement) RequestElement() (dat list.Element) {
+func (c *SChElement) RequestElement() (dat *list.Element) {
 	// eq <- struct{}{}
 	return <-c.dat
 }
 
 // TryElement is the comma-ok multi-valued form of RequestElement and
 // reports whether a received value was sent before the Element channel was closed.
-func (c *SChElement) TryElement() (dat list.Element, open bool) {
+func (c *SChElement) TryElement() (dat *list.Element, open bool) {
 	// eq <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

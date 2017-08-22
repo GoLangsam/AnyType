@@ -7,30 +7,11 @@ package lsm
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-// Note: SendProxyLSM uses "container/ring"
-
+// Note: SendProxyLSM imports "container/ring" for the expanding buffer.
 import (
 	"container/ring"
 	"github.com/golangsam/container/ccsafe/lsm"
 )
-
-/* usage as found in go/test/chan/sieve2.go
-func Sieve() {
-	// ...
-	primes := make(chan int, 10)
-	primes <- 3
-	// ...
-	go func() {
-		// In order to generate the nth prime we only need multiples of primes ≤ sqrt(nth prime).
-		// Thus, the merging goroutine will receive from 'primes' much slower than this goroutine will send to it,
-		// making the buffer accumulate and block this goroutine from sending, causing a deadlock.
-		// The solution is to use a proxy goroutine to do automatic buffering.
-		primes := sendproxy(primes)
-		// ...
-
-	}()
-}
-*/
 
 // LSMCAP is the capacity of the buffered proxy channel
 const LSMCAP = 10
@@ -43,21 +24,21 @@ const LSMQUE = 16
 // in an expanding buffer, so that sending to 'out' never blocks.
 //
 // Note: the expanding buffer is implemented via "container/ring"
-func SendProxyLSM(out chan<- lsm.LazyStringerMap) chan<- lsm.LazyStringerMap {
-	proxy := make(chan lsm.LazyStringerMap, LSMCAP)
+func SendProxyLSM(out chan<- *lsm.LazyStringerMap) chan<- *lsm.LazyStringerMap {
+	proxy := make(chan *lsm.LazyStringerMap, LSMCAP)
 	go func() {
 		n := LSMQUE // the allocated size of the circular queue
 		first := ring.New(n)
 		last := first
-		var c chan<- lsm.LazyStringerMap
-		var e lsm.LazyStringerMap
+		var c chan<- *lsm.LazyStringerMap
+		var e *lsm.LazyStringerMap
 		for {
 			c = out
 			if first == last {
 				// buffer empty: disable output
 				c = nil
 			} else {
-				e = first.Value.(lsm.LazyStringerMap)
+				e = first.Value.(*lsm.LazyStringerMap)
 			}
 			select {
 			case e = <-proxy:
@@ -75,3 +56,21 @@ func SendProxyLSM(out chan<- lsm.LazyStringerMap) chan<- lsm.LazyStringerMap {
 	}()
 	return proxy
 }
+
+/* usage as found in $GOROOT/test/chan/sieve2.go
+func Sieve() {
+	// ...
+	primes := make(chan int, 10)
+	primes <- 3
+	// ...
+	go func() {
+		// In order to generate the nth prime we only need multiples of primes ≤ sqrt(nth prime).
+		// Thus, the merging goroutine will receive from 'primes' much slower than this goroutine will send to it,
+		// making the buffer accumulate and block this goroutine from sending, causing a deadlock.
+		// The solution is to use a proxy goroutine to do automatic buffering.
+		primes := sendproxy(primes)
+		// ...
+
+	}()
+}
+*/

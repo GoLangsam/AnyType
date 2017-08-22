@@ -62,6 +62,22 @@ func ChanFsBaseSSlice(inp ...[]fs.FsBaseS) chan fs.FsBaseS {
 	return out
 }
 
+// ChanFsBaseSFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFsBaseSFuncNil(act func() fs.FsBaseS) <-chan fs.FsBaseS {
+	out := make(chan fs.FsBaseS)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}()
+	return out
+}
+
 // ChanFsBaseSFuncNok returns a channel to receive all results of act until nok before close.
 func ChanFsBaseSFuncNok(act func() (fs.FsBaseS, bool)) <-chan fs.FsBaseS {
 	out := make(chan fs.FsBaseS)

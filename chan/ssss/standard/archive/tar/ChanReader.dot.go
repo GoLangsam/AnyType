@@ -8,7 +8,7 @@ package tar
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/tar"
+	tar "archive/tar"
 )
 
 // MakeReaderChan returns a new open channel
@@ -57,6 +57,22 @@ func ChanReaderSlice(inp ...[]*tar.Reader) chan *tar.Reader {
 			for j := range inp[i] {
 				out <- inp[i][j]
 			}
+		}
+	}()
+	return out
+}
+
+// ChanReaderFuncNil returns a channel to receive all results of act until nil before close.
+func ChanReaderFuncNil(act func() *tar.Reader) <-chan *tar.Reader {
+	out := make(chan *tar.Reader)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
 		}
 	}()
 	return out

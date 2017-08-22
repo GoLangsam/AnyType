@@ -8,11 +8,11 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
 // MakeElementChan returns a new open channel
-// (simply a 'chan list.Element' that is).
+// (simply a 'chan *list.Element' that is).
 //
 // Note: No 'Element-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,11 +32,11 @@ import (
 //
 // Note: as always (except for PipeElementBuffer) the channel is unbuffered.
 //
-func MakeElementChan() (out chan list.Element) {
-	return make(chan list.Element)
+func MakeElementChan() (out chan *list.Element) {
+	return make(chan *list.Element)
 }
 
-func sendElement(out chan<- list.Element, inp ...list.Element) {
+func sendElement(out chan<- *list.Element, inp ...*list.Element) {
 	defer close(out)
 	for i := range inp {
 		out <- inp[i]
@@ -44,13 +44,13 @@ func sendElement(out chan<- list.Element, inp ...list.Element) {
 }
 
 // ChanElement returns a channel to receive all inputs before close.
-func ChanElement(inp ...list.Element) (out <-chan list.Element) {
-	cha := make(chan list.Element)
+func ChanElement(inp ...*list.Element) (out <-chan *list.Element) {
+	cha := make(chan *list.Element)
 	go sendElement(cha, inp...)
 	return cha
 }
 
-func sendElementSlice(out chan<- list.Element, inp ...[]list.Element) {
+func sendElementSlice(out chan<- *list.Element, inp ...[]*list.Element) {
 	defer close(out)
 	for i := range inp {
 		for j := range inp[i] {
@@ -60,13 +60,31 @@ func sendElementSlice(out chan<- list.Element, inp ...[]list.Element) {
 }
 
 // ChanElementSlice returns a channel to receive all inputs before close.
-func ChanElementSlice(inp ...[]list.Element) (out <-chan list.Element) {
-	cha := make(chan list.Element)
+func ChanElementSlice(inp ...[]*list.Element) (out <-chan *list.Element) {
+	cha := make(chan *list.Element)
 	go sendElementSlice(cha, inp...)
 	return cha
 }
 
-func chanElementFuncNok(out chan<- list.Element, act func() (list.Element, bool)) {
+func chanElementFuncNil(out chan<- *list.Element, act func() *list.Element) {
+	defer close(out)
+	for {
+		res := act() // Apply action
+		if res == nil {
+			return
+		}
+		out <- res
+	}
+}
+
+// ChanElementFuncNil returns a channel to receive all results of act until nil before close.
+func ChanElementFuncNil(act func() *list.Element) (out <-chan *list.Element) {
+	cha := make(chan *list.Element)
+	go chanElementFuncNil(cha, act)
+	return cha
+}
+
+func chanElementFuncNok(out chan<- *list.Element, act func() (*list.Element, bool)) {
 	defer close(out)
 	for {
 		res, ok := act() // Apply action
@@ -78,13 +96,13 @@ func chanElementFuncNok(out chan<- list.Element, act func() (list.Element, bool)
 }
 
 // ChanElementFuncNok returns a channel to receive all results of act until nok before close.
-func ChanElementFuncNok(act func() (list.Element, bool)) (out <-chan list.Element) {
-	cha := make(chan list.Element)
+func ChanElementFuncNok(act func() (*list.Element, bool)) (out <-chan *list.Element) {
+	cha := make(chan *list.Element)
 	go chanElementFuncNok(cha, act)
 	return cha
 }
 
-func chanElementFuncErr(out chan<- list.Element, act func() (list.Element, error)) {
+func chanElementFuncErr(out chan<- *list.Element, act func() (*list.Element, error)) {
 	defer close(out)
 	for {
 		res, err := act() // Apply action
@@ -96,13 +114,13 @@ func chanElementFuncErr(out chan<- list.Element, act func() (list.Element, error
 }
 
 // ChanElementFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanElementFuncErr(act func() (list.Element, error)) (out <-chan list.Element) {
-	cha := make(chan list.Element)
+func ChanElementFuncErr(act func() (*list.Element, error)) (out <-chan *list.Element) {
+	cha := make(chan *list.Element)
 	go chanElementFuncErr(cha, act)
 	return cha
 }
 
-func joinElement(done chan<- struct{}, out chan<- list.Element, inp ...list.Element) {
+func joinElement(done chan<- struct{}, out chan<- *list.Element, inp ...*list.Element) {
 	defer close(done)
 	for i := range inp {
 		out <- inp[i]
@@ -111,13 +129,13 @@ func joinElement(done chan<- struct{}, out chan<- list.Element, inp ...list.Elem
 }
 
 // JoinElement sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinElement(out chan<- list.Element, inp ...list.Element) (done <-chan struct{}) {
+func JoinElement(out chan<- *list.Element, inp ...*list.Element) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinElement(cha, out, inp...)
 	return cha
 }
 
-func joinElementSlice(done chan<- struct{}, out chan<- list.Element, inp ...[]list.Element) {
+func joinElementSlice(done chan<- struct{}, out chan<- *list.Element, inp ...[]*list.Element) {
 	defer close(done)
 	for i := range inp {
 		for j := range inp[i] {
@@ -128,13 +146,13 @@ func joinElementSlice(done chan<- struct{}, out chan<- list.Element, inp ...[]li
 }
 
 // JoinElementSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinElementSlice(out chan<- list.Element, inp ...[]list.Element) (done <-chan struct{}) {
+func JoinElementSlice(out chan<- *list.Element, inp ...[]*list.Element) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinElementSlice(cha, out, inp...)
 	return cha
 }
 
-func joinElementChan(done chan<- struct{}, out chan<- list.Element, inp <-chan list.Element) {
+func joinElementChan(done chan<- struct{}, out chan<- *list.Element, inp <-chan *list.Element) {
 	defer close(done)
 	for i := range inp {
 		out <- i
@@ -143,13 +161,13 @@ func joinElementChan(done chan<- struct{}, out chan<- list.Element, inp <-chan l
 }
 
 // JoinElementChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinElementChan(out chan<- list.Element, inp <-chan list.Element) (done <-chan struct{}) {
+func JoinElementChan(out chan<- *list.Element, inp <-chan *list.Element) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinElementChan(cha, out, inp)
 	return cha
 }
 
-func doitElement(done chan<- struct{}, inp <-chan list.Element) {
+func doitElement(done chan<- struct{}, inp <-chan *list.Element) {
 	defer close(done)
 	for i := range inp {
 		_ = i // Drain inp
@@ -158,15 +176,15 @@ func doitElement(done chan<- struct{}, inp <-chan list.Element) {
 }
 
 // DoneElement returns a channel to receive one signal before close after inp has been drained.
-func DoneElement(inp <-chan list.Element) (done <-chan struct{}) {
+func DoneElement(inp <-chan *list.Element) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go doitElement(cha, inp)
 	return cha
 }
 
-func doitElementSlice(done chan<- ([]list.Element), inp <-chan list.Element) {
+func doitElementSlice(done chan<- ([]*list.Element), inp <-chan *list.Element) {
 	defer close(done)
-	ElementS := []list.Element{}
+	ElementS := []*list.Element{}
 	for i := range inp {
 		ElementS = append(ElementS, i)
 	}
@@ -176,13 +194,13 @@ func doitElementSlice(done chan<- ([]list.Element), inp <-chan list.Element) {
 // DoneElementSlice returns a channel which will receive a slice
 // of all the Elements received on inp channel before close.
 // Unlike DoneElement, a full slice is sent once, not just an event.
-func DoneElementSlice(inp <-chan list.Element) (done <-chan ([]list.Element)) {
-	cha := make(chan ([]list.Element))
+func DoneElementSlice(inp <-chan *list.Element) (done <-chan ([]*list.Element)) {
+	cha := make(chan ([]*list.Element))
 	go doitElementSlice(cha, inp)
 	return cha
 }
 
-func doitElementFunc(done chan<- struct{}, inp <-chan list.Element, act func(a list.Element)) {
+func doitElementFunc(done chan<- struct{}, inp <-chan *list.Element, act func(a *list.Element)) {
 	defer close(done)
 	for i := range inp {
 		act(i) // Apply action
@@ -191,16 +209,16 @@ func doitElementFunc(done chan<- struct{}, inp <-chan list.Element, act func(a l
 }
 
 // DoneElementFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneElementFunc(inp <-chan list.Element, act func(a list.Element)) (out <-chan struct{}) {
+func DoneElementFunc(inp <-chan *list.Element, act func(a *list.Element)) (out <-chan struct{}) {
 	cha := make(chan struct{})
 	if act == nil {
-		act = func(a list.Element) { return }
+		act = func(a *list.Element) { return }
 	}
 	go doitElementFunc(cha, inp, act)
 	return cha
 }
 
-func pipeElementBuffer(out chan<- list.Element, inp <-chan list.Element) {
+func pipeElementBuffer(out chan<- *list.Element, inp <-chan *list.Element) {
 	defer close(out)
 	for i := range inp {
 		out <- i
@@ -208,13 +226,13 @@ func pipeElementBuffer(out chan<- list.Element, inp <-chan list.Element) {
 }
 
 // PipeElementBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeElementBuffer(inp <-chan list.Element, cap int) (out <-chan list.Element) {
-	cha := make(chan list.Element, cap)
+func PipeElementBuffer(inp <-chan *list.Element, cap int) (out <-chan *list.Element) {
+	cha := make(chan *list.Element, cap)
 	go pipeElementBuffer(cha, inp)
 	return cha
 }
 
-func pipeElementFunc(out chan<- list.Element, inp <-chan list.Element, act func(a list.Element) list.Element) {
+func pipeElementFunc(out chan<- *list.Element, inp <-chan *list.Element, act func(a *list.Element) *list.Element) {
 	defer close(out)
 	for i := range inp {
 		out <- act(i)
@@ -224,16 +242,16 @@ func pipeElementFunc(out chan<- list.Element, inp <-chan list.Element, act func(
 // PipeElementFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeElementMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeElementFunc(inp <-chan list.Element, act func(a list.Element) list.Element) (out <-chan list.Element) {
-	cha := make(chan list.Element)
+func PipeElementFunc(inp <-chan *list.Element, act func(a *list.Element) *list.Element) (out <-chan *list.Element) {
+	cha := make(chan *list.Element)
 	if act == nil {
-		act = func(a list.Element) list.Element { return a }
+		act = func(a *list.Element) *list.Element { return a }
 	}
 	go pipeElementFunc(cha, inp, act)
 	return cha
 }
 
-func pipeElementFork(out1, out2 chan<- list.Element, inp <-chan list.Element) {
+func pipeElementFork(out1, out2 chan<- *list.Element, inp <-chan *list.Element) {
 	defer close(out1)
 	defer close(out2)
 	for i := range inp {
@@ -244,25 +262,25 @@ func pipeElementFork(out1, out2 chan<- list.Element, inp <-chan list.Element) {
 
 // PipeElementFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeElementFork(inp <-chan list.Element) (out1, out2 <-chan list.Element) {
-	cha1 := make(chan list.Element)
-	cha2 := make(chan list.Element)
+func PipeElementFork(inp <-chan *list.Element) (out1, out2 <-chan *list.Element) {
+	cha1 := make(chan *list.Element)
+	cha2 := make(chan *list.Element)
 	go pipeElementFork(cha1, cha2, inp)
 	return cha1, cha2
 }
 
 // ElementTube is the signature for a pipe function.
-type ElementTube func(inp <-chan list.Element, out <-chan list.Element)
+type ElementTube func(inp <-chan *list.Element, out <-chan *list.Element)
 
 // ElementDaisy returns a channel to receive all inp after having passed thru tube.
-func ElementDaisy(inp <-chan list.Element, tube ElementTube) (out <-chan list.Element) {
-	cha := make(chan list.Element)
+func ElementDaisy(inp <-chan *list.Element, tube ElementTube) (out <-chan *list.Element) {
+	cha := make(chan *list.Element)
 	go tube(inp, cha)
 	return cha
 }
 
 // ElementDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func ElementDaisyChain(inp <-chan list.Element, tubes ...ElementTube) (out <-chan list.Element) {
+func ElementDaisyChain(inp <-chan *list.Element, tubes ...ElementTube) (out <-chan *list.Element) {
 	cha := inp
 	for i := range tubes {
 		cha = ElementDaisy(cha, tubes[i])

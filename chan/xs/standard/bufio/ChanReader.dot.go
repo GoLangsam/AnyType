@@ -8,7 +8,7 @@ package bufio
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"bufio"
+	bufio "bufio"
 )
 
 var _ *bufio.Reader // silence import

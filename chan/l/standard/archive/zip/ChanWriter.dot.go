@@ -8,7 +8,7 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // WriterChan represents a
@@ -23,20 +23,20 @@ type WriterChan interface {
 // receive-only
 // channel
 type WriterROnlyChan interface {
-	RequestWriter() (dat zip.Writer)        // the receive function - aka "MyWriter := <-MyWriterROnlyChan"
-	TryWriter() (dat zip.Writer, open bool) // the multi-valued comma-ok receive function - aka "MyWriter, ok := <-MyWriterROnlyChan"
+	RequestWriter() (dat *zip.Writer)        // the receive function - aka "MyWriter := <-MyWriterROnlyChan"
+	TryWriter() (dat *zip.Writer, open bool) // the multi-valued comma-ok receive function - aka "MyWriter, ok := <-MyWriterROnlyChan"
 }
 
 // WriterSOnlyChan represents a
 // send-only
 // channel
 type WriterSOnlyChan interface {
-	ProvideWriter(dat zip.Writer) // the send function - aka "MyKind <- some Writer"
+	ProvideWriter(dat *zip.Writer) // the send function - aka "MyKind <- some Writer"
 }
 
 // DChWriter is a demand channel
 type DChWriter struct {
-	dat chan zip.Writer
+	dat chan *zip.Writer
 	req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type DChWriter struct {
 // demand channel
 func MakeDemandWriterChan() *DChWriter {
 	d := new(DChWriter)
-	d.dat = make(chan zip.Writer)
+	d.dat = make(chan *zip.Writer)
 	d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeDemandWriterChan() *DChWriter {
 // demand channel
 func MakeDemandWriterBuff(cap int) *DChWriter {
 	d := new(DChWriter)
-	d.dat = make(chan zip.Writer, cap)
+	d.dat = make(chan *zip.Writer, cap)
 	d.req = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideWriter is the send function - aka "MyKind <- some Writer"
-func (c *DChWriter) ProvideWriter(dat zip.Writer) {
+func (c *DChWriter) ProvideWriter(dat *zip.Writer) {
 	<-c.req
 	c.dat <- dat
 }
 
 // RequestWriter is the receive function - aka "some Writer <- MyKind"
-func (c *DChWriter) RequestWriter() (dat zip.Writer) {
+func (c *DChWriter) RequestWriter() (dat *zip.Writer) {
 	c.req <- struct{}{}
 	return <-c.dat
 }
 
 // TryWriter is the comma-ok multi-valued form of RequestWriter and
 // reports whether a received value was sent before the Writer channel was closed.
-func (c *DChWriter) TryWriter() (dat zip.Writer, open bool) {
+func (c *DChWriter) TryWriter() (dat *zip.Writer, open bool) {
 	c.req <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

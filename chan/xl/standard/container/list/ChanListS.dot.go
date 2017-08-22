@@ -8,9 +8,9 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
-var _ []list.List // silence import
+var _ []*list.List // silence import
 
 // No functionality yet associated with this source file.

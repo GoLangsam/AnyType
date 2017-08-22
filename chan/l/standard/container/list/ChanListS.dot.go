@@ -8,7 +8,7 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
 // ListSChan represents a
@@ -23,20 +23,20 @@ type ListSChan interface {
 // receive-only
 // channel
 type ListSROnlyChan interface {
-	RequestListS() (dat []list.List)        // the receive function - aka "MyListS := <-MyListSROnlyChan"
-	TryListS() (dat []list.List, open bool) // the multi-valued comma-ok receive function - aka "MyListS, ok := <-MyListSROnlyChan"
+	RequestListS() (dat []*list.List)        // the receive function - aka "MyListS := <-MyListSROnlyChan"
+	TryListS() (dat []*list.List, open bool) // the multi-valued comma-ok receive function - aka "MyListS, ok := <-MyListSROnlyChan"
 }
 
 // ListSSOnlyChan represents a
 // send-only
 // channel
 type ListSSOnlyChan interface {
-	ProvideListS(dat []list.List) // the send function - aka "MyKind <- some ListS"
+	ProvideListS(dat []*list.List) // the send function - aka "MyKind <- some ListS"
 }
 
 // DChListS is a demand channel
 type DChListS struct {
-	dat chan []list.List
+	dat chan []*list.List
 	req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type DChListS struct {
 // demand channel
 func MakeDemandListSChan() *DChListS {
 	d := new(DChListS)
-	d.dat = make(chan []list.List)
+	d.dat = make(chan []*list.List)
 	d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeDemandListSChan() *DChListS {
 // demand channel
 func MakeDemandListSBuff(cap int) *DChListS {
 	d := new(DChListS)
-	d.dat = make(chan []list.List, cap)
+	d.dat = make(chan []*list.List, cap)
 	d.req = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideListS is the send function - aka "MyKind <- some ListS"
-func (c *DChListS) ProvideListS(dat []list.List) {
+func (c *DChListS) ProvideListS(dat []*list.List) {
 	<-c.req
 	c.dat <- dat
 }
 
 // RequestListS is the receive function - aka "some ListS <- MyKind"
-func (c *DChListS) RequestListS() (dat []list.List) {
+func (c *DChListS) RequestListS() (dat []*list.List) {
 	c.req <- struct{}{}
 	return <-c.dat
 }
 
 // TryListS is the comma-ok multi-valued form of RequestListS and
 // reports whether a received value was sent before the ListS channel was closed.
-func (c *DChListS) TryListS() (dat []list.List, open bool) {
+func (c *DChListS) TryListS() (dat []*list.List, open bool) {
 	c.req <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

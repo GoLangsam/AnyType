@@ -8,7 +8,7 @@ package bufio
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"bufio"
+	bufio "bufio"
 )
 
 // MakeReaderChan returns a new open channel

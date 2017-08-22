@@ -11,6 +11,6 @@ import (
 	"github.com/golangsam/container/ccsafe/tag"
 )
 
-var _ tag.TagAny // silence import
+var _ *tag.TagAny // silence import
 
 // No functionality yet associated with this source file.

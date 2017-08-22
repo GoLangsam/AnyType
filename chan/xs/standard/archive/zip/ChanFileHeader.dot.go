@@ -8,9 +8,9 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
-var _ zip.FileHeader // silence import
+var _ *zip.FileHeader // silence import
 
 // No functionality yet associated with this source file.

@@ -8,7 +8,7 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // ReadCloserChan represents a
@@ -23,20 +23,20 @@ type ReadCloserChan interface {
 // receive-only
 // channel
 type ReadCloserROnlyChan interface {
-	RequestReadCloser() (dat zip.ReadCloser)        // the receive function - aka "MyReadCloser := <-MyReadCloserROnlyChan"
-	TryReadCloser() (dat zip.ReadCloser, open bool) // the multi-valued comma-ok receive function - aka "MyReadCloser, ok := <-MyReadCloserROnlyChan"
+	RequestReadCloser() (dat *zip.ReadCloser)        // the receive function - aka "MyReadCloser := <-MyReadCloserROnlyChan"
+	TryReadCloser() (dat *zip.ReadCloser, open bool) // the multi-valued comma-ok receive function - aka "MyReadCloser, ok := <-MyReadCloserROnlyChan"
 }
 
 // ReadCloserSOnlyChan represents a
 // send-only
 // channel
 type ReadCloserSOnlyChan interface {
-	ProvideReadCloser(dat zip.ReadCloser) // the send function - aka "MyKind <- some ReadCloser"
+	ProvideReadCloser(dat *zip.ReadCloser) // the send function - aka "MyKind <- some ReadCloser"
 }
 
 // DChReadCloser is a demand channel
 type DChReadCloser struct {
-	dat chan zip.ReadCloser
+	dat chan *zip.ReadCloser
 	req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type DChReadCloser struct {
 // demand channel
 func MakeDemandReadCloserChan() *DChReadCloser {
 	d := new(DChReadCloser)
-	d.dat = make(chan zip.ReadCloser)
+	d.dat = make(chan *zip.ReadCloser)
 	d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeDemandReadCloserChan() *DChReadCloser {
 // demand channel
 func MakeDemandReadCloserBuff(cap int) *DChReadCloser {
 	d := new(DChReadCloser)
-	d.dat = make(chan zip.ReadCloser, cap)
+	d.dat = make(chan *zip.ReadCloser, cap)
 	d.req = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideReadCloser is the send function - aka "MyKind <- some ReadCloser"
-func (c *DChReadCloser) ProvideReadCloser(dat zip.ReadCloser) {
+func (c *DChReadCloser) ProvideReadCloser(dat *zip.ReadCloser) {
 	<-c.req
 	c.dat <- dat
 }
 
 // RequestReadCloser is the receive function - aka "some ReadCloser <- MyKind"
-func (c *DChReadCloser) RequestReadCloser() (dat zip.ReadCloser) {
+func (c *DChReadCloser) RequestReadCloser() (dat *zip.ReadCloser) {
 	c.req <- struct{}{}
 	return <-c.dat
 }
 
 // TryReadCloser is the comma-ok multi-valued form of RequestReadCloser and
 // reports whether a received value was sent before the ReadCloser channel was closed.
-func (c *DChReadCloser) TryReadCloser() (dat zip.ReadCloser, open bool) {
+func (c *DChReadCloser) TryReadCloser() (dat *zip.ReadCloser, open bool) {
 	c.req <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

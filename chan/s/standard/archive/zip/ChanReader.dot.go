@@ -8,7 +8,7 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // ReaderChan represents a
@@ -23,20 +23,20 @@ type ReaderChan interface {
 // receive-only
 // channel
 type ReaderROnlyChan interface {
-	RequestReader() (dat zip.Reader)        // the receive function - aka "MyReader := <-MyReaderROnlyChan"
-	TryReader() (dat zip.Reader, open bool) // the multi-valued comma-ok receive function - aka "MyReader, ok := <-MyReaderROnlyChan"
+	RequestReader() (dat *zip.Reader)        // the receive function - aka "MyReader := <-MyReaderROnlyChan"
+	TryReader() (dat *zip.Reader, open bool) // the multi-valued comma-ok receive function - aka "MyReader, ok := <-MyReaderROnlyChan"
 }
 
 // ReaderSOnlyChan represents a
 // send-only
 // channel
 type ReaderSOnlyChan interface {
-	ProvideReader(dat zip.Reader) // the send function - aka "MyKind <- some Reader"
+	ProvideReader(dat *zip.Reader) // the send function - aka "MyKind <- some Reader"
 }
 
 // SChReader is a supply channel
 type SChReader struct {
-	dat chan zip.Reader
+	dat chan *zip.Reader
 	// req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type SChReader struct {
 // supply channel
 func MakeSupplyReaderChan() *SChReader {
 	d := new(SChReader)
-	d.dat = make(chan zip.Reader)
+	d.dat = make(chan *zip.Reader)
 	// d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeSupplyReaderChan() *SChReader {
 // supply channel
 func MakeSupplyReaderBuff(cap int) *SChReader {
 	d := new(SChReader)
-	d.dat = make(chan zip.Reader, cap)
+	d.dat = make(chan *zip.Reader, cap)
 	// eq = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideReader is the send function - aka "MyKind <- some Reader"
-func (c *SChReader) ProvideReader(dat zip.Reader) {
+func (c *SChReader) ProvideReader(dat *zip.Reader) {
 	// .req
 	c.dat <- dat
 }
 
 // RequestReader is the receive function - aka "some Reader <- MyKind"
-func (c *SChReader) RequestReader() (dat zip.Reader) {
+func (c *SChReader) RequestReader() (dat *zip.Reader) {
 	// eq <- struct{}{}
 	return <-c.dat
 }
 
 // TryReader is the comma-ok multi-valued form of RequestReader and
 // reports whether a received value was sent before the Reader channel was closed.
-func (c *SChReader) TryReader() (dat zip.Reader, open bool) {
+func (c *SChReader) TryReader() (dat *zip.Reader, open bool) {
 	// eq <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

@@ -8,11 +8,11 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // MakeFileChan returns a new open channel
-// (simply a 'chan zip.File' that is).
+// (simply a 'chan *zip.File' that is).
 //
 // Note: No 'File-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,11 +32,11 @@ import (
 //
 // Note: as always (except for PipeFileBuffer) the channel is unbuffered.
 //
-func MakeFileChan() (out chan zip.File) {
-	return make(chan zip.File)
+func MakeFileChan() (out chan *zip.File) {
+	return make(chan *zip.File)
 }
 
-func sendFile(out chan<- zip.File, inp ...zip.File) {
+func sendFile(out chan<- *zip.File, inp ...*zip.File) {
 	defer close(out)
 	for i := range inp {
 		out <- inp[i]
@@ -44,13 +44,13 @@ func sendFile(out chan<- zip.File, inp ...zip.File) {
 }
 
 // ChanFile returns a channel to receive all inputs before close.
-func ChanFile(inp ...zip.File) (out <-chan zip.File) {
-	cha := make(chan zip.File)
+func ChanFile(inp ...*zip.File) (out <-chan *zip.File) {
+	cha := make(chan *zip.File)
 	go sendFile(cha, inp...)
 	return cha
 }
 
-func sendFileSlice(out chan<- zip.File, inp ...[]zip.File) {
+func sendFileSlice(out chan<- *zip.File, inp ...[]*zip.File) {
 	defer close(out)
 	for i := range inp {
 		for j := range inp[i] {
@@ -60,13 +60,31 @@ func sendFileSlice(out chan<- zip.File, inp ...[]zip.File) {
 }
 
 // ChanFileSlice returns a channel to receive all inputs before close.
-func ChanFileSlice(inp ...[]zip.File) (out <-chan zip.File) {
-	cha := make(chan zip.File)
+func ChanFileSlice(inp ...[]*zip.File) (out <-chan *zip.File) {
+	cha := make(chan *zip.File)
 	go sendFileSlice(cha, inp...)
 	return cha
 }
 
-func chanFileFuncNok(out chan<- zip.File, act func() (zip.File, bool)) {
+func chanFileFuncNil(out chan<- *zip.File, act func() *zip.File) {
+	defer close(out)
+	for {
+		res := act() // Apply action
+		if res == nil {
+			return
+		}
+		out <- res
+	}
+}
+
+// ChanFileFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFileFuncNil(act func() *zip.File) (out <-chan *zip.File) {
+	cha := make(chan *zip.File)
+	go chanFileFuncNil(cha, act)
+	return cha
+}
+
+func chanFileFuncNok(out chan<- *zip.File, act func() (*zip.File, bool)) {
 	defer close(out)
 	for {
 		res, ok := act() // Apply action
@@ -78,13 +96,13 @@ func chanFileFuncNok(out chan<- zip.File, act func() (zip.File, bool)) {
 }
 
 // ChanFileFuncNok returns a channel to receive all results of act until nok before close.
-func ChanFileFuncNok(act func() (zip.File, bool)) (out <-chan zip.File) {
-	cha := make(chan zip.File)
+func ChanFileFuncNok(act func() (*zip.File, bool)) (out <-chan *zip.File) {
+	cha := make(chan *zip.File)
 	go chanFileFuncNok(cha, act)
 	return cha
 }
 
-func chanFileFuncErr(out chan<- zip.File, act func() (zip.File, error)) {
+func chanFileFuncErr(out chan<- *zip.File, act func() (*zip.File, error)) {
 	defer close(out)
 	for {
 		res, err := act() // Apply action
@@ -96,13 +114,13 @@ func chanFileFuncErr(out chan<- zip.File, act func() (zip.File, error)) {
 }
 
 // ChanFileFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanFileFuncErr(act func() (zip.File, error)) (out <-chan zip.File) {
-	cha := make(chan zip.File)
+func ChanFileFuncErr(act func() (*zip.File, error)) (out <-chan *zip.File) {
+	cha := make(chan *zip.File)
 	go chanFileFuncErr(cha, act)
 	return cha
 }
 
-func joinFile(done chan<- struct{}, out chan<- zip.File, inp ...zip.File) {
+func joinFile(done chan<- struct{}, out chan<- *zip.File, inp ...*zip.File) {
 	defer close(done)
 	for i := range inp {
 		out <- inp[i]
@@ -111,13 +129,13 @@ func joinFile(done chan<- struct{}, out chan<- zip.File, inp ...zip.File) {
 }
 
 // JoinFile sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinFile(out chan<- zip.File, inp ...zip.File) (done <-chan struct{}) {
+func JoinFile(out chan<- *zip.File, inp ...*zip.File) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFile(cha, out, inp...)
 	return cha
 }
 
-func joinFileSlice(done chan<- struct{}, out chan<- zip.File, inp ...[]zip.File) {
+func joinFileSlice(done chan<- struct{}, out chan<- *zip.File, inp ...[]*zip.File) {
 	defer close(done)
 	for i := range inp {
 		for j := range inp[i] {
@@ -128,13 +146,13 @@ func joinFileSlice(done chan<- struct{}, out chan<- zip.File, inp ...[]zip.File)
 }
 
 // JoinFileSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinFileSlice(out chan<- zip.File, inp ...[]zip.File) (done <-chan struct{}) {
+func JoinFileSlice(out chan<- *zip.File, inp ...[]*zip.File) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileSlice(cha, out, inp...)
 	return cha
 }
 
-func joinFileChan(done chan<- struct{}, out chan<- zip.File, inp <-chan zip.File) {
+func joinFileChan(done chan<- struct{}, out chan<- *zip.File, inp <-chan *zip.File) {
 	defer close(done)
 	for i := range inp {
 		out <- i
@@ -143,13 +161,13 @@ func joinFileChan(done chan<- struct{}, out chan<- zip.File, inp <-chan zip.File
 }
 
 // JoinFileChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinFileChan(out chan<- zip.File, inp <-chan zip.File) (done <-chan struct{}) {
+func JoinFileChan(out chan<- *zip.File, inp <-chan *zip.File) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileChan(cha, out, inp)
 	return cha
 }
 
-func doitFile(done chan<- struct{}, inp <-chan zip.File) {
+func doitFile(done chan<- struct{}, inp <-chan *zip.File) {
 	defer close(done)
 	for i := range inp {
 		_ = i // Drain inp
@@ -158,15 +176,15 @@ func doitFile(done chan<- struct{}, inp <-chan zip.File) {
 }
 
 // DoneFile returns a channel to receive one signal before close after inp has been drained.
-func DoneFile(inp <-chan zip.File) (done <-chan struct{}) {
+func DoneFile(inp <-chan *zip.File) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go doitFile(cha, inp)
 	return cha
 }
 
-func doitFileSlice(done chan<- ([]zip.File), inp <-chan zip.File) {
+func doitFileSlice(done chan<- ([]*zip.File), inp <-chan *zip.File) {
 	defer close(done)
-	FileS := []zip.File{}
+	FileS := []*zip.File{}
 	for i := range inp {
 		FileS = append(FileS, i)
 	}
@@ -176,13 +194,13 @@ func doitFileSlice(done chan<- ([]zip.File), inp <-chan zip.File) {
 // DoneFileSlice returns a channel which will receive a slice
 // of all the Files received on inp channel before close.
 // Unlike DoneFile, a full slice is sent once, not just an event.
-func DoneFileSlice(inp <-chan zip.File) (done <-chan ([]zip.File)) {
-	cha := make(chan ([]zip.File))
+func DoneFileSlice(inp <-chan *zip.File) (done <-chan ([]*zip.File)) {
+	cha := make(chan ([]*zip.File))
 	go doitFileSlice(cha, inp)
 	return cha
 }
 
-func doitFileFunc(done chan<- struct{}, inp <-chan zip.File, act func(a zip.File)) {
+func doitFileFunc(done chan<- struct{}, inp <-chan *zip.File, act func(a *zip.File)) {
 	defer close(done)
 	for i := range inp {
 		act(i) // Apply action
@@ -191,16 +209,16 @@ func doitFileFunc(done chan<- struct{}, inp <-chan zip.File, act func(a zip.File
 }
 
 // DoneFileFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneFileFunc(inp <-chan zip.File, act func(a zip.File)) (out <-chan struct{}) {
+func DoneFileFunc(inp <-chan *zip.File, act func(a *zip.File)) (out <-chan struct{}) {
 	cha := make(chan struct{})
 	if act == nil {
-		act = func(a zip.File) { return }
+		act = func(a *zip.File) { return }
 	}
 	go doitFileFunc(cha, inp, act)
 	return cha
 }
 
-func pipeFileBuffer(out chan<- zip.File, inp <-chan zip.File) {
+func pipeFileBuffer(out chan<- *zip.File, inp <-chan *zip.File) {
 	defer close(out)
 	for i := range inp {
 		out <- i
@@ -208,13 +226,13 @@ func pipeFileBuffer(out chan<- zip.File, inp <-chan zip.File) {
 }
 
 // PipeFileBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeFileBuffer(inp <-chan zip.File, cap int) (out <-chan zip.File) {
-	cha := make(chan zip.File, cap)
+func PipeFileBuffer(inp <-chan *zip.File, cap int) (out <-chan *zip.File) {
+	cha := make(chan *zip.File, cap)
 	go pipeFileBuffer(cha, inp)
 	return cha
 }
 
-func pipeFileFunc(out chan<- zip.File, inp <-chan zip.File, act func(a zip.File) zip.File) {
+func pipeFileFunc(out chan<- *zip.File, inp <-chan *zip.File, act func(a *zip.File) *zip.File) {
 	defer close(out)
 	for i := range inp {
 		out <- act(i)
@@ -224,16 +242,16 @@ func pipeFileFunc(out chan<- zip.File, inp <-chan zip.File, act func(a zip.File)
 // PipeFileFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeFileMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeFileFunc(inp <-chan zip.File, act func(a zip.File) zip.File) (out <-chan zip.File) {
-	cha := make(chan zip.File)
+func PipeFileFunc(inp <-chan *zip.File, act func(a *zip.File) *zip.File) (out <-chan *zip.File) {
+	cha := make(chan *zip.File)
 	if act == nil {
-		act = func(a zip.File) zip.File { return a }
+		act = func(a *zip.File) *zip.File { return a }
 	}
 	go pipeFileFunc(cha, inp, act)
 	return cha
 }
 
-func pipeFileFork(out1, out2 chan<- zip.File, inp <-chan zip.File) {
+func pipeFileFork(out1, out2 chan<- *zip.File, inp <-chan *zip.File) {
 	defer close(out1)
 	defer close(out2)
 	for i := range inp {
@@ -244,25 +262,25 @@ func pipeFileFork(out1, out2 chan<- zip.File, inp <-chan zip.File) {
 
 // PipeFileFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeFileFork(inp <-chan zip.File) (out1, out2 <-chan zip.File) {
-	cha1 := make(chan zip.File)
-	cha2 := make(chan zip.File)
+func PipeFileFork(inp <-chan *zip.File) (out1, out2 <-chan *zip.File) {
+	cha1 := make(chan *zip.File)
+	cha2 := make(chan *zip.File)
 	go pipeFileFork(cha1, cha2, inp)
 	return cha1, cha2
 }
 
 // FileTube is the signature for a pipe function.
-type FileTube func(inp <-chan zip.File, out <-chan zip.File)
+type FileTube func(inp <-chan *zip.File, out <-chan *zip.File)
 
 // FileDaisy returns a channel to receive all inp after having passed thru tube.
-func FileDaisy(inp <-chan zip.File, tube FileTube) (out <-chan zip.File) {
-	cha := make(chan zip.File)
+func FileDaisy(inp <-chan *zip.File, tube FileTube) (out <-chan *zip.File) {
+	cha := make(chan *zip.File)
 	go tube(inp, cha)
 	return cha
 }
 
 // FileDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func FileDaisyChain(inp <-chan zip.File, tubes ...FileTube) (out <-chan zip.File) {
+func FileDaisyChain(inp <-chan *zip.File, tubes ...FileTube) (out <-chan *zip.File) {
 	cha := inp
 	for i := range tubes {
 		cha = FileDaisy(cha, tubes[i])

@@ -8,11 +8,11 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // MakeReadCloserChan returns a new open channel
-// (simply a 'chan zip.ReadCloser' that is).
+// (simply a 'chan *zip.ReadCloser' that is).
 //
 // Note: No 'ReadCloser-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,14 +32,14 @@ import (
 //
 // Note: as always (except for PipeReadCloserBuffer) the channel is unbuffered.
 //
-func MakeReadCloserChan() (out chan zip.ReadCloser) {
-	return make(chan zip.ReadCloser)
+func MakeReadCloserChan() (out chan *zip.ReadCloser) {
+	return make(chan *zip.ReadCloser)
 }
 
 // ChanReadCloser returns a channel to receive all inputs before close.
-func ChanReadCloser(inp ...zip.ReadCloser) (out <-chan zip.ReadCloser) {
-	cha := make(chan zip.ReadCloser)
-	go func(out chan<- zip.ReadCloser, inp ...zip.ReadCloser) {
+func ChanReadCloser(inp ...*zip.ReadCloser) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser)
+	go func(out chan<- *zip.ReadCloser, inp ...*zip.ReadCloser) {
 		defer close(out)
 		for i := range inp {
 			out <- inp[i]
@@ -49,9 +49,9 @@ func ChanReadCloser(inp ...zip.ReadCloser) (out <-chan zip.ReadCloser) {
 }
 
 // ChanReadCloserSlice returns a channel to receive all inputs before close.
-func ChanReadCloserSlice(inp ...[]zip.ReadCloser) (out <-chan zip.ReadCloser) {
-	cha := make(chan zip.ReadCloser)
-	go func(out chan<- zip.ReadCloser, inp ...[]zip.ReadCloser) {
+func ChanReadCloserSlice(inp ...[]*zip.ReadCloser) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser)
+	go func(out chan<- *zip.ReadCloser, inp ...[]*zip.ReadCloser) {
 		defer close(out)
 		for i := range inp {
 			for j := range inp[i] {
@@ -62,10 +62,26 @@ func ChanReadCloserSlice(inp ...[]zip.ReadCloser) (out <-chan zip.ReadCloser) {
 	return cha
 }
 
+// ChanReadCloserFuncNil returns a channel to receive all results of act until nil before close.
+func ChanReadCloserFuncNil(act func() *zip.ReadCloser) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser)
+	go func(out chan<- *zip.ReadCloser, act func() *zip.ReadCloser) {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}(cha, act)
+	return cha
+}
+
 // ChanReadCloserFuncNok returns a channel to receive all results of act until nok before close.
-func ChanReadCloserFuncNok(act func() (zip.ReadCloser, bool)) (out <-chan zip.ReadCloser) {
-	cha := make(chan zip.ReadCloser)
-	go func(out chan<- zip.ReadCloser, act func() (zip.ReadCloser, bool)) {
+func ChanReadCloserFuncNok(act func() (*zip.ReadCloser, bool)) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser)
+	go func(out chan<- *zip.ReadCloser, act func() (*zip.ReadCloser, bool)) {
 		defer close(out)
 		for {
 			res, ok := act() // Apply action
@@ -79,9 +95,9 @@ func ChanReadCloserFuncNok(act func() (zip.ReadCloser, bool)) (out <-chan zip.Re
 }
 
 // ChanReadCloserFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanReadCloserFuncErr(act func() (zip.ReadCloser, error)) (out <-chan zip.ReadCloser) {
-	cha := make(chan zip.ReadCloser)
-	go func(out chan<- zip.ReadCloser, act func() (zip.ReadCloser, error)) {
+func ChanReadCloserFuncErr(act func() (*zip.ReadCloser, error)) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser)
+	go func(out chan<- *zip.ReadCloser, act func() (*zip.ReadCloser, error)) {
 		defer close(out)
 		for {
 			res, err := act() // Apply action
@@ -95,9 +111,9 @@ func ChanReadCloserFuncErr(act func() (zip.ReadCloser, error)) (out <-chan zip.R
 }
 
 // JoinReadCloser sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinReadCloser(out chan<- zip.ReadCloser, inp ...zip.ReadCloser) (done <-chan struct{}) {
+func JoinReadCloser(out chan<- *zip.ReadCloser, inp ...*zip.ReadCloser) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- zip.ReadCloser, inp ...zip.ReadCloser) {
+	go func(done chan<- struct{}, out chan<- *zip.ReadCloser, inp ...*zip.ReadCloser) {
 		defer close(done)
 		for i := range inp {
 			out <- inp[i]
@@ -108,9 +124,9 @@ func JoinReadCloser(out chan<- zip.ReadCloser, inp ...zip.ReadCloser) (done <-ch
 }
 
 // JoinReadCloserSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinReadCloserSlice(out chan<- zip.ReadCloser, inp ...[]zip.ReadCloser) (done <-chan struct{}) {
+func JoinReadCloserSlice(out chan<- *zip.ReadCloser, inp ...[]*zip.ReadCloser) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- zip.ReadCloser, inp ...[]zip.ReadCloser) {
+	go func(done chan<- struct{}, out chan<- *zip.ReadCloser, inp ...[]*zip.ReadCloser) {
 		defer close(done)
 		for i := range inp {
 			for j := range inp[i] {
@@ -123,9 +139,9 @@ func JoinReadCloserSlice(out chan<- zip.ReadCloser, inp ...[]zip.ReadCloser) (do
 }
 
 // JoinReadCloserChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinReadCloserChan(out chan<- zip.ReadCloser, inp <-chan zip.ReadCloser) (done <-chan struct{}) {
+func JoinReadCloserChan(out chan<- *zip.ReadCloser, inp <-chan *zip.ReadCloser) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, out chan<- zip.ReadCloser, inp <-chan zip.ReadCloser) {
+	go func(done chan<- struct{}, out chan<- *zip.ReadCloser, inp <-chan *zip.ReadCloser) {
 		defer close(done)
 		for i := range inp {
 			out <- i
@@ -136,9 +152,9 @@ func JoinReadCloserChan(out chan<- zip.ReadCloser, inp <-chan zip.ReadCloser) (d
 }
 
 // DoneReadCloser returns a channel to receive one signal before close after inp has been drained.
-func DoneReadCloser(inp <-chan zip.ReadCloser) (done <-chan struct{}) {
+func DoneReadCloser(inp <-chan *zip.ReadCloser) (done <-chan struct{}) {
 	cha := make(chan struct{})
-	go func(done chan<- struct{}, inp <-chan zip.ReadCloser) {
+	go func(done chan<- struct{}, inp <-chan *zip.ReadCloser) {
 		defer close(done)
 		for i := range inp {
 			_ = i // Drain inp
@@ -151,11 +167,11 @@ func DoneReadCloser(inp <-chan zip.ReadCloser) (done <-chan struct{}) {
 // DoneReadCloserSlice returns a channel which will receive a slice
 // of all the ReadClosers received on inp channel before close.
 // Unlike DoneReadCloser, a full slice is sent once, not just an event.
-func DoneReadCloserSlice(inp <-chan zip.ReadCloser) (done <-chan []zip.ReadCloser) {
-	cha := make(chan []zip.ReadCloser)
-	go func(inp <-chan zip.ReadCloser, done chan<- []zip.ReadCloser) {
+func DoneReadCloserSlice(inp <-chan *zip.ReadCloser) (done <-chan []*zip.ReadCloser) {
+	cha := make(chan []*zip.ReadCloser)
+	go func(inp <-chan *zip.ReadCloser, done chan<- []*zip.ReadCloser) {
 		defer close(done)
-		ReadCloserS := []zip.ReadCloser{}
+		ReadCloserS := []*zip.ReadCloser{}
 		for i := range inp {
 			ReadCloserS = append(ReadCloserS, i)
 		}
@@ -165,12 +181,12 @@ func DoneReadCloserSlice(inp <-chan zip.ReadCloser) (done <-chan []zip.ReadClose
 }
 
 // DoneReadCloserFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneReadCloserFunc(inp <-chan zip.ReadCloser, act func(a zip.ReadCloser)) (out <-chan struct{}) {
+func DoneReadCloserFunc(inp <-chan *zip.ReadCloser, act func(a *zip.ReadCloser)) (out <-chan struct{}) {
 	cha := make(chan struct{})
 	if act == nil {
-		act = func(a zip.ReadCloser) { return }
+		act = func(a *zip.ReadCloser) { return }
 	}
-	go func(done chan<- struct{}, inp <-chan zip.ReadCloser, act func(a zip.ReadCloser)) {
+	go func(done chan<- struct{}, inp <-chan *zip.ReadCloser, act func(a *zip.ReadCloser)) {
 		defer close(done)
 		for i := range inp {
 			act(i) // Apply action
@@ -181,9 +197,9 @@ func DoneReadCloserFunc(inp <-chan zip.ReadCloser, act func(a zip.ReadCloser)) (
 }
 
 // PipeReadCloserBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeReadCloserBuffer(inp <-chan zip.ReadCloser, cap int) (out <-chan zip.ReadCloser) {
-	cha := make(chan zip.ReadCloser, cap)
-	go func(out chan<- zip.ReadCloser, inp <-chan zip.ReadCloser) {
+func PipeReadCloserBuffer(inp <-chan *zip.ReadCloser, cap int) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser, cap)
+	go func(out chan<- *zip.ReadCloser, inp <-chan *zip.ReadCloser) {
 		defer close(out)
 		for i := range inp {
 			out <- i
@@ -195,12 +211,12 @@ func PipeReadCloserBuffer(inp <-chan zip.ReadCloser, cap int) (out <-chan zip.Re
 // PipeReadCloserFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeReadCloserMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeReadCloserFunc(inp <-chan zip.ReadCloser, act func(a zip.ReadCloser) zip.ReadCloser) (out <-chan zip.ReadCloser) {
-	cha := make(chan zip.ReadCloser)
+func PipeReadCloserFunc(inp <-chan *zip.ReadCloser, act func(a *zip.ReadCloser) *zip.ReadCloser) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser)
 	if act == nil {
-		act = func(a zip.ReadCloser) zip.ReadCloser { return a }
+		act = func(a *zip.ReadCloser) *zip.ReadCloser { return a }
 	}
-	go func(out chan<- zip.ReadCloser, inp <-chan zip.ReadCloser, act func(a zip.ReadCloser) zip.ReadCloser) {
+	go func(out chan<- *zip.ReadCloser, inp <-chan *zip.ReadCloser, act func(a *zip.ReadCloser) *zip.ReadCloser) {
 		defer close(out)
 		for i := range inp {
 			out <- act(i)
@@ -211,10 +227,10 @@ func PipeReadCloserFunc(inp <-chan zip.ReadCloser, act func(a zip.ReadCloser) zi
 
 // PipeReadCloserFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeReadCloserFork(inp <-chan zip.ReadCloser) (out1, out2 <-chan zip.ReadCloser) {
-	cha1 := make(chan zip.ReadCloser)
-	cha2 := make(chan zip.ReadCloser)
-	go func(out1, out2 chan<- zip.ReadCloser, inp <-chan zip.ReadCloser) {
+func PipeReadCloserFork(inp <-chan *zip.ReadCloser) (out1, out2 <-chan *zip.ReadCloser) {
+	cha1 := make(chan *zip.ReadCloser)
+	cha2 := make(chan *zip.ReadCloser)
+	go func(out1, out2 chan<- *zip.ReadCloser, inp <-chan *zip.ReadCloser) {
 		defer close(out1)
 		defer close(out2)
 		for i := range inp {
@@ -226,17 +242,17 @@ func PipeReadCloserFork(inp <-chan zip.ReadCloser) (out1, out2 <-chan zip.ReadCl
 }
 
 // ReadCloserTube is the signature for a pipe function.
-type ReadCloserTube func(inp <-chan zip.ReadCloser, out <-chan zip.ReadCloser)
+type ReadCloserTube func(inp <-chan *zip.ReadCloser, out <-chan *zip.ReadCloser)
 
 // ReadCloserDaisy returns a channel to receive all inp after having passed thru tube.
-func ReadCloserDaisy(inp <-chan zip.ReadCloser, tube ReadCloserTube) (out <-chan zip.ReadCloser) {
-	cha := make(chan zip.ReadCloser)
+func ReadCloserDaisy(inp <-chan *zip.ReadCloser, tube ReadCloserTube) (out <-chan *zip.ReadCloser) {
+	cha := make(chan *zip.ReadCloser)
 	go tube(inp, cha)
 	return cha
 }
 
 // ReadCloserDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func ReadCloserDaisyChain(inp <-chan zip.ReadCloser, tubes ...ReadCloserTube) (out <-chan zip.ReadCloser) {
+func ReadCloserDaisyChain(inp <-chan *zip.ReadCloser, tubes ...ReadCloserTube) (out <-chan *zip.ReadCloser) {
 	cha := inp
 	for i := range tubes {
 		cha = ReadCloserDaisy(cha, tubes[i])

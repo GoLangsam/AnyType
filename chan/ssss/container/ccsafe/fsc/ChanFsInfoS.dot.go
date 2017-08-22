@@ -62,6 +62,22 @@ func ChanFsInfoSSlice(inp ...[]fs.FsInfoS) chan fs.FsInfoS {
 	return out
 }
 
+// ChanFsInfoSFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFsInfoSFuncNil(act func() fs.FsInfoS) <-chan fs.FsInfoS {
+	out := make(chan fs.FsInfoS)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}()
+	return out
+}
+
 // ChanFsInfoSFuncNok returns a channel to receive all results of act until nok before close.
 func ChanFsInfoSFuncNok(act func() (fs.FsInfoS, bool)) <-chan fs.FsInfoS {
 	out := make(chan fs.FsInfoS)

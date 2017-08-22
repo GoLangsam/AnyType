@@ -8,7 +8,7 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
 // ElementSChan represents a
@@ -23,20 +23,20 @@ type ElementSChan interface {
 // receive-only
 // channel
 type ElementSROnlyChan interface {
-	RequestElementS() (dat []list.Element)        // the receive function - aka "MyElementS := <-MyElementSROnlyChan"
-	TryElementS() (dat []list.Element, open bool) // the multi-valued comma-ok receive function - aka "MyElementS, ok := <-MyElementSROnlyChan"
+	RequestElementS() (dat []*list.Element)        // the receive function - aka "MyElementS := <-MyElementSROnlyChan"
+	TryElementS() (dat []*list.Element, open bool) // the multi-valued comma-ok receive function - aka "MyElementS, ok := <-MyElementSROnlyChan"
 }
 
 // ElementSSOnlyChan represents a
 // send-only
 // channel
 type ElementSSOnlyChan interface {
-	ProvideElementS(dat []list.Element) // the send function - aka "MyKind <- some ElementS"
+	ProvideElementS(dat []*list.Element) // the send function - aka "MyKind <- some ElementS"
 }
 
 // DChElementS is a demand channel
 type DChElementS struct {
-	dat chan []list.Element
+	dat chan []*list.Element
 	req chan struct{}
 }
 
@@ -46,7 +46,7 @@ type DChElementS struct {
 // demand channel
 func MakeDemandElementSChan() *DChElementS {
 	d := new(DChElementS)
-	d.dat = make(chan []list.Element)
+	d.dat = make(chan []*list.Element)
 	d.req = make(chan struct{})
 	return d
 }
@@ -57,26 +57,26 @@ func MakeDemandElementSChan() *DChElementS {
 // demand channel
 func MakeDemandElementSBuff(cap int) *DChElementS {
 	d := new(DChElementS)
-	d.dat = make(chan []list.Element, cap)
+	d.dat = make(chan []*list.Element, cap)
 	d.req = make(chan struct{}, cap)
 	return d
 }
 
 // ProvideElementS is the send function - aka "MyKind <- some ElementS"
-func (c *DChElementS) ProvideElementS(dat []list.Element) {
+func (c *DChElementS) ProvideElementS(dat []*list.Element) {
 	<-c.req
 	c.dat <- dat
 }
 
 // RequestElementS is the receive function - aka "some ElementS <- MyKind"
-func (c *DChElementS) RequestElementS() (dat []list.Element) {
+func (c *DChElementS) RequestElementS() (dat []*list.Element) {
 	c.req <- struct{}{}
 	return <-c.dat
 }
 
 // TryElementS is the comma-ok multi-valued form of RequestElementS and
 // reports whether a received value was sent before the ElementS channel was closed.
-func (c *DChElementS) TryElementS() (dat []list.Element, open bool) {
+func (c *DChElementS) TryElementS() (dat []*list.Element, open bool) {
 	c.req <- struct{}{}
 	dat, open = <-c.dat
 	return dat, open

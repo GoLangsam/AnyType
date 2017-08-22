@@ -8,11 +8,11 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // MakeWriterChan returns a new open channel
-// (simply a 'chan zip.Writer' that is).
+// (simply a 'chan *zip.Writer' that is).
 //
 // Note: No 'Writer-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,13 +32,13 @@ import (
 //
 // Note: as always (except for PipeWriterBuffer) the channel is unbuffered.
 //
-func MakeWriterChan() chan zip.Writer {
-	return make(chan zip.Writer)
+func MakeWriterChan() chan *zip.Writer {
+	return make(chan *zip.Writer)
 }
 
 // ChanWriter returns a channel to receive all inputs before close.
-func ChanWriter(inp ...zip.Writer) chan zip.Writer {
-	out := make(chan zip.Writer)
+func ChanWriter(inp ...*zip.Writer) chan *zip.Writer {
+	out := make(chan *zip.Writer)
 	go func() {
 		defer close(out)
 		for i := range inp {
@@ -49,8 +49,8 @@ func ChanWriter(inp ...zip.Writer) chan zip.Writer {
 }
 
 // ChanWriterSlice returns a channel to receive all inputs before close.
-func ChanWriterSlice(inp ...[]zip.Writer) chan zip.Writer {
-	out := make(chan zip.Writer)
+func ChanWriterSlice(inp ...[]*zip.Writer) chan *zip.Writer {
+	out := make(chan *zip.Writer)
 	go func() {
 		defer close(out)
 		for i := range inp {
@@ -62,9 +62,25 @@ func ChanWriterSlice(inp ...[]zip.Writer) chan zip.Writer {
 	return out
 }
 
+// ChanWriterFuncNil returns a channel to receive all results of act until nil before close.
+func ChanWriterFuncNil(act func() *zip.Writer) <-chan *zip.Writer {
+	out := make(chan *zip.Writer)
+	go func() {
+		defer close(out)
+		for {
+			res := act() // Apply action
+			if res == nil {
+				return
+			}
+			out <- res
+		}
+	}()
+	return out
+}
+
 // ChanWriterFuncNok returns a channel to receive all results of act until nok before close.
-func ChanWriterFuncNok(act func() (zip.Writer, bool)) <-chan zip.Writer {
-	out := make(chan zip.Writer)
+func ChanWriterFuncNok(act func() (*zip.Writer, bool)) <-chan *zip.Writer {
+	out := make(chan *zip.Writer)
 	go func() {
 		defer close(out)
 		for {
@@ -79,8 +95,8 @@ func ChanWriterFuncNok(act func() (zip.Writer, bool)) <-chan zip.Writer {
 }
 
 // ChanWriterFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanWriterFuncErr(act func() (zip.Writer, error)) <-chan zip.Writer {
-	out := make(chan zip.Writer)
+func ChanWriterFuncErr(act func() (*zip.Writer, error)) <-chan *zip.Writer {
+	out := make(chan *zip.Writer)
 	go func() {
 		defer close(out)
 		for {
@@ -95,7 +111,7 @@ func ChanWriterFuncErr(act func() (zip.Writer, error)) <-chan zip.Writer {
 }
 
 // JoinWriter sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinWriter(out chan<- zip.Writer, inp ...zip.Writer) chan struct{} {
+func JoinWriter(out chan<- *zip.Writer, inp ...*zip.Writer) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -108,7 +124,7 @@ func JoinWriter(out chan<- zip.Writer, inp ...zip.Writer) chan struct{} {
 }
 
 // JoinWriterSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinWriterSlice(out chan<- zip.Writer, inp ...[]zip.Writer) chan struct{} {
+func JoinWriterSlice(out chan<- *zip.Writer, inp ...[]*zip.Writer) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -123,7 +139,7 @@ func JoinWriterSlice(out chan<- zip.Writer, inp ...[]zip.Writer) chan struct{} {
 }
 
 // JoinWriterChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinWriterChan(out chan<- zip.Writer, inp <-chan zip.Writer) chan struct{} {
+func JoinWriterChan(out chan<- *zip.Writer, inp <-chan *zip.Writer) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -136,7 +152,7 @@ func JoinWriterChan(out chan<- zip.Writer, inp <-chan zip.Writer) chan struct{} 
 }
 
 // DoneWriter returns a channel to receive one signal before close after inp has been drained.
-func DoneWriter(inp <-chan zip.Writer) chan struct{} {
+func DoneWriter(inp <-chan *zip.Writer) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -151,11 +167,11 @@ func DoneWriter(inp <-chan zip.Writer) chan struct{} {
 // DoneWriterSlice returns a channel which will receive a slice
 // of all the Writers received on inp channel before close.
 // Unlike DoneWriter, a full slice is sent once, not just an event.
-func DoneWriterSlice(inp <-chan zip.Writer) chan []zip.Writer {
-	done := make(chan []zip.Writer)
+func DoneWriterSlice(inp <-chan *zip.Writer) chan []*zip.Writer {
+	done := make(chan []*zip.Writer)
 	go func() {
 		defer close(done)
-		WriterS := []zip.Writer{}
+		WriterS := []*zip.Writer{}
 		for i := range inp {
 			WriterS = append(WriterS, i)
 		}
@@ -165,10 +181,10 @@ func DoneWriterSlice(inp <-chan zip.Writer) chan []zip.Writer {
 }
 
 // DoneWriterFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneWriterFunc(inp <-chan zip.Writer, act func(a zip.Writer)) chan struct{} {
+func DoneWriterFunc(inp <-chan *zip.Writer, act func(a *zip.Writer)) chan struct{} {
 	done := make(chan struct{})
 	if act == nil {
-		act = func(a zip.Writer) { return }
+		act = func(a *zip.Writer) { return }
 	}
 	go func() {
 		defer close(done)
@@ -181,8 +197,8 @@ func DoneWriterFunc(inp <-chan zip.Writer, act func(a zip.Writer)) chan struct{}
 }
 
 // PipeWriterBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeWriterBuffer(inp <-chan zip.Writer, cap int) chan zip.Writer {
-	out := make(chan zip.Writer, cap)
+func PipeWriterBuffer(inp <-chan *zip.Writer, cap int) chan *zip.Writer {
+	out := make(chan *zip.Writer, cap)
 	go func() {
 		defer close(out)
 		for i := range inp {
@@ -195,10 +211,10 @@ func PipeWriterBuffer(inp <-chan zip.Writer, cap int) chan zip.Writer {
 // PipeWriterFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeWriterMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeWriterFunc(inp <-chan zip.Writer, act func(a zip.Writer) zip.Writer) chan zip.Writer {
-	out := make(chan zip.Writer)
+func PipeWriterFunc(inp <-chan *zip.Writer, act func(a *zip.Writer) *zip.Writer) chan *zip.Writer {
+	out := make(chan *zip.Writer)
 	if act == nil {
-		act = func(a zip.Writer) zip.Writer { return a }
+		act = func(a *zip.Writer) *zip.Writer { return a }
 	}
 	go func() {
 		defer close(out)
@@ -211,9 +227,9 @@ func PipeWriterFunc(inp <-chan zip.Writer, act func(a zip.Writer) zip.Writer) ch
 
 // PipeWriterFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeWriterFork(inp <-chan zip.Writer) (chan zip.Writer, chan zip.Writer) {
-	out1 := make(chan zip.Writer)
-	out2 := make(chan zip.Writer)
+func PipeWriterFork(inp <-chan *zip.Writer) (chan *zip.Writer, chan *zip.Writer) {
+	out1 := make(chan *zip.Writer)
+	out2 := make(chan *zip.Writer)
 	go func() {
 		defer close(out1)
 		defer close(out2)
@@ -226,17 +242,17 @@ func PipeWriterFork(inp <-chan zip.Writer) (chan zip.Writer, chan zip.Writer) {
 }
 
 // WriterTube is the signature for a pipe function.
-type WriterTube func(inp <-chan zip.Writer, out <-chan zip.Writer)
+type WriterTube func(inp <-chan *zip.Writer, out <-chan *zip.Writer)
 
 // WriterDaisy returns a channel to receive all inp after having passed thru tube.
-func WriterDaisy(inp <-chan zip.Writer, tube WriterTube) (out <-chan zip.Writer) {
-	cha := make(chan zip.Writer)
+func WriterDaisy(inp <-chan *zip.Writer, tube WriterTube) (out <-chan *zip.Writer) {
+	cha := make(chan *zip.Writer)
 	go tube(inp, cha)
 	return cha
 }
 
 // WriterDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func WriterDaisyChain(inp <-chan zip.Writer, tubes ...WriterTube) (out <-chan zip.Writer) {
+func WriterDaisyChain(inp <-chan *zip.Writer, tubes ...WriterTube) (out <-chan *zip.Writer) {
 	cha := inp
 	for i := range tubes {
 		cha = WriterDaisy(cha, tubes[i])

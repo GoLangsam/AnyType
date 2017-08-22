@@ -8,11 +8,11 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // MakeFileHeaderChan returns a new open channel
-// (simply a 'chan zip.FileHeader' that is).
+// (simply a 'chan *zip.FileHeader' that is).
 //
 // Note: No 'FileHeader-producer' is launched here yet! (as is in all the other functions).
 //
@@ -32,11 +32,11 @@ import (
 //
 // Note: as always (except for PipeFileHeaderBuffer) the channel is unbuffered.
 //
-func MakeFileHeaderChan() (out chan zip.FileHeader) {
-	return make(chan zip.FileHeader)
+func MakeFileHeaderChan() (out chan *zip.FileHeader) {
+	return make(chan *zip.FileHeader)
 }
 
-func sendFileHeader(out chan<- zip.FileHeader, inp ...zip.FileHeader) {
+func sendFileHeader(out chan<- *zip.FileHeader, inp ...*zip.FileHeader) {
 	defer close(out)
 	for i := range inp {
 		out <- inp[i]
@@ -44,13 +44,13 @@ func sendFileHeader(out chan<- zip.FileHeader, inp ...zip.FileHeader) {
 }
 
 // ChanFileHeader returns a channel to receive all inputs before close.
-func ChanFileHeader(inp ...zip.FileHeader) (out <-chan zip.FileHeader) {
-	cha := make(chan zip.FileHeader)
+func ChanFileHeader(inp ...*zip.FileHeader) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader)
 	go sendFileHeader(cha, inp...)
 	return cha
 }
 
-func sendFileHeaderSlice(out chan<- zip.FileHeader, inp ...[]zip.FileHeader) {
+func sendFileHeaderSlice(out chan<- *zip.FileHeader, inp ...[]*zip.FileHeader) {
 	defer close(out)
 	for i := range inp {
 		for j := range inp[i] {
@@ -60,13 +60,31 @@ func sendFileHeaderSlice(out chan<- zip.FileHeader, inp ...[]zip.FileHeader) {
 }
 
 // ChanFileHeaderSlice returns a channel to receive all inputs before close.
-func ChanFileHeaderSlice(inp ...[]zip.FileHeader) (out <-chan zip.FileHeader) {
-	cha := make(chan zip.FileHeader)
+func ChanFileHeaderSlice(inp ...[]*zip.FileHeader) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader)
 	go sendFileHeaderSlice(cha, inp...)
 	return cha
 }
 
-func chanFileHeaderFuncNok(out chan<- zip.FileHeader, act func() (zip.FileHeader, bool)) {
+func chanFileHeaderFuncNil(out chan<- *zip.FileHeader, act func() *zip.FileHeader) {
+	defer close(out)
+	for {
+		res := act() // Apply action
+		if res == nil {
+			return
+		}
+		out <- res
+	}
+}
+
+// ChanFileHeaderFuncNil returns a channel to receive all results of act until nil before close.
+func ChanFileHeaderFuncNil(act func() *zip.FileHeader) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader)
+	go chanFileHeaderFuncNil(cha, act)
+	return cha
+}
+
+func chanFileHeaderFuncNok(out chan<- *zip.FileHeader, act func() (*zip.FileHeader, bool)) {
 	defer close(out)
 	for {
 		res, ok := act() // Apply action
@@ -78,13 +96,13 @@ func chanFileHeaderFuncNok(out chan<- zip.FileHeader, act func() (zip.FileHeader
 }
 
 // ChanFileHeaderFuncNok returns a channel to receive all results of act until nok before close.
-func ChanFileHeaderFuncNok(act func() (zip.FileHeader, bool)) (out <-chan zip.FileHeader) {
-	cha := make(chan zip.FileHeader)
+func ChanFileHeaderFuncNok(act func() (*zip.FileHeader, bool)) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader)
 	go chanFileHeaderFuncNok(cha, act)
 	return cha
 }
 
-func chanFileHeaderFuncErr(out chan<- zip.FileHeader, act func() (zip.FileHeader, error)) {
+func chanFileHeaderFuncErr(out chan<- *zip.FileHeader, act func() (*zip.FileHeader, error)) {
 	defer close(out)
 	for {
 		res, err := act() // Apply action
@@ -96,13 +114,13 @@ func chanFileHeaderFuncErr(out chan<- zip.FileHeader, act func() (zip.FileHeader
 }
 
 // ChanFileHeaderFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanFileHeaderFuncErr(act func() (zip.FileHeader, error)) (out <-chan zip.FileHeader) {
-	cha := make(chan zip.FileHeader)
+func ChanFileHeaderFuncErr(act func() (*zip.FileHeader, error)) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader)
 	go chanFileHeaderFuncErr(cha, act)
 	return cha
 }
 
-func joinFileHeader(done chan<- struct{}, out chan<- zip.FileHeader, inp ...zip.FileHeader) {
+func joinFileHeader(done chan<- struct{}, out chan<- *zip.FileHeader, inp ...*zip.FileHeader) {
 	defer close(done)
 	for i := range inp {
 		out <- inp[i]
@@ -111,13 +129,13 @@ func joinFileHeader(done chan<- struct{}, out chan<- zip.FileHeader, inp ...zip.
 }
 
 // JoinFileHeader sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinFileHeader(out chan<- zip.FileHeader, inp ...zip.FileHeader) (done <-chan struct{}) {
+func JoinFileHeader(out chan<- *zip.FileHeader, inp ...*zip.FileHeader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileHeader(cha, out, inp...)
 	return cha
 }
 
-func joinFileHeaderSlice(done chan<- struct{}, out chan<- zip.FileHeader, inp ...[]zip.FileHeader) {
+func joinFileHeaderSlice(done chan<- struct{}, out chan<- *zip.FileHeader, inp ...[]*zip.FileHeader) {
 	defer close(done)
 	for i := range inp {
 		for j := range inp[i] {
@@ -128,13 +146,13 @@ func joinFileHeaderSlice(done chan<- struct{}, out chan<- zip.FileHeader, inp ..
 }
 
 // JoinFileHeaderSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinFileHeaderSlice(out chan<- zip.FileHeader, inp ...[]zip.FileHeader) (done <-chan struct{}) {
+func JoinFileHeaderSlice(out chan<- *zip.FileHeader, inp ...[]*zip.FileHeader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileHeaderSlice(cha, out, inp...)
 	return cha
 }
 
-func joinFileHeaderChan(done chan<- struct{}, out chan<- zip.FileHeader, inp <-chan zip.FileHeader) {
+func joinFileHeaderChan(done chan<- struct{}, out chan<- *zip.FileHeader, inp <-chan *zip.FileHeader) {
 	defer close(done)
 	for i := range inp {
 		out <- i
@@ -143,13 +161,13 @@ func joinFileHeaderChan(done chan<- struct{}, out chan<- zip.FileHeader, inp <-c
 }
 
 // JoinFileHeaderChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinFileHeaderChan(out chan<- zip.FileHeader, inp <-chan zip.FileHeader) (done <-chan struct{}) {
+func JoinFileHeaderChan(out chan<- *zip.FileHeader, inp <-chan *zip.FileHeader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go joinFileHeaderChan(cha, out, inp)
 	return cha
 }
 
-func doitFileHeader(done chan<- struct{}, inp <-chan zip.FileHeader) {
+func doitFileHeader(done chan<- struct{}, inp <-chan *zip.FileHeader) {
 	defer close(done)
 	for i := range inp {
 		_ = i // Drain inp
@@ -158,15 +176,15 @@ func doitFileHeader(done chan<- struct{}, inp <-chan zip.FileHeader) {
 }
 
 // DoneFileHeader returns a channel to receive one signal before close after inp has been drained.
-func DoneFileHeader(inp <-chan zip.FileHeader) (done <-chan struct{}) {
+func DoneFileHeader(inp <-chan *zip.FileHeader) (done <-chan struct{}) {
 	cha := make(chan struct{})
 	go doitFileHeader(cha, inp)
 	return cha
 }
 
-func doitFileHeaderSlice(done chan<- ([]zip.FileHeader), inp <-chan zip.FileHeader) {
+func doitFileHeaderSlice(done chan<- ([]*zip.FileHeader), inp <-chan *zip.FileHeader) {
 	defer close(done)
-	FileHeaderS := []zip.FileHeader{}
+	FileHeaderS := []*zip.FileHeader{}
 	for i := range inp {
 		FileHeaderS = append(FileHeaderS, i)
 	}
@@ -176,13 +194,13 @@ func doitFileHeaderSlice(done chan<- ([]zip.FileHeader), inp <-chan zip.FileHead
 // DoneFileHeaderSlice returns a channel which will receive a slice
 // of all the FileHeaders received on inp channel before close.
 // Unlike DoneFileHeader, a full slice is sent once, not just an event.
-func DoneFileHeaderSlice(inp <-chan zip.FileHeader) (done <-chan ([]zip.FileHeader)) {
-	cha := make(chan ([]zip.FileHeader))
+func DoneFileHeaderSlice(inp <-chan *zip.FileHeader) (done <-chan ([]*zip.FileHeader)) {
+	cha := make(chan ([]*zip.FileHeader))
 	go doitFileHeaderSlice(cha, inp)
 	return cha
 }
 
-func doitFileHeaderFunc(done chan<- struct{}, inp <-chan zip.FileHeader, act func(a zip.FileHeader)) {
+func doitFileHeaderFunc(done chan<- struct{}, inp <-chan *zip.FileHeader, act func(a *zip.FileHeader)) {
 	defer close(done)
 	for i := range inp {
 		act(i) // Apply action
@@ -191,16 +209,16 @@ func doitFileHeaderFunc(done chan<- struct{}, inp <-chan zip.FileHeader, act fun
 }
 
 // DoneFileHeaderFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneFileHeaderFunc(inp <-chan zip.FileHeader, act func(a zip.FileHeader)) (out <-chan struct{}) {
+func DoneFileHeaderFunc(inp <-chan *zip.FileHeader, act func(a *zip.FileHeader)) (out <-chan struct{}) {
 	cha := make(chan struct{})
 	if act == nil {
-		act = func(a zip.FileHeader) { return }
+		act = func(a *zip.FileHeader) { return }
 	}
 	go doitFileHeaderFunc(cha, inp, act)
 	return cha
 }
 
-func pipeFileHeaderBuffer(out chan<- zip.FileHeader, inp <-chan zip.FileHeader) {
+func pipeFileHeaderBuffer(out chan<- *zip.FileHeader, inp <-chan *zip.FileHeader) {
 	defer close(out)
 	for i := range inp {
 		out <- i
@@ -208,13 +226,13 @@ func pipeFileHeaderBuffer(out chan<- zip.FileHeader, inp <-chan zip.FileHeader) 
 }
 
 // PipeFileHeaderBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeFileHeaderBuffer(inp <-chan zip.FileHeader, cap int) (out <-chan zip.FileHeader) {
-	cha := make(chan zip.FileHeader, cap)
+func PipeFileHeaderBuffer(inp <-chan *zip.FileHeader, cap int) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader, cap)
 	go pipeFileHeaderBuffer(cha, inp)
 	return cha
 }
 
-func pipeFileHeaderFunc(out chan<- zip.FileHeader, inp <-chan zip.FileHeader, act func(a zip.FileHeader) zip.FileHeader) {
+func pipeFileHeaderFunc(out chan<- *zip.FileHeader, inp <-chan *zip.FileHeader, act func(a *zip.FileHeader) *zip.FileHeader) {
 	defer close(out)
 	for i := range inp {
 		out <- act(i)
@@ -224,16 +242,16 @@ func pipeFileHeaderFunc(out chan<- zip.FileHeader, inp <-chan zip.FileHeader, ac
 // PipeFileHeaderFunc returns a channel to receive every result of act applied to inp before close.
 // Note: it 'could' be PipeFileHeaderMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeFileHeaderFunc(inp <-chan zip.FileHeader, act func(a zip.FileHeader) zip.FileHeader) (out <-chan zip.FileHeader) {
-	cha := make(chan zip.FileHeader)
+func PipeFileHeaderFunc(inp <-chan *zip.FileHeader, act func(a *zip.FileHeader) *zip.FileHeader) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader)
 	if act == nil {
-		act = func(a zip.FileHeader) zip.FileHeader { return a }
+		act = func(a *zip.FileHeader) *zip.FileHeader { return a }
 	}
 	go pipeFileHeaderFunc(cha, inp, act)
 	return cha
 }
 
-func pipeFileHeaderFork(out1, out2 chan<- zip.FileHeader, inp <-chan zip.FileHeader) {
+func pipeFileHeaderFork(out1, out2 chan<- *zip.FileHeader, inp <-chan *zip.FileHeader) {
 	defer close(out1)
 	defer close(out2)
 	for i := range inp {
@@ -244,25 +262,25 @@ func pipeFileHeaderFork(out1, out2 chan<- zip.FileHeader, inp <-chan zip.FileHea
 
 // PipeFileHeaderFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeFileHeaderFork(inp <-chan zip.FileHeader) (out1, out2 <-chan zip.FileHeader) {
-	cha1 := make(chan zip.FileHeader)
-	cha2 := make(chan zip.FileHeader)
+func PipeFileHeaderFork(inp <-chan *zip.FileHeader) (out1, out2 <-chan *zip.FileHeader) {
+	cha1 := make(chan *zip.FileHeader)
+	cha2 := make(chan *zip.FileHeader)
 	go pipeFileHeaderFork(cha1, cha2, inp)
 	return cha1, cha2
 }
 
 // FileHeaderTube is the signature for a pipe function.
-type FileHeaderTube func(inp <-chan zip.FileHeader, out <-chan zip.FileHeader)
+type FileHeaderTube func(inp <-chan *zip.FileHeader, out <-chan *zip.FileHeader)
 
 // FileHeaderDaisy returns a channel to receive all inp after having passed thru tube.
-func FileHeaderDaisy(inp <-chan zip.FileHeader, tube FileHeaderTube) (out <-chan zip.FileHeader) {
-	cha := make(chan zip.FileHeader)
+func FileHeaderDaisy(inp <-chan *zip.FileHeader, tube FileHeaderTube) (out <-chan *zip.FileHeader) {
+	cha := make(chan *zip.FileHeader)
 	go tube(inp, cha)
 	return cha
 }
 
 // FileHeaderDaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func FileHeaderDaisyChain(inp <-chan zip.FileHeader, tubes ...FileHeaderTube) (out <-chan zip.FileHeader) {
+func FileHeaderDaisyChain(inp <-chan *zip.FileHeader, tubes ...FileHeaderTube) (out <-chan *zip.FileHeader) {
 	cha := inp
 	for i := range tubes {
 		cha = FileHeaderDaisy(cha, tubes[i])
