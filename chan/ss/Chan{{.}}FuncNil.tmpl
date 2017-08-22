@@ -1,4 +1,4 @@
-func chan{{.}}FuncNil(out chan<- {{.Dot}}, act func() ({{.Dot}})) {
+func chan{{.}}FuncNil(out chan<- {{.Dot}}, act func() {{.Dot}}) {
 	defer close(out)
 	for {
 		res := act() // Apply action
@@ -10,7 +10,7 @@ func chan{{.}}FuncNil(out chan<- {{.Dot}}, act func() ({{.Dot}})) {
 }
 
 // Chan{{.}}FuncNil returns a channel to receive all results of act until nil before close.
-func Chan{{.}}FuncNil(act func() ({{.Dot}})) (out <-chan {{.Dot}}) {
+func Chan{{.}}FuncNil(act func() {{.Dot}}) (out <-chan {{.Dot}}) {
 	cha := make(chan {{.Dot}})
 	go chan{{.}}FuncNil(cha, act)
 	return cha

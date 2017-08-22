@@ -1,5 +1,5 @@
 // Chan{{.}}FuncNil returns a channel to receive all results of act until nil before close.
-func Chan{{.}}FuncNil(act func() ({{.Dot}})) (<-chan {{.Dot}}) {
+func Chan{{.}}FuncNil(act func() {{.Dot}}) (<-chan {{.Dot}}) {
 	out := make(chan {{.Dot}})
 	go func() {
 		defer close(out)
