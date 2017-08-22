@@ -8,14 +8,14 @@ package list
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"container/list"
+	list "container/list"
 )
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
 // ElementPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `list.Element`)
+// of items (of type `*list.Element`)
 // which are cached in a growing-only list.
 // Next() traverses the ElementPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type ElementPile struct {
-	pile   chan list.Element // channel to receive further items
-	list   []list.Element    // list of known items
-	offset int               // index for Next()
+	pile   chan *list.Element // channel to receive further items
+	list   []*list.Element    // list of known items
+	offset int                // index for Next()
 }
 
 // MakeElementPile returns a (pointer to a) fresh pile
-// of items (of type `list.Element`)
+// of items (of type `*list.Element`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeElementPile(size, buff int) *ElementPile {
 	pile := new(ElementPile)
-	pile.list = make([]list.Element, 0, size)
-	pile.pile = make(chan list.Element, buff)
+	pile.list = make([]*list.Element, 0, size)
+	pile.pile = make(chan *list.Element, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *ElementPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *ElementPile) Next() (item list.Element, ok bool) {
+func (d *ElementPile) Next() (item *list.Element, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *ElementPile) Next() (item list.Element, ok bool) {
 }
 
 // Pile adds
-// an item (of type `list.Element`)
+// an item (of type `*list.Element`)
 // to the ElementPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *ElementPile) Pile(item list.Element) {
+func (d *ElementPile) Pile(item *list.Element) {
 	d.pile <- item
 }
 

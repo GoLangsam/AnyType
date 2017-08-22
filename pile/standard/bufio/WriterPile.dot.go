@@ -8,7 +8,7 @@ package bufio
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"bufio"
+	bufio "bufio"
 )
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"

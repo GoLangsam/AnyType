@@ -2,52 +2,48 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tag
+package IsAny
 
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-import (
-	"github.com/golangsam/container/ccsafe/tag"
-)
-
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
-// TagPile is a structure for
+// AnySPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `*tag.TagAny`)
+// of items (of type `[]interface{}`)
 // which are cached in a growing-only list.
-// Next() traverses the TagPile.
+// Next() traverses the AnySPile.
 // Reset() allows a new transversal from the beginning.
 //
 // You may either
-// traverse the TagPile lazily -following its (buffered) growth that is-
+// traverse the AnySPile lazily -following its (buffered) growth that is-
 // or
 // await the signal from Wait() before starting traversal.
 //
 // Note: Pile() may be used concurrently,
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
-type TagPile struct {
-	pile   chan *tag.TagAny // channel to receive further items
-	list   []*tag.TagAny    // list of known items
-	offset int              // index for Next()
+type AnySPile struct {
+	pile   chan []interface{} // channel to receive further items
+	list   [][]interface{}    // list of known items
+	offset int                // index for Next()
 }
 
-// MakeTagPile returns a (pointer to a) fresh pile
-// of items (of type `*tag.TagAny`)
+// MakeAnySPile returns a (pointer to a) fresh pile
+// of items (of type `[]interface{}`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
-func MakeTagPile(size, buff int) *TagPile {
-	pile := new(TagPile)
-	pile.list = make([]*tag.TagAny, 0, size)
-	pile.pile = make(chan *tag.TagAny, buff)
+func MakeAnySPile(size, buff int) *AnySPile {
+	pile := new(AnySPile)
+	pile.list = make([][]interface{}, 0, size)
+	pile.pile = make(chan []interface{}, buff)
 	return pile
 }
 
 // Reset puts the pile iterator `Next()` back at the beginning.
-func (d *TagPile) Reset() {
+func (d *AnySPile) Reset() {
 	d.offset = 0
 }
 
@@ -55,7 +51,7 @@ func (d *TagPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *TagPile) Next() (item *tag.TagAny, ok bool) {
+func (d *AnySPile) Next() (item []interface{}, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +64,11 @@ func (d *TagPile) Next() (item *tag.TagAny, ok bool) {
 }
 
 // Pile adds
-// an item (of type `*tag.TagAny`)
-// to the TagPile.
+// an item (of type `[]interface{}`)
+// to the AnySPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *TagPile) Pile(item *tag.TagAny) {
+func (d *AnySPile) Pile(item []interface{}) {
 	d.pile <- item
 }
 
@@ -84,7 +80,7 @@ func (d *TagPile) Pile(item *tag.TagAny) {
 // any Pile(...) will panic
 // and
 // any Next() will return immediately: no eventual blocking, that is.
-func (d *TagPile) Close() {
+func (d *AnySPile) Close() {
 	close(d.pile)
 }
 
@@ -97,9 +93,9 @@ func (d *TagPile) Close() {
 // Once the pile is closed, Wait() will return in constant time.)
 //
 // Note: Upon close of the done-channel, the pile is Reset() so You may traverse it (via Next) right away.
-func (d *TagPile) Wait() (done <-chan int) {
+func (d *AnySPile) Wait() (done <-chan int) {
 	cha := make(chan int)
-	go func(cha chan<- int, d *TagPile) {
+	go func(cha chan<- int, d *AnySPile) {
 		defer close(cha)
 		d.Reset()
 		if len(d.list) > 0 { // skip what's already known

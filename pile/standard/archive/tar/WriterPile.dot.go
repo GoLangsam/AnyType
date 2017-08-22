@@ -8,7 +8,7 @@ package tar
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/tar"
+	tar "archive/tar"
 )
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"

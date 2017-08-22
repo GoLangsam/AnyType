@@ -8,14 +8,14 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
 // ReadCloserPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `zip.ReadCloser`)
+// of items (of type `*zip.ReadCloser`)
 // which are cached in a growing-only list.
 // Next() traverses the ReadCloserPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type ReadCloserPile struct {
-	pile   chan zip.ReadCloser // channel to receive further items
-	list   []zip.ReadCloser    // list of known items
-	offset int                 // index for Next()
+	pile   chan *zip.ReadCloser // channel to receive further items
+	list   []*zip.ReadCloser    // list of known items
+	offset int                  // index for Next()
 }
 
 // MakeReadCloserPile returns a (pointer to a) fresh pile
-// of items (of type `zip.ReadCloser`)
+// of items (of type `*zip.ReadCloser`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeReadCloserPile(size, buff int) *ReadCloserPile {
 	pile := new(ReadCloserPile)
-	pile.list = make([]zip.ReadCloser, 0, size)
-	pile.pile = make(chan zip.ReadCloser, buff)
+	pile.list = make([]*zip.ReadCloser, 0, size)
+	pile.pile = make(chan *zip.ReadCloser, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *ReadCloserPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *ReadCloserPile) Next() (item zip.ReadCloser, ok bool) {
+func (d *ReadCloserPile) Next() (item *zip.ReadCloser, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *ReadCloserPile) Next() (item zip.ReadCloser, ok bool) {
 }
 
 // Pile adds
-// an item (of type `zip.ReadCloser`)
+// an item (of type `*zip.ReadCloser`)
 // to the ReadCloserPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *ReadCloserPile) Pile(item zip.ReadCloser) {
+func (d *ReadCloserPile) Pile(item *zip.ReadCloser) {
 	d.pile <- item
 }
 

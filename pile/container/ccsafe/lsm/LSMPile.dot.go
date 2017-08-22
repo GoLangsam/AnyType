@@ -15,7 +15,7 @@ import (
 
 // LSMPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `lsm.LazyStringerMap`)
+// of items (of type `*lsm.LazyStringerMap`)
 // which are cached in a growing-only list.
 // Next() traverses the LSMPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type LSMPile struct {
-	pile   chan lsm.LazyStringerMap // channel to receive further items
-	list   []lsm.LazyStringerMap    // list of known items
-	offset int                      // index for Next()
+	pile   chan *lsm.LazyStringerMap // channel to receive further items
+	list   []*lsm.LazyStringerMap    // list of known items
+	offset int                       // index for Next()
 }
 
 // MakeLSMPile returns a (pointer to a) fresh pile
-// of items (of type `lsm.LazyStringerMap`)
+// of items (of type `*lsm.LazyStringerMap`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeLSMPile(size, buff int) *LSMPile {
 	pile := new(LSMPile)
-	pile.list = make([]lsm.LazyStringerMap, 0, size)
-	pile.pile = make(chan lsm.LazyStringerMap, buff)
+	pile.list = make([]*lsm.LazyStringerMap, 0, size)
+	pile.pile = make(chan *lsm.LazyStringerMap, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *LSMPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *LSMPile) Next() (item lsm.LazyStringerMap, ok bool) {
+func (d *LSMPile) Next() (item *lsm.LazyStringerMap, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *LSMPile) Next() (item lsm.LazyStringerMap, ok bool) {
 }
 
 // Pile adds
-// an item (of type `lsm.LazyStringerMap`)
+// an item (of type `*lsm.LazyStringerMap`)
 // to the LSMPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *LSMPile) Pile(item lsm.LazyStringerMap) {
+func (d *LSMPile) Pile(item *lsm.LazyStringerMap) {
 	d.pile <- item
 }
 

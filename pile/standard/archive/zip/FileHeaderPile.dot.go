@@ -8,14 +8,14 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
 // FileHeaderPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `zip.FileHeader`)
+// of items (of type `*zip.FileHeader`)
 // which are cached in a growing-only list.
 // Next() traverses the FileHeaderPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type FileHeaderPile struct {
-	pile   chan zip.FileHeader // channel to receive further items
-	list   []zip.FileHeader    // list of known items
-	offset int                 // index for Next()
+	pile   chan *zip.FileHeader // channel to receive further items
+	list   []*zip.FileHeader    // list of known items
+	offset int                  // index for Next()
 }
 
 // MakeFileHeaderPile returns a (pointer to a) fresh pile
-// of items (of type `zip.FileHeader`)
+// of items (of type `*zip.FileHeader`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeFileHeaderPile(size, buff int) *FileHeaderPile {
 	pile := new(FileHeaderPile)
-	pile.list = make([]zip.FileHeader, 0, size)
-	pile.pile = make(chan zip.FileHeader, buff)
+	pile.list = make([]*zip.FileHeader, 0, size)
+	pile.pile = make(chan *zip.FileHeader, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *FileHeaderPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *FileHeaderPile) Next() (item zip.FileHeader, ok bool) {
+func (d *FileHeaderPile) Next() (item *zip.FileHeader, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *FileHeaderPile) Next() (item zip.FileHeader, ok bool) {
 }
 
 // Pile adds
-// an item (of type `zip.FileHeader`)
+// an item (of type `*zip.FileHeader`)
 // to the FileHeaderPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *FileHeaderPile) Pile(item zip.FileHeader) {
+func (d *FileHeaderPile) Pile(item *zip.FileHeader) {
 	d.pile <- item
 }
 

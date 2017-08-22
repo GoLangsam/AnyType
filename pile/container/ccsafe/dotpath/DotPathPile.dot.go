@@ -15,7 +15,7 @@ import (
 
 // DotPathPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `dotpath.DotPath`)
+// of items (of type `*dotpath.DotPath`)
 // which are cached in a growing-only list.
 // Next() traverses the DotPathPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type DotPathPile struct {
-	pile   chan dotpath.DotPath // channel to receive further items
-	list   []dotpath.DotPath    // list of known items
-	offset int                  // index for Next()
+	pile   chan *dotpath.DotPath // channel to receive further items
+	list   []*dotpath.DotPath    // list of known items
+	offset int                   // index for Next()
 }
 
 // MakeDotPathPile returns a (pointer to a) fresh pile
-// of items (of type `dotpath.DotPath`)
+// of items (of type `*dotpath.DotPath`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeDotPathPile(size, buff int) *DotPathPile {
 	pile := new(DotPathPile)
-	pile.list = make([]dotpath.DotPath, 0, size)
-	pile.pile = make(chan dotpath.DotPath, buff)
+	pile.list = make([]*dotpath.DotPath, 0, size)
+	pile.pile = make(chan *dotpath.DotPath, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *DotPathPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *DotPathPile) Next() (item dotpath.DotPath, ok bool) {
+func (d *DotPathPile) Next() (item *dotpath.DotPath, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *DotPathPile) Next() (item dotpath.DotPath, ok bool) {
 }
 
 // Pile adds
-// an item (of type `dotpath.DotPath`)
+// an item (of type `*dotpath.DotPath`)
 // to the DotPathPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *DotPathPile) Pile(item dotpath.DotPath) {
+func (d *DotPathPile) Pile(item *dotpath.DotPath) {
 	d.pile <- item
 }
 

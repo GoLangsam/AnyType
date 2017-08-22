@@ -8,14 +8,14 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
 // WriterPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `zip.Writer`)
+// of items (of type `*zip.Writer`)
 // which are cached in a growing-only list.
 // Next() traverses the WriterPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type WriterPile struct {
-	pile   chan zip.Writer // channel to receive further items
-	list   []zip.Writer    // list of known items
-	offset int             // index for Next()
+	pile   chan *zip.Writer // channel to receive further items
+	list   []*zip.Writer    // list of known items
+	offset int              // index for Next()
 }
 
 // MakeWriterPile returns a (pointer to a) fresh pile
-// of items (of type `zip.Writer`)
+// of items (of type `*zip.Writer`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeWriterPile(size, buff int) *WriterPile {
 	pile := new(WriterPile)
-	pile.list = make([]zip.Writer, 0, size)
-	pile.pile = make(chan zip.Writer, buff)
+	pile.list = make([]*zip.Writer, 0, size)
+	pile.pile = make(chan *zip.Writer, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *WriterPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *WriterPile) Next() (item zip.Writer, ok bool) {
+func (d *WriterPile) Next() (item *zip.Writer, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *WriterPile) Next() (item zip.Writer, ok bool) {
 }
 
 // Pile adds
-// an item (of type `zip.Writer`)
+// an item (of type `*zip.Writer`)
 // to the WriterPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *WriterPile) Pile(item zip.Writer) {
+func (d *WriterPile) Pile(item *zip.Writer) {
 	d.pile <- item
 }
 

@@ -8,14 +8,14 @@ package zip
 // DO NOT EDIT - Improve the pattern!
 
 import (
-	"archive/zip"
+	zip "archive/zip"
 )
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
 // ReaderPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `zip.Reader`)
+// of items (of type `*zip.Reader`)
 // which are cached in a growing-only list.
 // Next() traverses the ReaderPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type ReaderPile struct {
-	pile   chan zip.Reader // channel to receive further items
-	list   []zip.Reader    // list of known items
-	offset int             // index for Next()
+	pile   chan *zip.Reader // channel to receive further items
+	list   []*zip.Reader    // list of known items
+	offset int              // index for Next()
 }
 
 // MakeReaderPile returns a (pointer to a) fresh pile
-// of items (of type `zip.Reader`)
+// of items (of type `*zip.Reader`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeReaderPile(size, buff int) *ReaderPile {
 	pile := new(ReaderPile)
-	pile.list = make([]zip.Reader, 0, size)
-	pile.pile = make(chan zip.Reader, buff)
+	pile.list = make([]*zip.Reader, 0, size)
+	pile.pile = make(chan *zip.Reader, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *ReaderPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *ReaderPile) Next() (item zip.Reader, ok bool) {
+func (d *ReaderPile) Next() (item *zip.Reader, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *ReaderPile) Next() (item zip.Reader, ok bool) {
 }
 
 // Pile adds
-// an item (of type `zip.Reader`)
+// an item (of type `*zip.Reader`)
 // to the ReaderPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *ReaderPile) Pile(item zip.Reader) {
+func (d *ReaderPile) Pile(item *zip.Reader) {
 	d.pile <- item
 }
 

@@ -15,7 +15,7 @@ import (
 
 // DotPile is a structure for
 // a lazily populated sequence (= slice)
-// of items (of type `dot.Dot`)
+// of items (of type `*dot.Dot`)
 // which are cached in a growing-only list.
 // Next() traverses the DotPile.
 // Reset() allows a new transversal from the beginning.
@@ -29,20 +29,20 @@ import (
 // Next() (and Reset) should be confined to a single go routine (thread),
 // as the iteration is not intended to by concurrency safe.
 type DotPile struct {
-	pile   chan dot.Dot // channel to receive further items
-	list   []dot.Dot    // list of known items
-	offset int          // index for Next()
+	pile   chan *dot.Dot // channel to receive further items
+	list   []*dot.Dot    // list of known items
+	offset int           // index for Next()
 }
 
 // MakeDotPile returns a (pointer to a) fresh pile
-// of items (of type `dot.Dot`)
+// of items (of type `*dot.Dot`)
 // with size as initial capacity
 // and
 // with buff non-blocking Add's before respective Next's
 func MakeDotPile(size, buff int) *DotPile {
 	pile := new(DotPile)
-	pile.list = make([]dot.Dot, 0, size)
-	pile.pile = make(chan dot.Dot, buff)
+	pile.list = make([]*dot.Dot, 0, size)
+	pile.pile = make(chan *dot.Dot, buff)
 	return pile
 }
 
@@ -55,7 +55,7 @@ func (d *DotPile) Reset() {
 // or false iff the pile is exhausted.
 // Next may block, awaiting another Pile(),
 // iff the pile is not Closed().
-func (d *DotPile) Next() (item dot.Dot, ok bool) {
+func (d *DotPile) Next() (item *dot.Dot, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -68,11 +68,11 @@ func (d *DotPile) Next() (item dot.Dot, ok bool) {
 }
 
 // Pile adds
-// an item (of type `dot.Dot`)
+// an item (of type `*dot.Dot`)
 // to the DotPile.
 //
 // Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *DotPile) Pile(item dot.Dot) {
+func (d *DotPile) Pile(item *dot.Dot) {
 	d.pile <- item
 }
 
