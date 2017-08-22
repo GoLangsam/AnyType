@@ -1,5 +1,5 @@
 {{/*-
-{{.DotDot "Dot"     "dot.Dot"}}
+{{.DotDot "Dot"     "*dot.Dot"}}
 {{range .Range}}
 	{{.DotDot ":Package:" "dot"}}
 	{{with .G ":Import:"}}
@@ -7,7 +7,5 @@
 	{{end}}
 {{end}}
 -*/}}
-{{- template "Copy"			. }}
-{{  template "Package"			. }}
-{{  template "Edit"			. }}
+{{- template "Prolog"			. -}}
 // No go functionality is associated with this source file.

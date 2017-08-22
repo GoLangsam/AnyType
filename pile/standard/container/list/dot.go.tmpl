@@ -1,8 +1,8 @@
 {{/*-
-{{.DotDot ""		"list.List"}}
-{{.DotDot "ListS"	"[]list.List"}}
-{{.DotDot "Element"	"list.Element"}}
-{{.DotDot "ElementS"	"[]list.Element"}}
+{{.DotDot ""		"*list.List"}}
+{{.DotDot "ListS"	"[]*list.List"}}
+{{.DotDot "Element"	"*list.Element"}}
+{{.DotDot "ElementS"	"[]*list.Element"}}
 {{range .Range}}
 	{{.DotDot ":Package:" "list"}}
 	{{with .G ":Import:"}}
@@ -10,7 +10,5 @@
 	{{end}}
 {{end}}
 -*/}}
-{{- template "Copy"			. }}
-{{  template "Package"			. }}
-{{  template "Edit"			. }}
+{{- template "Prolog"			. -}}
 // No go functionality is associated with this source file.

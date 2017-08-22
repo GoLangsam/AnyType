@@ -17,9 +17,7 @@
 	{{.DotDot ":Package:" "IsNumeric"}}
 {{end}}
 -*/}}
-{{- template "Copy"			. }}
-{{  template "Package"			. }}
-{{  template "Edit"			. }}
+{{- template "Prolog"			. -}}
 // from go/types/type.go
 
 // BasicKind describes the kind of basic type.
@@ -45,4 +43,3 @@ const (
 
 var _ BasicInfo = IsOrdered // allows to use "Merge"
 // token.LSS, token.LEQ, token.GTR, token.GEQ
-

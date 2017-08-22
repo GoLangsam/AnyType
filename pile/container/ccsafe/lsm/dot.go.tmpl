@@ -1,5 +1,5 @@
 {{/*-
-{{.DotDot "LSM"     "lsm.LazyStringerMap"}}
+{{.DotDot "LSM"     "*lsm.LazyStringerMap"}}
 {{range .Range}}
 	{{.DotDot ":Package:" "lsm"}}
 	{{with .G ":Import:"}}
@@ -7,7 +7,5 @@
 	{{end}}
 {{end}}
 -*/}}
-{{- template "Copy"			. }}
-{{  template "Package"			. }}
-{{  template "Edit"			. }}
+{{- template "Prolog"			. -}}
 // No go functionality is associated with this source file.

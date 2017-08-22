@@ -1,9 +1,9 @@
 {{/*-
-{{.DotDot "File"		"zip.File"	}}
-{{.DotDot "FileHeader"		"zip.FileHeader"	}}
-{{.DotDot "ReadCloser"		"zip.ReadCloser"	}}
-{{.DotDot "Reader"		"zip.Reader"	}}
-{{.DotDot "Writer"		"zip.Writer"	}}
+{{.DotDot "File"		"*zip.File"	}}
+{{.DotDot "FileHeader"		"*zip.FileHeader"	}}
+{{.DotDot "ReadCloser"		"*zip.ReadCloser"	}}
+{{.DotDot "Reader"		"*zip.Reader"	}}
+{{.DotDot "Writer"		"*zip.Writer"	}}
 {{range .Range}}
 	{{.DotDot ":Package:" "zip"}}
 	{{with .G ":Import:"}}
@@ -11,9 +11,7 @@
 	{{end}}
 {{end}}
 -*/}}
-{{- template "Copy"			. }}
-{{  template "Package"			. }}
-{{  template "Edit"			. }}
+{{- template "Prolog"			. -}}
 // No go functionality is associated with this source file.
 
 /*
