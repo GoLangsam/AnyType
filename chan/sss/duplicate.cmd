@@ -1,12 +1,23 @@
-@If "%1"=="" goto iter
-@If "%2"=="" goto %1
+@Setlocal EnableExtensions
 
-@Set args= /I /E /V /C /H /R /K /O /X /B /Y
+@If "%1"=="" (
+	@Call %0 Core
+	@Call %0 DefineCore
+	@Call %0 DotGoTmpl
+	@Call %0 CleanUp
+	@goto :EOF
+)
+
+@If "%2"=="" (
+	@Echo Now: %1
+	goto %1
+)
+
+@Set args= /I /E /V /C /H /R /K /O /X /B /Y /Q
 @xcopy %1	%2		%args%
-@goto done
+@goto :EOF
 
-:cleanup
-@Echo Do Cleanup
+:CleanUp
 @cd	..\s\
 @Del 		Send{{.}}Proxy.dot.go.tmpl
 @cd	..\l\
@@ -19,24 +30,26 @@
 @Del 		Send{{.}}Proxy.dot.go.tmpl
 
 @cd ..\sss\
+@Echo Done Cleanup
 
-@goto done
+@goto :EOF
 
-:iter
-
-@Echo xCopy Define.Core.tmpl
+:Core
+@xcopy _Core.all		Define.Core.tmpl			/Y /Q
 @xcopy _Core.nonil		basic\type\Define.Core.tmpl		/Y /Q
-@xcopy _Core.tmpl		basic\type\IsUnsafe\Define.Core.tmpl	/Y /Q
+@xcopy _Core.all		basic\type\IsUnsafe\Define.Core.tmpl	/Y /Q
 @xcopy _Core.merge		basic\type\IsFloat\Define.Core.tmpl	/Y /Q
 @xcopy _Core.merge		basic\type\IsInteger\Define.Core.tmpl	/Y /Q
 @xcopy _Core.merge		basic\type\IsOrdered\Define.Core.tmpl	/Y /Q
 @xcopy _Core.merge		basic\type\IsUnsigned\Define.Core.tmpl	/Y /Q
+@goto :EOF
 
-@Echo Distribute Define.Core.tmpl
+:DefineCore
 @Call %0 *Define.Core.tmpl	..\s\
 @Call %0 *Define.Core.tmpl	..\ss\
+@goto :EOF
 
-@Echo Distribute *dot.go.tmpl
+:DotGoTmpl
 @Call %0 *dot.go.tmpl	..\s\
 @Call %0 *dot.go.tmpl	..\ss\
 
@@ -45,10 +58,4 @@
 @Call %0 *dot.go.tmpl	..\sl\
 @Call %0 *dot.go.tmpl	..\xs\
 @Call %0 *dot.go.tmpl	..\xl\
-
-@Echo Call Cleanup
-@Call %0 cleanup
-
-@goto done
-
-:done
+@goto :EOF
