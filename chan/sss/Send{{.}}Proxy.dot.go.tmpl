@@ -1,8 +1,9 @@
-{{template "Copy"			. }}
-{{template "Package"			. }}
-{{template "Edit"			. }}
+{{- template "Copy"			. }}
+{{  template "Package"			. }}
+{{  template "Edit"			. }}
 // Note: SendProxy{{.AddStrings ":Import:" "container/ring" }} uses "container/ring"
-{{template "Import"			. }}
+
+{{  template "Import"			. -}}
 /* usage as found in go/test/chan/sieve2.go
 func Sieve() {
 	// ...
