@@ -45,8 +45,8 @@
 @goto :EOF
 
 :DefineCore
-@Call %0 *Define.Core.tmpl	..\s\
 @Call %0 *Define.Core.tmpl	..\ss\
+@Call %0 *Define.Core.tmpl	..\ssss\
 @goto :EOF
 
 :DotGoTmpl
