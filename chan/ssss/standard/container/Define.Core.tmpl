@@ -1,12 +1,12 @@
 {{ define "Core"                	  }}{{/*
-     Version "_Core.nonil"      
+     Version "_Core.all"        
      Creators                   	*/}}
 {{-  template "Make{{.}}Chan"   	. }}
 {{/* Generators	                	*/}}
 {{-  template "Chan{{.}}"       	. }}
 {{   template "Chan{{.}}Slice"  	. }}
-{{/* template "Chan{{.}}FuncNil" not!	*/}}
-{{-  template "Chan{{.}}FuncNok"	. }}
+{{   template "Chan{{.}}FuncNil"	. }}
+{{   template "Chan{{.}}FuncNok"	. }}
 {{   template "Chan{{.}}FuncErr"	. }}
 {{/* Joiners                    	*/}}
 {{-  template "Join{{.}}"       	. }}

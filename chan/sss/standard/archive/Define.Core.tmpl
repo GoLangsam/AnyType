@@ -1,12 +1,12 @@
 {{ define "Core"                	  }}{{/*
-     Version "_Core.merge"      
+     Version "_Core.all"        
      Creators                   	*/}}
 {{-  template "Make{{.}}Chan"   	. }}
 {{/* Generators	                	*/}}
 {{-  template "Chan{{.}}"       	. }}
 {{   template "Chan{{.}}Slice"  	. }}
-{{/* template "Chan{{.}}FuncNil" not!	*/}}
-{{-  template "Chan{{.}}FuncNok"	. }}
+{{   template "Chan{{.}}FuncNil"	. }}
+{{   template "Chan{{.}}FuncNok"	. }}
 {{   template "Chan{{.}}FuncErr"	. }}
 {{/* Joiners                    	*/}}
 {{-  template "Join{{.}}"       	. }}
@@ -22,6 +22,4 @@
 {{   template "Pipe{{.}}Fork"   	. }}
 {{/* Tube & DaisyChain          	*/}}
 {{-  template "{{.}}Tube"       	. }}
-{{/* Merge              		*/}}
-{{-  template "Merge{{.}}"		. }}
 {{- end}}
