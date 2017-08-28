@@ -7,26 +7,26 @@ package IsOrdered
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-// Note: SendProxy imports "container/ring" for the expanding buffer.
+// Note: SendProxyString imports "container/ring" for the expanding buffer.
 import (
 	"container/ring"
 )
 
-// CAP is the capacity of the buffered proxy channel
-const CAP = 10
+// StringCAP is the capacity of the buffered proxy channel
+const StringCAP = 10
 
-// QUE is the allocated size of the circular queue
-const QUE = 16
+// StringQUE is the allocated size of the circular queue
+const StringQUE = 16
 
-// SendProxy returns a channel to serve as a sending proxy to 'out'.
+// SendProxyString returns a channel to serve as a sending proxy to 'out'.
 // Uses a goroutine to receive values from 'out' and store them
 // in an expanding buffer, so that sending to 'out' never blocks.
 //
 // Note: the expanding buffer is implemented via "container/ring"
-func SendProxy(out chan<- string) chan<- string {
-	proxy := make(chan string, CAP)
+func SendProxyString(out chan<- string) chan<- string {
+	proxy := make(chan string, StringCAP)
 	go func() {
-		n := QUE // the allocated size of the circular queue
+		n := StringQUE // the allocated size of the circular queue
 		first := ring.New(n)
 		last := first
 		var c chan<- string

@@ -7,33 +7,33 @@ package IsOrdered
 // This file was generated with dotgo
 // DO NOT EDIT - Improve the pattern!
 
-// MakeChan returns a new open channel
+// MakeStringChan returns a new open channel
 // (simply a 'chan string' that is).
 //
-// Note: No '-producer' is launched here yet! (as is in all the other functions).
+// Note: No 'String-producer' is launched here yet! (as is in all the other functions).
 //
 // This is useful to easily create corresponding variables such as
 //
-//	var myPipelineStartsHere := MakeChan()
-//	// ... lot's of code to design and build Your favourite "myWorkflowPipeline"
+//	var myStringPipelineStartsHere := MakeStringChan()
+//	// ... lot's of code to design and build Your favourite "myStringWorkflowPipeline"
 //	// ...
 //	// ... *before* You start pouring data into it, e.g. simply via:
 //	for drop := range water {
-//		myPipelineStartsHere <- drop
+//		myStringPipelineStartsHere <- drop
 //	}
-//	close(myPipelineStartsHere)
+//	close(myStringPipelineStartsHere)
 //
 // Hint: especially helpful, if Your piping library operates on some hidden (non-exported) type
 // (or on a type imported from elsewhere - and You don't want/need or should(!) have to care.)
 //
-// Note: as always (except for PipeBuffer) the channel is unbuffered.
+// Note: as always (except for PipeStringBuffer) the channel is unbuffered.
 //
-func MakeChan() chan string {
+func MakeStringChan() chan string {
 	return make(chan string)
 }
 
-// Chan returns a channel to receive all inputs before close.
-func Chan(inp ...string) chan string {
+// ChanString returns a channel to receive all inputs before close.
+func ChanString(inp ...string) chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -44,8 +44,8 @@ func Chan(inp ...string) chan string {
 	return out
 }
 
-// ChanSlice returns a channel to receive all inputs before close.
-func ChanSlice(inp ...[]string) chan string {
+// ChanStringSlice returns a channel to receive all inputs before close.
+func ChanStringSlice(inp ...[]string) chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -58,8 +58,8 @@ func ChanSlice(inp ...[]string) chan string {
 	return out
 }
 
-// ChanFuncNok returns a channel to receive all results of act until nok before close.
-func ChanFuncNok(act func() (string, bool)) <-chan string {
+// ChanStringFuncNok returns a channel to receive all results of act until nok before close.
+func ChanStringFuncNok(act func() (string, bool)) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -74,8 +74,8 @@ func ChanFuncNok(act func() (string, bool)) <-chan string {
 	return out
 }
 
-// ChanFuncErr returns a channel to receive all results of act until err != nil before close.
-func ChanFuncErr(act func() (string, error)) <-chan string {
+// ChanStringFuncErr returns a channel to receive all results of act until err != nil before close.
+func ChanStringFuncErr(act func() (string, error)) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -90,8 +90,8 @@ func ChanFuncErr(act func() (string, error)) <-chan string {
 	return out
 }
 
-// Join sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func Join(out chan<- string, inp ...string) chan struct{} {
+// JoinString sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
+func JoinString(out chan<- string, inp ...string) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -103,8 +103,8 @@ func Join(out chan<- string, inp ...string) chan struct{} {
 	return done
 }
 
-// JoinSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinSlice(out chan<- string, inp ...[]string) chan struct{} {
+// JoinStringSlice sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
+func JoinStringSlice(out chan<- string, inp ...[]string) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -118,8 +118,8 @@ func JoinSlice(out chan<- string, inp ...[]string) chan struct{} {
 	return done
 }
 
-// JoinChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
-func JoinChan(out chan<- string, inp <-chan string) chan struct{} {
+// JoinStringChan sends inputs on the given out channel and returns a done channel to receive one signal when inp has been drained
+func JoinStringChan(out chan<- string, inp <-chan string) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -131,8 +131,8 @@ func JoinChan(out chan<- string, inp <-chan string) chan struct{} {
 	return done
 }
 
-// Done returns a channel to receive one signal before close after inp has been drained.
-func Done(inp <-chan string) chan struct{} {
+// DoneString returns a channel to receive one signal before close after inp has been drained.
+func DoneString(inp <-chan string) chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -144,24 +144,24 @@ func Done(inp <-chan string) chan struct{} {
 	return done
 }
 
-// DoneSlice returns a channel which will receive a slice
-// of all the s received on inp channel before close.
-// Unlike Done, a full slice is sent once, not just an event.
-func DoneSlice(inp <-chan string) chan []string {
+// DoneStringSlice returns a channel which will receive a slice
+// of all the Strings received on inp channel before close.
+// Unlike DoneString, a full slice is sent once, not just an event.
+func DoneStringSlice(inp <-chan string) chan []string {
 	done := make(chan []string)
 	go func() {
 		defer close(done)
-		S := []string{}
+		StringS := []string{}
 		for i := range inp {
-			S = append(S, i)
+			StringS = append(StringS, i)
 		}
-		done <- S
+		done <- StringS
 	}()
 	return done
 }
 
-// DoneFunc returns a channel to receive one signal before close after act has been applied to all inp.
-func DoneFunc(inp <-chan string, act func(a string)) chan struct{} {
+// DoneStringFunc returns a channel to receive one signal before close after act has been applied to all inp.
+func DoneStringFunc(inp <-chan string, act func(a string)) chan struct{} {
 	done := make(chan struct{})
 	if act == nil {
 		act = func(a string) { return }
@@ -176,8 +176,8 @@ func DoneFunc(inp <-chan string, act func(a string)) chan struct{} {
 	return done
 }
 
-// PipeBuffer returns a buffered channel with capacity cap to receive all inp before close.
-func PipeBuffer(inp <-chan string, cap int) chan string {
+// PipeStringBuffer returns a buffered channel with capacity cap to receive all inp before close.
+func PipeStringBuffer(inp <-chan string, cap int) chan string {
 	out := make(chan string, cap)
 	go func() {
 		defer close(out)
@@ -188,10 +188,10 @@ func PipeBuffer(inp <-chan string, cap int) chan string {
 	return out
 }
 
-// PipeFunc returns a channel to receive every result of act applied to inp before close.
-// Note: it 'could' be PipeMap for functional people,
+// PipeStringFunc returns a channel to receive every result of act applied to inp before close.
+// Note: it 'could' be PipeStringMap for functional people,
 // but 'map' has a very different meaning in go lang.
-func PipeFunc(inp <-chan string, act func(a string) string) chan string {
+func PipeStringFunc(inp <-chan string, act func(a string) string) chan string {
 	out := make(chan string)
 	if act == nil {
 		act = func(a string) string { return a }
@@ -205,9 +205,9 @@ func PipeFunc(inp <-chan string, act func(a string) string) chan string {
 	return out
 }
 
-// PipeFork returns two channels to receive every result of inp before close.
+// PipeStringFork returns two channels to receive every result of inp before close.
 //  Note: Yes, it is a VERY simple fanout - but sometimes all You need.
-func PipeFork(inp <-chan string) (chan string, chan string) {
+func PipeStringFork(inp <-chan string) (chan string, chan string) {
 	out1 := make(chan string)
 	out2 := make(chan string)
 	go func() {
@@ -221,21 +221,21 @@ func PipeFork(inp <-chan string) (chan string, chan string) {
 	return out1, out2
 }
 
-// Tube is the signature for a pipe function.
-type Tube func(inp <-chan string, out <-chan string)
+// StringTube is the signature for a pipe function.
+type StringTube func(inp <-chan string, out <-chan string)
 
-// Daisy returns a channel to receive all inp after having passed thru tube.
-func Daisy(inp <-chan string, tube Tube) (out <-chan string) {
+// StringDaisy returns a channel to receive all inp after having passed thru tube.
+func StringDaisy(inp <-chan string, tube StringTube) (out <-chan string) {
 	cha := make(chan string)
 	go tube(inp, cha)
 	return cha
 }
 
-// DaisyChain returns a channel to receive all inp after having passed thru all tubes.
-func DaisyChain(inp <-chan string, tubes ...Tube) (out <-chan string) {
+// StringDaisyChain returns a channel to receive all inp after having passed thru all tubes.
+func StringDaisyChain(inp <-chan string, tubes ...StringTube) (out <-chan string) {
 	cha := inp
 	for i := range tubes {
-		cha = Daisy(cha, tubes[i])
+		cha = StringDaisy(cha, tubes[i])
 	}
 	return cha
 }
@@ -262,10 +262,10 @@ func main() {
 }
 */
 
-// Merge returns a channel to receive all inputs sorted and free of duplicates.
+// MergeString returns a channel to receive all inputs sorted and free of duplicates.
 // Each input channel needs to be ascending; sorted and free of duplicates.
-//  Note: If no inputs are given, a closed channel is returned.
-func Merge(inps ...<-chan string) (out <-chan string) {
+//  Note: If no inputs are given, a closed Stringchannel is returned.
+func MergeString(inps ...<-chan string) (out <-chan string) {
 
 	if len(inps) < 1 { // none: return a closed channel
 		cha := make(chan string)
@@ -274,14 +274,14 @@ func Merge(inps ...<-chan string) (out <-chan string) {
 	} else if len(inps) < 2 { // just one: return it
 		return inps[0]
 	} else { // tail recurse
-		return merge2(inps[0], Merge(inps[1:]...))
+		return mergeString2(inps[0], MergeString(inps[1:]...))
 	}
 }
 
-// merge2 takes two (eager) channels of comparable types,
+// mergeString2 takes two (eager) channels of comparable types,
 // each of which needs to be sorted and free of duplicates,
 // and merges them into a returned channel, which will be sorted and free of duplicates
-func merge2(i1, i2 <-chan string) (out <-chan string) {
+func mergeString2(i1, i2 <-chan string) (out <-chan string) {
 	cha := make(chan string)
 	go func(out chan<- string, i1, i2 <-chan string) {
 		defer close(out)
