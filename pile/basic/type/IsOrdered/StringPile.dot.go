@@ -9,16 +9,16 @@ package IsOrdered
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
-// Int8Pile is a hybrid container for
+// StringPile is a hybrid container for
 // a lazily and concurrently populated growing-only slice
-// of items (of type `int8`)
+// of items (of type `string`)
 // which may be traversed in parallel to it's growth.
 //
 // Usage for a pile `p`:
-//  p := MakeInt8Pile(128, 32)
+//  p := MakeStringPile(128, 32)
 //
 // Have it grow concurrently using multiple:
-//  var item int8 = something
+//  var item string = something
 //  p.Pile(item)
 // in as many go routines as You may seem fit.
 //
@@ -26,7 +26,7 @@ package IsOrdered
 // traverse `p` in parallel right away:
 //  for item, ok := p.Iter(); ok; item, ok = p.Next() { ... do sth with item ... }
 // Here p.Iter() starts a new transversal with the first item (if any), and
-// p.Next() keeps traverses the Int8Pile.
+// p.Next() keeps traverses the StringPile.
 //
 // or traverse blocking / awaiting close first:
 //  for item := range <-p.Done() { ... do sth with item ... }
@@ -39,28 +39,28 @@ package IsOrdered
 // Thus: You may call `Pile` concurrently to Your traversal, but use of
 // either `Done` or `Iter` and `Next` *must* be confined to a single go routine (thread).
 //
-type Int8Pile struct {
-	pile   chan int8 // channel to receive further items
-	list   []int8    // list of known items
-	offset int       // index for Next()
+type StringPile struct {
+	pile   chan string // channel to receive further items
+	list   []string    // list of known items
+	offset int         // index for Next()
 }
 
-// MakeInt8Pile returns a (pointer to a) fresh pile
-// of items (of type `int8`)
+// MakeStringPile returns a (pointer to a) fresh pile
+// of items (of type `string`)
 // with size as initial capacity
 // and
 // with buff as initial leeway, allowing as many Pile's to execute non-blocking before respective Done or Next's.
-func MakeInt8Pile(size, buff int) *Int8Pile {
-	pile := new(Int8Pile)
-	pile.list = make([]int8, 0, size)
-	pile.pile = make(chan int8, buff)
+func MakeStringPile(size, buff int) *StringPile {
+	pile := new(StringPile)
+	pile.list = make([]string, 0, size)
+	pile.pile = make(chan string, buff)
 	return pile
 }
 
-// Pile appends an `int8` item to the Int8Pile.
+// Pile appends an `string` item to the StringPile.
 //
 // Note: Pile will block iff buff is exceeded and no Done() or Next()'s are used.
-func (d *Int8Pile) Pile(item int8) {
+func (d *StringPile) Pile(item string) {
 	d.pile <- item
 }
 
@@ -74,7 +74,7 @@ func (d *Int8Pile) Pile(item int8) {
 // any Pile(...) will panic
 // and
 // any Done() or Next() will return immediately: no eventual blocking, that is.
-func (d *Int8Pile) Close() (err error) {
+func (d *StringPile) Close() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -91,7 +91,7 @@ func (d *Int8Pile) Close() (err error) {
 // and returns the first `Next()`, iff any.
 // Usage for a pile `p`:
 //  for item, ok := p.Iter(); ok; item, ok = p.Next() { ... do sth with item ... }
-func (d *Int8Pile) Iter() (item int8, ok bool) {
+func (d *StringPile) Iter() (item string, ok bool) {
 	d.offset = 0
 	return d.Next()
 }
@@ -101,7 +101,7 @@ func (d *Int8Pile) Iter() (item int8, ok bool) {
 //
 // Note: Iff the pile is not closed yet,
 // Next may block, awaiting some Pile().
-func (d *Int8Pile) Next() (item int8, ok bool) {
+func (d *StringPile) Next() (item string, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
 		item = d.list[d.offset]
@@ -113,7 +113,7 @@ func (d *Int8Pile) Next() (item int8, ok bool) {
 	return item, ok
 }
 
-// Done returns a channel which emits the result (as slice of Int8) once the pile is closed.
+// Done returns a channel which emits the result (as slice of String) once the pile is closed.
 //
 // Users of Done() *must not* iterate (via Iter() Next()...) before the done-channel is closed!
 //
@@ -128,9 +128,9 @@ func (d *Int8Pile) Next() (item int8, ok bool) {
 // or use the result when available
 //  r, p := <-p.Done(), nil
 // while discaring the pile itself.
-func (d *Int8Pile) Done() (done <-chan []int8) {
-	cha := make(chan []int8)
-	go func(cha chan<- []int8, d *Int8Pile) {
+func (d *StringPile) Done() (done <-chan []string) {
+	cha := make(chan []string)
+	go func(cha chan<- []string, d *StringPile) {
 		defer close(cha)
 		d.offset = 0
 		if len(d.list) > d.offset {

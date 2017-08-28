@@ -9,21 +9,36 @@ package IsOrdered
 
 // Note: originally inspired by parts of "cmd/doc/dirs.go"
 
-// Int16Pile is a structure for
-// a lazily populated sequence (= slice)
+// Int16Pile is a hybrid container for
+// a lazily and concurrently populated growing-only slice
 // of items (of type `int16`)
-// which are cached in a growing-only list.
-// Next() traverses the Int16Pile.
-// Reset() allows a new transversal from the beginning.
+// which may be traversed in parallel to it's growth.
 //
-// You may either
-// traverse the Int16Pile lazily -following its (buffered) growth that is-
-// or
-// await the signal from Wait() before starting traversal.
+// Usage for a pile `p`:
+//  p := MakeInt16Pile(128, 32)
 //
-// Note: Pile() may be used concurrently,
-// Next() (and Reset) should be confined to a single go routine (thread),
-// as the iteration is not intended to by concurrency safe.
+// Have it grow concurrently using multiple:
+//  var item int16 = something
+//  p.Pile(item)
+// in as many go routines as You may seem fit.
+//
+// In parallel, You may either
+// traverse `p` in parallel right away:
+//  for item, ok := p.Iter(); ok; item, ok = p.Next() { ... do sth with item ... }
+// Here p.Iter() starts a new transversal with the first item (if any), and
+// p.Next() keeps traverses the Int16Pile.
+//
+// or traverse blocking / awaiting close first:
+//  for item := range <-p.Done() { ... do sth with item ... }
+//
+// or use the result when available:
+//  r, p := <-p.Done(), nil
+// Hint: here we get the result in `r` and at the same time discard / deallocate / forget the pile `p` itself.
+//
+// Note: The traversal is *not* intended to be concurrency safe!
+// Thus: You may call `Pile` concurrently to Your traversal, but use of
+// either `Done` or `Iter` and `Next` *must* be confined to a single go routine (thread).
+//
 type Int16Pile struct {
 	pile   chan int16 // channel to receive further items
 	list   []int16    // list of known items
@@ -34,7 +49,7 @@ type Int16Pile struct {
 // of items (of type `int16`)
 // with size as initial capacity
 // and
-// with buff non-blocking Add's before respective Next's
+// with buff as initial leeway, allowing as many Pile's to execute non-blocking before respective Done or Next's.
 func MakeInt16Pile(size, buff int) *Int16Pile {
 	pile := new(Int16Pile)
 	pile.list = make([]int16, 0, size)
@@ -42,15 +57,50 @@ func MakeInt16Pile(size, buff int) *Int16Pile {
 	return pile
 }
 
-// Reset puts the pile iterator `Next()` back at the beginning.
-func (d *Int16Pile) Reset() {
+// Pile appends an `int16` item to the Int16Pile.
+//
+// Note: Pile will block iff buff is exceeded and no Done() or Next()'s are used.
+func (d *Int16Pile) Pile(item int16) {
+	d.pile <- item
+}
+
+// Close - call once when everything has been piled.
+//
+// Close intentionally implements io.Closer
+//
+// Note: After Close(),
+// any Close(...) will panic
+// and
+// any Pile(...) will panic
+// and
+// any Done() or Next() will return immediately: no eventual blocking, that is.
+func (d *Int16Pile) Close() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			if err, ok = r.(error); !ok {
+				panic(r)
+			}
+		}
+	}()
+	close(d.pile)
+	return nil
+}
+
+// Iter puts the pile iterator back to the beginning
+// and returns the first `Next()`, iff any.
+// Usage for a pile `p`:
+//  for item, ok := p.Iter(); ok; item, ok = p.Next() { ... do sth with item ... }
+func (d *Int16Pile) Iter() (item int16, ok bool) {
 	d.offset = 0
+	return d.Next()
 }
 
 // Next returns the next item,
 // or false iff the pile is exhausted.
-// Next may block, awaiting another Pile(),
-// iff the pile is not Closed().
+//
+// Note: Iff the pile is not closed yet,
+// Next may block, awaiting some Pile().
 func (d *Int16Pile) Next() (item int16, ok bool) {
 	if d.offset < len(d.list) {
 		ok = true
@@ -63,52 +113,35 @@ func (d *Int16Pile) Next() (item int16, ok bool) {
 	return item, ok
 }
 
-// Pile adds
-// an item (of type `int16`)
-// to the Int16Pile.
+// Done returns a channel which emits the result (as slice of Int16) once the pile is closed.
 //
-// Note: Pile() may block, iff buff is exceeded and no corresponding Next()'s were called.
-func (d *Int16Pile) Pile(item int16) {
-	d.pile <- item
-}
-
-// Close - call once after everything has been piled.
+// Users of Done() *must not* iterate (via Iter() Next()...) before the done-channel is closed!
 //
-// Note: After Close(),
-// any Close(...) will panic
-// and
-// any Pile(...) will panic
-// and
-// any Next() will return immediately: no eventual blocking, that is.
-func (d *Int16Pile) Close() {
-	close(d.pile)
-}
-
-// Wait returns a done channel which emits the size (=length) of the pile once it's been closed.
+// Done is a convenience - useful iff You do not like/need to start any traversal before the pile is fully populated.
+// Once the pile is closed, Done() will signal in constant time.
 //
-// Users of Wait() *must not* iterate (via Next() or Reset()) before the done-channel is closed!
-//
-// Wait is a convenience - useful iff You do not like/need to start any traversal before the pile is fully populated.
-// (Or iff You just like to know the size to be traversed, i.e. in order to allocate some traversal-related structure.
-// Once the pile is closed, Wait() will return in constant time.)
-//
-// Note: Upon close of the done-channel, the pile is Reset() so You may traverse it (via Next) right away.
-func (d *Int16Pile) Wait() (done <-chan int) {
-	cha := make(chan int)
-	go func(cha chan<- int, d *Int16Pile) {
+// Note: Upon signalling, the pile is reset to it's tip,
+// so You may traverse it (via Next) right away.
+// Usage for a pile `p`:
+// Traverse blocking / awaiting close first:
+//  for item := range <-p.Done() { ... do sth with item ... }
+// or use the result when available
+//  r, p := <-p.Done(), nil
+// while discaring the pile itself.
+func (d *Int16Pile) Done() (done <-chan []int16) {
+	cha := make(chan []int16)
+	go func(cha chan<- []int16, d *Int16Pile) {
 		defer close(cha)
-		d.Reset()
-		if len(d.list) > 0 { // skip what's already known
+		d.offset = 0
+		if len(d.list) > d.offset {
+			// skip what's already known
 			d.offset = len(d.list) - 1
 		}
-		defer d.Reset()
-		for {
-			_, ok := d.Next() // keep draining
-			if !ok {
-				break
-			}
+		for _, ok := d.Next(); ok; _, ok = d.Next() {
+			// keep draining
 		}
-		cha <- len(d.list) // signal the length, and terminate
+		d.offset = 0  // reset
+		cha <- d.list // signal the result, and terminate
 	}(cha, d)
 	return cha
 }
