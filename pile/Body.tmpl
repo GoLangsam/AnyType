@@ -60,7 +60,7 @@ func (d *{{.}}Pile) Pile(item {{.Dot}}) {
 // Close intentionally implements io.Closer
 //
 // Note: After Close(),
-// any Close(...) will panic
+// any Close() will return the error from close(chan),
 // and
 // any Pile(...) will panic
 // and
