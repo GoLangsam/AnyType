@@ -5,7 +5,7 @@ Templates, and ready-to-use go lang source files - generated with dotgo.
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GoLangsam/AnyType)](https://goreportcard.com/report/github.com/GoLangsam/AnyType)
 [![Build Status](https://travis-ci.org/GoLangsam/AnyType.svg?branch=master)](https://travis-ci.org/GoLangsam/AnyType)
-[![GoDoc](https://godoc.org/github.com/GoLangsam/AnyTypee?status.svg)](https://godoc.org/github.com/GoLangsam/AnyType)
+[![GoDoc](https://godoc.org/github.com/GoLangsam/AnyType?status.svg)](https://godoc.org/github.com/GoLangsam/AnyType)
 
 **Important:** This repo is not intended to be cloned (or `go get`) - it will just clobber Your disk.
 
