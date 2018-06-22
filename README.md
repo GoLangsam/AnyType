@@ -1,5 +1,15 @@
 # AnyType
 
+**Important:** This repo is retired! The new repo [`github.com/GoLangsam/pile`](https://github.com/GoLangsam/pile) provides better and more functionality.
+
+```
+    go get -u github.com/GoLangsam/pipe
+```
+
+Note: This repo will be removed one day. For now it remains as a test case for the agnostic generator.
+
+---
+
 Templates, and ready-to-use go lang source files - generated with dotgo.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
