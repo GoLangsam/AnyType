@@ -101,13 +101,12 @@ For You - to be a ***Happy*** Gopher!
 So: be a ***Happy*** Gopher!
 
 ---
-## License
+Your suggestions, remarks, questions and/or contributions are welcome ;-)
 
+---
+## Think deep - code happy - be simple - see clear :-)
 
-This project is licensed under the MIT general use license.
-You're free to integrate, fork, and play with this code as you feel fit without consulting the author,
-as long as you provide proper credit to the author in your works.
-
+---
 ## Support on Beerpay
 Hey dude! Help me out for a couple of :beers:!
 
